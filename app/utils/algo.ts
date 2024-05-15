@@ -3,53 +3,92 @@ type Assignment = {
     nurse: string,
     rooms: Room[]
 }
+export const dummyNurses = ['Elizabeth', 'Gerry', 'Trace', 'Ajo', 'Jessica', 'Shayne'];
+export const dummyRooms: Room[] = [
+    {
+        name: '4&5'
+        , patientCount: 4
+    }
+    , {
+        name: '7&8'
+        , patientCount: 3
+    }
+    , {
+        name: '9&10'
+        , patientCount: 2
+    }
+    , {
+        name: '11&12'
+        , patientCount: 3
+    }
+    , {
+        name: '13&14'
+        , patientCount: 5
+    }
+    , {
+        name: '15&16'
+        , patientCount: 4
+    }
+    , {
+        name: '17&18'
+        , patientCount: 5
+    }
+    , {
+        name: '19&20'
+        , patientCount: 5
+    }
+    , {
+        name: '21&22'
+        , patientCount: 1
+    }
+    , {
+        name: '23&24'
+        , patientCount: 2
+    }
+    , {
+        name: '25&26'
+        , patientCount: 2
+    }
+    , {
+        name: '27&28'
+        , patientCount: 2
+    }
+    , {
+        name: '29&30'
+        , patientCount: 4
+    }
+    , {
+        name: '32&33'
+        , patientCount: 1
+    }
+    , {
+        name: '34&35'
+        , patientCount: 3
+    }
+]
 export function roomMatcher(nurses: string[], rooms: Room[]) {
     const assignments: Assignment[] = [];
     const exceptions: Room[] = [];
-    const totalAssignments = rooms.reduce((prev, curr) => prev + curr.patientCount, 0);
-    const averageAssignments = Math.floor(totalAssignments / nurses.length);
+    const totalAssignments = dummyRooms.reduce((prev, curr) => prev + curr.patientCount, 0);
+    const averageAssignments = Math.floor(totalAssignments / dummyNurses.length);
 
-    // give each nurse rooms until reaching averageAssignments
-    // raise exceptions which would put any nurse over the averageAssignments to the user
-    let runningPatientCount = 0;
-    let nurseRooms: Room[] = [];
-    let nursePointer = 0;
-    let roomPointer = 0;
-    while (nursePointer < nurses.length && roomPointer < rooms.length) {
-
-        // Nurse has no rooms, automatically they should be getting one
-        if (nurseRooms.length === 0) {
-            nurseRooms.push(rooms[roomPointer]);
-            runningPatientCount += rooms[roomPointer].patientCount;
-            roomPointer++;
-            if (roomPointer === rooms.length) {
-                assignments.push({ nurse: nurses[nursePointer], rooms: nurseRooms })
+    const usedRooms: Room[] = [];
+    for (const nurse of dummyNurses) {
+        let runningPatientCount = 0;
+        const nurseRooms: Room[] = [];
+        for (const room of dummyRooms) {
+            if (!usedRooms.find(usedRoom => usedRoom == room) && runningPatientCount + room.patientCount <= averageAssignments) {
+                usedRooms.push(room);
+                runningPatientCount += room.patientCount;
+                nurseRooms.push(room);
             }
-            continue;
         }
-
-        // Nurse can add more patients before going over average
-        if (runningPatientCount + rooms[roomPointer].patientCount <= averageAssignments) {
-            nurseRooms.push(rooms[roomPointer]);
-            runningPatientCount += rooms[roomPointer].patientCount;
-            roomPointer++;
-            continue;
+        assignments.push({ nurse, rooms: nurseRooms });
+    }
+    for (const room of dummyRooms) {
+        if (!usedRooms.find(usedRoom => usedRoom == room)) {
+            exceptions.push(room);
         }
-
-        // When we cannot add the current room to the assignment and there are no nurses left to consider, this would be an exception we should store, then continue at the next room
-        if (nursePointer === nurses.length - 1 && runningPatientCount + rooms[roomPointer].patientCount > averageAssignments) {
-            exceptions.push(rooms[roomPointer]);
-            roomPointer++;
-            if (roomPointer === rooms.length - 1) {
-                assignments.push({ nurse: nurses[nursePointer], rooms: nurseRooms });
-            }
-            continue;
-        }
-
-        assignments.push({ nurse: nurses[nursePointer], rooms: nurseRooms });
-        runningPatientCount = 0;
-        nursePointer++;
-        nurseRooms = [];
     }
 
     return { assignments, exceptions, averageAssignments };

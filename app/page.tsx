@@ -1,7 +1,7 @@
 'use client';
-import { Button, Grid, TextField, Typography } from "@mui/material";
+import { Button, Divider, Grid, Paper, TextField, Tooltip, Typography } from "@mui/material";
 import { useState } from "react";
-import { roomMatcher } from "./utils/algo";
+import { roomMatcher, dummyRooms } from "./utils/algo";
 
 export type Room = {
     name: string,
@@ -83,23 +83,29 @@ export default function Home() {
                         )
                     })}
                 </Grid>
-                <Grid item>
+                <Grid item container direction='column'>
                     <Typography>Target Average Patient Count: {averageAssignments}</Typography>
-                    <Typography>Assignments</Typography>
-                    {assignments.map(assignment => {
-                        return (
-                            <>
-                                <Typography>{assignment.nurse}</Typography>
-                                {
-                                    assignment.rooms.map(room => {
-                                        return (
-                                            <Typography key={room.name}>{room.name}: {room.patientCount}</Typography>
-                                        )
-                                    })
-                                }
-                            </>
-                        )
-                    })}
+                    <Typography variant="h2">Assignments</Typography>
+                    <Grid item container direction="row">
+                        {assignments.map(assignment => {
+                            return (
+                                <Paper key={assignment.nurse} elevation={1} sx={{ mr: 5, minWidth: '15rem', padding: '2rem' }}>
+                                    <Typography variant="h5">{assignment.nurse}</Typography>
+                                    <Typography variant="subtitle2">{assignment.rooms.reduce((prev, curr) => prev + curr.patientCount, 0)} patients</Typography>
+                                    <Divider sx={{ mb: 2 }} />
+                                    {
+                                        assignment.rooms.map(room => {
+                                            return (
+                                                <Tooltip key={room.name} title={`${room.patientCount} patients`}>
+                                                    <Typography variant="body1">Room {room.name}</Typography>
+                                                </Tooltip>
+                                            )
+                                        })
+                                    }
+                                </Paper>
+                            )
+                        })}
+                    </Grid>
                     <Typography>Exceptions</Typography>
                     {exceptions.map(exception => {
                         return (
@@ -107,6 +113,18 @@ export default function Home() {
                         )
                     })}
                 </Grid>
+                {/* <Grid item>
+                    <Typography>Rooms</Typography>
+                    {dummyRooms.map(room => {
+                        const foundAssignment = assignments.find(assignment => assignment.rooms.includes(room));
+                        return (
+                            <>
+                                <Typography>{room.name}</Typography>
+                                {foundAssignment && foundAssignment.nurse}
+                            </>
+                        )
+                    })}
+                </Grid> */}
             </Grid>
         </main >
     );
