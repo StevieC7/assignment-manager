@@ -12,6 +12,7 @@ export default function Home() {
     const [nurseName, setNurseName] = useState<string>('');
     const [roomList, setRoomList] = useState<Room[]>([]);
     const [room, setRoom] = useState<Room>({ name: '', patientCount: 0 });
+    const { assignments, exceptions, averageAssignments } = roomMatcher(nurseList, roomList);
     return (
         <main>
             <h1>Room Assigner</h1>
@@ -83,7 +84,28 @@ export default function Home() {
                     })}
                 </Grid>
                 <Grid item>
-                    {JSON.stringify([...roomMatcher(nurseList, roomList).entries()])}
+                    <Typography>Target Average Patient Count: {averageAssignments}</Typography>
+                    <Typography>Assignments</Typography>
+                    {assignments.map(assignment => {
+                        return (
+                            <>
+                                <Typography>{assignment.nurse}</Typography>
+                                {
+                                    assignment.rooms.map(room => {
+                                        return (
+                                            <Typography key={room.name}>{room.name}: {room.patientCount}</Typography>
+                                        )
+                                    })
+                                }
+                            </>
+                        )
+                    })}
+                    <Typography>Exceptions</Typography>
+                    {exceptions.map(exception => {
+                        return (
+                            <Typography key={exception.name}>{exception.name}: {exception.patientCount}</Typography>
+                        )
+                    })}
                 </Grid>
             </Grid>
         </main >
