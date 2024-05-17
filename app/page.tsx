@@ -160,7 +160,7 @@ export default function Home() {
                         xs={3}
                         className='h-dvh'
                     >
-                        <Grid item container direction='column' xs={6}>
+                        <Grid item container direction='column'>
                             <Typography variant='h4'>Nurses</Typography>
                             <TextField
                                 placeholder="Nurse Name"
@@ -177,18 +177,18 @@ export default function Home() {
                             </Button>
                             {nurseList.map((nurse, id) => {
                                 return (
-                                    <>
-                                        <Typography key={id}>
+                                    <Grid key={id} item container direction='row' alignItems='center'>
+                                        <Typography>
                                             {nurse}
                                         </Typography>
                                         <Button onClick={() => handleDeleteNurse(id, nurse)}>
                                             Delete
                                         </Button>
-                                    </>
+                                    </Grid>
                                 )
                             })}
                         </Grid>
-                        <Grid item container direction='column' xs={6}>
+                        <Grid item container direction='column'>
                             <Typography variant='h4'>Rooms</Typography>
                             <TextField
                                 placeholder="Room Name"
@@ -207,15 +207,23 @@ export default function Home() {
                             {roomList.map((room, id) => {
                                 // TODO: add an "update" functionality for the patient count
                                 return (
-                                    <>
-                                        <Typography key={id}>
-                                            {room.name}: {room.patientCount}
+                                    <Grid key={id} item container direction='row' alignItems='center' justifyContent='space-between'>
+                                        <Typography>
+                                            {room.name}
                                         </Typography>
-                                        <TextField type='number' value={room.patientCount} onChange={(e) => handleUpdateRoomPatientCount(room.name, parseInt(e.currentTarget.value))} />
-                                        <Button onClick={() => handleDeleteRoom(id, room.name)}>
-                                            Delete
-                                        </Button>
-                                    </>
+                                        <Grid item container justifyContent='flex-end' alignItems='center' xs={9}>
+                                            <TextField
+                                                type='number'
+                                                value={room.patientCount}
+                                                onChange={(e) => handleUpdateRoomPatientCount(room.name, parseInt(e.currentTarget.value))}
+                                                className='w-16'
+                                            />
+                                            <Typography variant='body1'>patients</Typography>
+                                            <Button onClick={() => handleDeleteRoom(id, room.name)}>
+                                                Delete
+                                            </Button>
+                                        </Grid>
+                                    </Grid>
                                 )
                             })}
                         </Grid>
