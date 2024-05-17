@@ -6,6 +6,7 @@ import DraggableRoom from "./components/DraggableRoom";
 import { DndContext, DragEndEvent } from "@dnd-kit/core";
 import { CheckCircle } from "@mui/icons-material";
 import { roomMatcher } from "./utils/algo";
+import * as Papa from 'papaparse';
 
 export type Room = {
     name: string,
@@ -93,6 +94,21 @@ export default function Home() {
         if (assignments) setNurseAssignments(JSON.parse(assignments));
     }
 
+    const handleExport = () => {
+        const data = {
+            fields: ['Nurse', 'Room', 'Patient Count'],
+            data: Object.entries(nurseAssignments).map(assignmentTuple => [assignmentTuple[0], assignmentTuple[1].map(assignment => assignment.name), assignmentTuple[1].map(assignment => assignment.patientCount)])
+        }
+        const csv = Papa.unparse(data);
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8,' });
+        console.log({ csv, blob })
+        const objUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', objUrl);
+        link.setAttribute('download', 'schedule.csv');
+        link.click();
+    }
+
     const handleAutoAssign = () => {
         const { assignments } = roomMatcher(nurseList, roomList);
         setNurseAssignments(assignments);
@@ -110,6 +126,7 @@ export default function Home() {
                     <Grid item>
                         <Button variant="contained" onClick={handleSaveToLocal} className='h-12 mr-4'>Save</Button>
                         <Button variant="contained" onClick={handleLoadLocal} className='h-12'>Load</Button>
+                        <Button variant="contained" onClick={handleExport} className='h-12'>Export</Button>
                     </Grid>
                 </Grid>
                 <Grid
