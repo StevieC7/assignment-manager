@@ -16,17 +16,16 @@ export default function Home() {
     const [nurseList, setNurseList] = useState<string[]>([]);
     const [roomList, setRoomList] = useState<Room[]>([]);
 
-    const [parentList, setParentList] = useState<Record<string, UniqueIdentifier | null>>({});
-    // key will be the room id and value will be the nurse id
-
     const [nurseAssignments, setNurseAssignments] = useState<Record<string, Room[]>>({});
 
     // TODO: handle delete nurse (specifically, handle updating parent list and user assignment list when nurse deleted)
 
+    // TODO: room name validation (prevent adding room name that already exists)
+    const isRoomNameDuplicate = room.name !== '' && roomList.find(existingRoom => existingRoom.name === room.name) ? true : false;
+
     const handleAddRoom = () => {
         setRoomList([...roomList, room])
         setRoom({ name: '', patientCount: 0 })
-        setParentList({ ...parentList, [room.name]: null })
     }
 
     const handleDeleteRoom = (id: number, name: string) => {
@@ -39,14 +38,12 @@ export default function Home() {
             newUserAssigned[nurseName] = newList;
         }
         setNurseAssignments(newUserAssigned);
-        const newParentList = { ...parentList };
-        delete newParentList[name];
-        setParentList(newParentList);
     }
 
     const handleDragEnd = (event: DragEndEvent) => {
         const { over, active } = event;
-        const parent = parentList[active.id];
+        const parentTuple = Object.entries(nurseAssignments).find(nurse => nurse[1].map(room => room.name).includes(active.id as string));
+        const parent = parentTuple ? parentTuple[0] : undefined;
         if (over && parent && over.id === parent) {
             return;
         }
@@ -60,19 +57,12 @@ export default function Home() {
             const alreadyAssigned = nurseAssignments[over.id] || [];
             updatedAssigned[over.id] = activeRoom ? [...alreadyAssigned, activeRoom] : alreadyAssigned;
             setNurseAssignments(updatedAssigned);
-            if (activeRoom) {
-                const newParentList = { ...parentList, [activeRoom.name]: over.id }
-                setParentList(newParentList);
-            }
         } else {
             if (parent) {
                 let updatedAssigned = { ...nurseAssignments };
                 const updatedOldNurse = nurseAssignments[parent].filter(assignment => assignment.name !== active.id);
                 updatedAssigned[parent] = updatedOldNurse;
                 setNurseAssignments(updatedAssigned);
-            }
-            if (active.id) {
-                setParentList({ ...parentList, [active.id]: null })
             }
         }
     }
@@ -127,10 +117,13 @@ export default function Home() {
                                 placeholder="Room Name"
                                 value={room.name}
                                 onChange={e => setRoom({ name: e.currentTarget.value, patientCount: room.patientCount })}
+                                error={isRoomNameDuplicate}
                             />
                             <TextField type='number' placeholder="0" value={room.patientCount} onChange={e => setRoom({ name: room.name, patientCount: parseInt(e.currentTarget.value) })} />
                             <Button
+                                variant="contained"
                                 onClick={handleAddRoom}
+                                disabled={isRoomNameDuplicate}
                             >
                                 Save
                             </Button>
@@ -152,31 +145,29 @@ export default function Home() {
                         direction='column'
                         xs={9}
                     >
-                        {
-                            Object.entries(parentList).map(([key, val]) => {
-                                const roomId = key;
-                                const parentId = val;
-                                if (parentId) {
-                                    return null;
-                                } else {
+                        <Grid item container direction='row' xs={12} className='p-2 h-24'>
+                            {
+                                roomList.filter(room => !Object.values(nurseAssignments).flat().includes(room)).map(room => {
                                     return (
-                                        <DraggableRoom key={`room-${roomId}`} roomId={roomId}>{roomId}</DraggableRoom>
+                                        <DraggableRoom key={`room-${room.name}`} roomId={room.name}>{room.name}: {room.patientCount}</DraggableRoom>
                                     )
-                                }
-                            })
-                        }
+                                })
+                            }
+                        </Grid>
                         <Grid item container direction='row' xs={12}>
                             {
                                 nurseList.map(nurse => (
                                     <RoomZone key={nurse} nurseId={nurse} patientCount={nurseAssignments[nurse] ? nurseAssignments[nurse].reduce((prev, curr) => prev + curr.patientCount, 0) : 0}>
                                         {
-                                            Object.entries(parentList).map(([key, val]) => {
-                                                const roomId = key;
-                                                const parentId = val;
-                                                if (parentId === nurse) {
-                                                    return (
-                                                        <DraggableRoom key={`room-${roomId}`} roomId={roomId}>{roomId}</DraggableRoom>
-                                                    )
+                                            Object.entries(nurseAssignments).map(([key, val]) => {
+                                                const rooms = val;
+                                                if (rooms.length && key === nurse) {
+                                                    const roomList = rooms.map(room => {
+                                                        return (
+                                                            <DraggableRoom key={`room-${room.name}`} roomId={room.name}>{room.name}: {room.patientCount}</DraggableRoom>
+                                                        )
+                                                    })
+                                                    return roomList;
                                                 } else {
                                                     return null;
                                                 }

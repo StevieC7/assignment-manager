@@ -16,7 +16,7 @@ export default function DraggableRoom({ roomId, children }: Props) {
 
 
     return (
-        <button ref={setNodeRef} style={style} {...listeners} {...attributes} className='bg-blue-100 p-4 rounded-full'>
+        <button ref={setNodeRef} style={style} {...listeners} {...attributes} className='bg-blue-100 p-4 rounded-full h-12 items-center flex'>
             {children}
         </button>
     );
