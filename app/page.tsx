@@ -5,6 +5,7 @@ import RoomZone from "./components/RoomDropzone";
 import DraggableRoom from "./components/DraggableRoom";
 import { DndContext, DragEndEvent } from "@dnd-kit/core";
 import { CheckCircle } from "@mui/icons-material";
+import { roomMatcher } from "./utils/algo";
 
 export type Room = {
     name: string,
@@ -90,6 +91,15 @@ export default function Home() {
         if (nurses) setNurseList(JSON.parse(nurses));
         if (rooms) setRoomList(JSON.parse(rooms));
         if (assignments) setNurseAssignments(JSON.parse(assignments));
+    }
+
+    const handleAutoAssign = () => {
+        const { assignments } = roomMatcher(nurseList, roomList);
+        setNurseAssignments(assignments);
+    }
+
+    const handleResetAssignments = () => {
+        setNurseAssignments({});
     }
 
     return (
@@ -180,23 +190,48 @@ export default function Home() {
                             item
                             container
                             direction='row'
+                            justifyContent='space-between'
                             xs={12}
                             className='p-2 h-24'
                         >
-                            {
-                                unassignedRooms.length
-                                    ? unassignedRooms.map(room => {
-                                        return (
-                                            <DraggableRoom key={`room-${room.name}`} roomId={room.name}>{room.name}: {room.patientCount}</DraggableRoom>
+                            <Grid item container direction='row' xs={9} className='pl-6'>
+                                {
+                                    unassignedRooms.length
+                                        ? unassignedRooms.map(room => {
+                                            return (
+                                                <DraggableRoom key={`room-${room.name}`} roomId={room.name}>{room.name}: {room.patientCount}</DraggableRoom>
+                                            )
+                                        })
+                                        : (
+                                            <>
+                                                <CheckCircle className='text-green-500' />
+                                                <Typography>All Assigned</Typography>
+                                            </>
                                         )
-                                    })
-                                    : (
-                                        <Grid item className='pl-6' container>
-                                            <CheckCircle />
-                                            <Typography>All Assigned</Typography>
-                                        </Grid>
-                                    )
-                            }
+                                }
+                            </Grid>
+                            <Grid
+                                item
+                                container
+                                direction='row'
+                                justifyContent='flex-end'
+                                xs={3}
+                            >
+                                <Button
+                                    variant='outlined'
+                                    onClick={handleResetAssignments}
+                                    className='h-12'
+                                >
+                                    Reset Assignments
+                                </Button>
+                                <Button
+                                    variant='contained'
+                                    onClick={handleAutoAssign}
+                                    className='h-12 ml-4'
+                                >
+                                    Quick-fill
+                                </Button>
+                            </Grid>
                         </Grid>
                         <Typography variant='h4' className='pl-6 mb-4'>Target patient count: {averagePatientCount}</Typography>
                         <Grid
