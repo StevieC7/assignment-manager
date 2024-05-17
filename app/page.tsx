@@ -28,7 +28,7 @@ export default function Home() {
         setRoomList([...roomList, room])
         setRoom({ name: '', patientCount: 0 })
     }
-    // TODO: handle delete nurse (specifically, handle updating parent list and user assignment list when nurse deleted)
+
     const handleDeleteNurse = (id: number, name: string) => {
         const newList = [...nurseList];
         newList.splice(id, 1);
