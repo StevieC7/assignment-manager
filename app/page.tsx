@@ -1,26 +1,46 @@
 'use client';
 import { Button, Divider, Grid, Paper, TextField, Tooltip, Typography } from "@mui/material";
 import { useState } from "react";
-import { roomMatcher, dummyRooms } from "./utils/algo";
+import { roomMatcher, dummyRooms, dummyNurses } from "./utils/algo";
 import RoomZone from "./components/RoomDropzone";
 import DraggableRoom from "./components/DraggableRoom";
-import { DndContext } from "@dnd-kit/core";
+import { DndContext, DragEndEvent, UniqueIdentifier } from "@dnd-kit/core";
 
 export type Room = {
     name: string,
     patientCount: number,
 }
 export default function Home() {
-    const [parent, setParent] = useState(null);
-    const [nurseList, setNurseList] = useState<string[]>([]);
     const [nurseName, setNurseName] = useState<string>('');
-    const [roomList, setRoomList] = useState<Room[]>([]);
     const [room, setRoom] = useState<Room>({ name: '', patientCount: 0 });
+
+    const [nurseList, setNurseList] = useState<string[]>([]);
+    const [roomList, setRoomList] = useState<Room[]>([]);
+
+    const [parent, setParent] = useState<UniqueIdentifier | null>(null);
+
     const { assignments, exceptions, averageAssignments } = roomMatcher(nurseList, roomList);
-    const handleDragEnd = (event: any) => {
-        const { over } = event;
-        setParent(over ? over.id : null)
+    const [userAssigned, setUserAssigned] = useState<Record<string, Room[]>>({});
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { over, active } = event;
+        if (over) {
+            let updatedAssigned = { ...userAssigned };
+            if (parent) {
+                const updatedOldNurse = userAssigned[parent].filter(assignment => assignment.name !== active.id);
+                updatedAssigned[parent] = updatedOldNurse;
+            }
+            const activeRoom = dummyRooms.find(room => room.name === active.id);
+            const alreadyAssigned = userAssigned[over.id] || [];
+            updatedAssigned[over.id] = activeRoom ? [...alreadyAssigned, activeRoom] : alreadyAssigned;
+            setUserAssigned(updatedAssigned);
+            setParent(over.id);
+        } else {
+            setParent(null)
+        }
+
     }
+
     return (
         <main>
             <DndContext onDragEnd={handleDragEnd}>
@@ -122,28 +142,19 @@ export default function Home() {
                             )
                         })}
                     </Grid>
-                    {/* <Grid item>
-                    <Typography>Rooms</Typography>
-                    {dummyRooms.map(room => {
-                        const foundAssignment = assignments.find(assignment => assignment.rooms.includes(room));
-                        return (
-                            <>
-                                <Typography>{room.name}</Typography>
-                                {foundAssignment && foundAssignment.nurse}
-                            </>
-                        )
-                    })}
-                </Grid> */}
+                    {
+                        JSON.stringify(userAssigned)
+                    }
                     {
                         !parent && (
-                            <DraggableRoom roomId={'1'}>Drag me</DraggableRoom>
+                            <DraggableRoom roomId={'4&5'}>Drag me</DraggableRoom>
                         )
                     }
                     {
-                        dummyRooms.map(room => (
-                            <RoomZone key={room.name} nurseId={room.name}>
-                                {parent === room.name ? (
-                                    <DraggableRoom roomId={'1'}>Drag me</DraggableRoom>
+                        dummyNurses.map(nurse => (
+                            <RoomZone key={nurse} nurseId={nurse}>
+                                {parent === nurse ? (
+                                    <DraggableRoom roomId={'4&5'}>Drag me</DraggableRoom>
                                 ) : '+'}
                             </RoomZone>
                         ))
