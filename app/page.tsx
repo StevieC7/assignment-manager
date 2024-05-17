@@ -4,6 +4,7 @@ import { useState } from "react";
 import RoomZone from "./components/RoomDropzone";
 import DraggableRoom from "./components/DraggableRoom";
 import { DndContext, DragEndEvent } from "@dnd-kit/core";
+import { CheckCircle } from "@mui/icons-material";
 
 export type Room = {
     name: string,
@@ -16,15 +17,25 @@ export default function Home() {
     const [nurseList, setNurseList] = useState<string[]>([]);
     const [roomList, setRoomList] = useState<Room[]>([]);
 
+    const averagePatientCount = Math.ceil(roomList.reduce((prev, curr) => prev + curr.patientCount, 0) / nurseList.length);
     const [nurseAssignments, setNurseAssignments] = useState<Record<string, Room[]>>({});
 
-    // TODO: handle delete nurse (specifically, handle updating parent list and user assignment list when nurse deleted)
+    const unassignedRooms = roomList.filter(room => !Object.values(nurseAssignments).flat().map(val => val.name).includes(room.name));
 
     const isRoomNameDuplicate = room.name !== '' && roomList.find(existingRoom => existingRoom.name === room.name) ? true : false;
 
     const handleAddRoom = () => {
         setRoomList([...roomList, room])
         setRoom({ name: '', patientCount: 0 })
+    }
+    // TODO: handle delete nurse (specifically, handle updating parent list and user assignment list when nurse deleted)
+    const handleDeleteNurse = (id: number, name: string) => {
+        const newList = [...nurseList];
+        newList.splice(id, 1);
+        setNurseList(newList);
+        const newNurseAssignments = { ...nurseAssignments };
+        delete newNurseAssignments[name];
+        setNurseAssignments(newNurseAssignments);
     }
 
     const handleDeleteRoom = (id: number, name: string) => {
@@ -124,11 +135,7 @@ export default function Home() {
                                         <Typography key={id}>
                                             {nurse}
                                         </Typography>
-                                        <Button onClick={() => {
-                                            const newList = [...nurseList];
-                                            newList.splice(id, 1);
-                                            setNurseList(newList);
-                                        }}>
+                                        <Button onClick={() => handleDeleteNurse(id, nurse)}>
                                             Delete
                                         </Button>
                                     </>
@@ -169,19 +176,43 @@ export default function Home() {
                         direction='column'
                         xs={9}
                     >
-                        <Grid item container direction='row' xs={12} className='p-2 h-24'>
+                        <Grid
+                            item
+                            container
+                            direction='row'
+                            xs={12}
+                            className='p-2 h-24'
+                        >
                             {
-                                roomList.filter(room => !Object.values(nurseAssignments).flat().includes(room)).map(room => {
-                                    return (
-                                        <DraggableRoom key={`room-${room.name}`} roomId={room.name}>{room.name}: {room.patientCount}</DraggableRoom>
+                                unassignedRooms.length
+                                    ? unassignedRooms.map(room => {
+                                        return (
+                                            <DraggableRoom key={`room-${room.name}`} roomId={room.name}>{room.name}: {room.patientCount}</DraggableRoom>
+                                        )
+                                    })
+                                    : (
+                                        <Grid item className='pl-6' container>
+                                            <CheckCircle />
+                                            <Typography>All Assigned</Typography>
+                                        </Grid>
                                     )
-                                })
                             }
                         </Grid>
-                        <Grid item container direction='row' xs={12}>
+                        <Typography variant='h4' className='pl-6 mb-4'>Target patient count: {averagePatientCount}</Typography>
+                        <Grid
+                            item
+                            container
+                            direction='row'
+                            xs={12}
+                        >
                             {
                                 nurseList.map(nurse => (
-                                    <RoomZone key={nurse} nurseId={nurse} patientCount={nurseAssignments[nurse] ? nurseAssignments[nurse].reduce((prev, curr) => prev + curr.patientCount, 0) : 0}>
+                                    <RoomZone
+                                        key={nurse}
+                                        nurseId={nurse}
+                                        patientCount={nurseAssignments[nurse] ? nurseAssignments[nurse].reduce((prev, curr) => prev + curr.patientCount, 0) : 0}
+                                        averagePatientCount={averagePatientCount}
+                                    >
                                         {
                                             Object.entries(nurseAssignments).map(([key, val]) => {
                                                 const rooms = val;
