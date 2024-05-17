@@ -18,6 +18,8 @@ export default function Home() {
     const [roomList, setRoomList] = useState<Room[]>([]);
 
     const [parent, setParent] = useState<UniqueIdentifier | null>(null);
+    const [parentList, setParentList] = useState<Record<string, UniqueIdentifier | null>>({});
+    // key will be the room id and parent will be the nurse id
 
     const { assignments, exceptions, averageAssignments } = roomMatcher(nurseList, roomList);
     const [userAssigned, setUserAssigned] = useState<Record<string, Room[]>>({});
@@ -38,10 +40,22 @@ export default function Home() {
             updatedAssigned[over.id] = activeRoom ? [...alreadyAssigned, activeRoom] : alreadyAssigned;
             setUserAssigned(updatedAssigned);
             setParent(over.id);
+            if (activeRoom) {
+                const newParentList = { ...parentList, [activeRoom.name]: over.id }
+                setParentList(newParentList);
+            }
         } else {
+            if (parent) {
+                let updatedAssigned = { ...userAssigned };
+                const updatedOldNurse = userAssigned[parent].filter(assignment => assignment.name !== active.id);
+                updatedAssigned[parent] = updatedOldNurse;
+                setUserAssigned(updatedAssigned);
+            }
             setParent(null)
+            if (active.id) {
+                setParentList({ ...parentList, [active.id]: null })
+            }
         }
-
     }
 
     return (
