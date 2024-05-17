@@ -14,7 +14,6 @@ export type Room = {
     patientCount: number,
 }
 export default function Home() {
-    // TODO: update nurse
     const [nurseName, setNurseName] = useState<string>('');
     const [room, setRoom] = useState<Room>({ name: '', patientCount: 0 });
 
@@ -31,6 +30,24 @@ export default function Home() {
     const handleAddRoom = () => {
         setRoomList([...roomList, room])
         setRoom({ name: '', patientCount: 0 })
+    }
+
+    const handleUpdateRoomPatientCount = (name: string, patientCount: number) => {
+        const foundRoomIndex = roomList.findIndex(room => room.name === name);
+        if (foundRoomIndex !== -1) {
+            const newRoomList = [...roomList];
+            newRoomList.splice(foundRoomIndex, 1, { name, patientCount });
+            setRoomList(newRoomList);
+            let newNurseAssignments = { ...nurseAssignments };
+            for (const [nurseName, roomList] of Object.entries(newNurseAssignments)) {
+                if (roomList.find(room => room.name === name)) {
+                    const newList = roomList.filter(room => room.name !== name);
+                    newList.push({ name, patientCount });
+                    newNurseAssignments[nurseName] = newList;
+                }
+            }
+            setNurseAssignments(newNurseAssignments);
+        }
     }
 
     const handleDeleteNurse = (id: number, name: string) => {
@@ -188,11 +205,13 @@ export default function Home() {
                                 Save
                             </Button>
                             {roomList.map((room, id) => {
+                                // TODO: add an "update" functionality for the patient count
                                 return (
                                     <>
                                         <Typography key={id}>
                                             {room.name}: {room.patientCount}
                                         </Typography>
+                                        <TextField type='number' value={room.patientCount} onChange={(e) => handleUpdateRoomPatientCount(room.name, parseInt(e.currentTarget.value))} />
                                         <Button onClick={() => handleDeleteRoom(id, room.name)}>
                                             Delete
                                         </Button>
