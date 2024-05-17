@@ -17,9 +17,11 @@ export default function Home() {
     const [roomList, setRoomList] = useState<Room[]>([]);
 
     const [parentList, setParentList] = useState<Record<string, UniqueIdentifier | null>>({});
-    // key will be the room id and parent will be the nurse id
+    // key will be the room id and value will be the nurse id
 
-    const [userAssigned, setUserAssigned] = useState<Record<string, Room[]>>({});
+    const [nurseAssignments, setNurseAssignments] = useState<Record<string, Room[]>>({});
+
+    // TODO: handle delete nurse (specifically, handle updating parent list and user assignment list when nurse deleted)
 
     const handleAddRoom = () => {
         setRoomList([...roomList, room])
@@ -31,12 +33,12 @@ export default function Home() {
         const newList = [...roomList];
         newList.splice(id, 1);
         setRoomList(newList);
-        let newUserAssigned = { ...userAssigned };
+        let newUserAssigned = { ...nurseAssignments };
         for (const [nurseName, roomList] of Object.entries(newUserAssigned)) {
             const newList = roomList.filter(room => room.name !== name);
             newUserAssigned[nurseName] = newList;
         }
-        setUserAssigned(newUserAssigned);
+        setNurseAssignments(newUserAssigned);
         const newParentList = { ...parentList };
         delete newParentList[name];
         setParentList(newParentList);
@@ -49,25 +51,25 @@ export default function Home() {
             return;
         }
         if (over) {
-            let updatedAssigned = { ...userAssigned };
+            let updatedAssigned = { ...nurseAssignments };
             if (parent) {
-                const updatedOldNurse = userAssigned[parent].filter(assignment => assignment.name !== active.id);
+                const updatedOldNurse = nurseAssignments[parent].filter(assignment => assignment.name !== active.id);
                 updatedAssigned[parent] = updatedOldNurse;
             }
             const activeRoom = roomList.find(room => room.name === active.id);
-            const alreadyAssigned = userAssigned[over.id] || [];
+            const alreadyAssigned = nurseAssignments[over.id] || [];
             updatedAssigned[over.id] = activeRoom ? [...alreadyAssigned, activeRoom] : alreadyAssigned;
-            setUserAssigned(updatedAssigned);
+            setNurseAssignments(updatedAssigned);
             if (activeRoom) {
                 const newParentList = { ...parentList, [activeRoom.name]: over.id }
                 setParentList(newParentList);
             }
         } else {
             if (parent) {
-                let updatedAssigned = { ...userAssigned };
-                const updatedOldNurse = userAssigned[parent].filter(assignment => assignment.name !== active.id);
+                let updatedAssigned = { ...nurseAssignments };
+                const updatedOldNurse = nurseAssignments[parent].filter(assignment => assignment.name !== active.id);
                 updatedAssigned[parent] = updatedOldNurse;
-                setUserAssigned(updatedAssigned);
+                setNurseAssignments(updatedAssigned);
             }
             if (active.id) {
                 setParentList({ ...parentList, [active.id]: null })
@@ -166,7 +168,7 @@ export default function Home() {
                         <Grid item container direction='row' xs={12}>
                             {
                                 nurseList.map(nurse => (
-                                    <RoomZone key={nurse} nurseId={nurse} patientCount={userAssigned[nurse] ? userAssigned[nurse].reduce((prev, curr) => prev + curr.patientCount, 0) : 0}>
+                                    <RoomZone key={nurse} nurseId={nurse} patientCount={nurseAssignments[nurse] ? nurseAssignments[nurse].reduce((prev, curr) => prev + curr.patientCount, 0) : 0}>
                                         {
                                             Object.entries(parentList).map(([key, val]) => {
                                                 const roomId = key;
