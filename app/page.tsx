@@ -6,6 +6,7 @@ import DraggableRoom from "./components/DraggableRoom";
 import { DndContext, DragEndEvent } from "@dnd-kit/core";
 import { CheckCircle } from "@mui/icons-material";
 import { roomMatcher } from "./utils/algo";
+// @ts-ignore
 import * as Papa from 'papaparse';
 
 export type Room = {
@@ -13,6 +14,7 @@ export type Room = {
     patientCount: number,
 }
 export default function Home() {
+    // TODO: update nurse
     const [nurseName, setNurseName] = useState<string>('');
     const [room, setRoom] = useState<Room>({ name: '', patientCount: 0 });
 
