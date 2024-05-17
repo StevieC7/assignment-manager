@@ -24,6 +24,9 @@ export default function Home() {
 
     const handleDragEnd = (event: DragEndEvent) => {
         const { over, active } = event;
+        if (over && parent && over.id === parent) {
+            return;
+        }
         if (over) {
             let updatedAssigned = { ...userAssigned };
             if (parent) {
@@ -143,19 +146,16 @@ export default function Home() {
                         })}
                     </Grid>
                     {
-                        JSON.stringify(userAssigned)
-                    }
-                    {
                         !parent && (
                             <DraggableRoom roomId={'4&5'}>Drag me</DraggableRoom>
                         )
                     }
                     {
                         dummyNurses.map(nurse => (
-                            <RoomZone key={nurse} nurseId={nurse}>
-                                {parent === nurse ? (
-                                    <DraggableRoom roomId={'4&5'}>Drag me</DraggableRoom>
-                                ) : '+'}
+                            <RoomZone key={nurse} nurseId={nurse} patientCount={userAssigned[nurse] ? userAssigned[nurse].reduce((prev, curr) => prev + curr.patientCount, 0) : 0}>
+                                {parent === nurse && (
+                                    <DraggableRoom roomId={'4&5'}>Rooms 4&5</DraggableRoom>
+                                )}
                             </RoomZone>
                         ))
                     }
