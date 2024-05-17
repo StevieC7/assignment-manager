@@ -1,7 +1,6 @@
 'use client';
 import { Button, Divider, Grid, Paper, TextField, Tooltip, Typography } from "@mui/material";
 import { useState } from "react";
-import { roomMatcher, dummyRooms, dummyNurses } from "./utils/algo";
 import RoomZone from "./components/RoomDropzone";
 import DraggableRoom from "./components/DraggableRoom";
 import { DndContext, DragEndEvent, UniqueIdentifier } from "@dnd-kit/core";
@@ -20,7 +19,6 @@ export default function Home() {
     const [parentList, setParentList] = useState<Record<string, UniqueIdentifier | null>>({});
     // key will be the room id and parent will be the nurse id
 
-    const { assignments, exceptions, averageAssignments } = roomMatcher(nurseList, roomList);
     const [userAssigned, setUserAssigned] = useState<Record<string, Room[]>>({});
 
     const handleAddRoom = () => {
@@ -39,7 +37,6 @@ export default function Home() {
             let updatedAssigned = { ...userAssigned };
             if (parent) {
                 const updatedOldNurse = userAssigned[parent].filter(assignment => assignment.name !== active.id);
-                console.log({ updatedOldNurse, parent, over })
                 updatedAssigned[parent] = updatedOldNurse;
             }
             const activeRoom = roomList.find(room => room.name === active.id);
@@ -62,7 +59,6 @@ export default function Home() {
             }
         }
     }
-    console.log({ parentList })
 
     return (
         <main>
@@ -72,97 +68,77 @@ export default function Home() {
                     container
                     direction='row'
                 >
-                    <Grid item container direction='column' xs={6}>
-                        <TextField
-                            placeholder="Nurse Name"
-                            value={nurseName}
-                            onChange={e => setNurseName(e.currentTarget.value)}
-                        />
-                        <Button
-                            onClick={() => {
-                                setNurseList([...nurseList, nurseName])
-                                setNurseName('')
-                            }}
-                        >
-                            Save
-                        </Button>
-                        {nurseList.map((nurse, id) => {
-                            return (
-                                <>
-                                    <Typography key={id}>
-                                        {nurse}
-                                    </Typography>
-                                    <Button onClick={() => {
-                                        const newList = [...nurseList];
-                                        newList.splice(id, 1);
-                                        setNurseList(newList);
-                                    }}>
-                                        Delete
-                                    </Button>
-                                </>
-                            )
-                        })}
-                    </Grid>
-                    <Grid item container direction='column' xs={6}>
-                        <TextField
-                            placeholder="Room Name"
-                            value={room.name}
-                            onChange={e => setRoom({ name: e.currentTarget.value, patientCount: room.patientCount })}
-                        />
-                        <TextField type='number' placeholder="0" value={room.patientCount} onChange={e => setRoom({ name: room.name, patientCount: parseInt(e.currentTarget.value) })} />
-                        <Button
-                            onClick={handleAddRoom}
-                        >
-                            Save
-                        </Button>
-                        {roomList.map((room, id) => {
-                            return (
-                                <>
-                                    <Typography key={id}>
-                                        {room.name}: {room.patientCount}
-                                    </Typography>
-                                    <Button onClick={() => {
-                                        const newList = [...roomList];
-                                        newList.splice(id, 1);
-                                        setRoomList(newList);
-                                    }}>
-                                        Delete
-                                    </Button>
-                                </>
-                            )
-                        })}
-                    </Grid>
-                    <Grid item container direction='column'>
-                        <Typography>Target Average Patient Count: {averageAssignments}</Typography>
-                        <Typography variant="h2">Assignments</Typography>
-                        <Grid item container direction="row">
-                            {assignments.map(assignment => {
+                    <Grid
+                        container
+                        direction='column'
+                        xs={3}
+                        className='h-dvh'
+                    >
+                        <Grid item container direction='column' xs={6}>
+                            <TextField
+                                placeholder="Nurse Name"
+                                value={nurseName}
+                                onChange={e => setNurseName(e.currentTarget.value)}
+                            />
+                            <Button
+                                onClick={() => {
+                                    setNurseList([...nurseList, nurseName])
+                                    setNurseName('')
+                                }}
+                            >
+                                Save
+                            </Button>
+                            {nurseList.map((nurse, id) => {
                                 return (
-                                    <Paper key={assignment.nurse} elevation={1} sx={{ mr: 5, minWidth: '15rem', padding: '2rem' }}>
-                                        <Typography variant="h5">{assignment.nurse}</Typography>
-                                        <Typography variant="subtitle2">{assignment.rooms.reduce((prev, curr) => prev + curr.patientCount, 0)} patients</Typography>
-                                        <Divider sx={{ mb: 2 }} />
-                                        {
-                                            assignment.rooms.map(room => {
-                                                return (
-                                                    <Tooltip key={room.name} title={`${room.patientCount} patients`}>
-                                                        <Typography variant="body1">Room {room.name}</Typography>
-                                                    </Tooltip>
-                                                )
-                                            })
-                                        }
-                                    </Paper>
+                                    <>
+                                        <Typography key={id}>
+                                            {nurse}
+                                        </Typography>
+                                        <Button onClick={() => {
+                                            const newList = [...nurseList];
+                                            newList.splice(id, 1);
+                                            setNurseList(newList);
+                                        }}>
+                                            Delete
+                                        </Button>
+                                    </>
                                 )
                             })}
                         </Grid>
-                        <Typography>Exceptions</Typography>
-                        {exceptions.map(exception => {
-                            return (
-                                <Typography key={exception.name}>{exception.name}: {exception.patientCount}</Typography>
-                            )
-                        })}
+                        <Grid item container direction='column' xs={6}>
+                            <TextField
+                                placeholder="Room Name"
+                                value={room.name}
+                                onChange={e => setRoom({ name: e.currentTarget.value, patientCount: room.patientCount })}
+                            />
+                            <TextField type='number' placeholder="0" value={room.patientCount} onChange={e => setRoom({ name: room.name, patientCount: parseInt(e.currentTarget.value) })} />
+                            <Button
+                                onClick={handleAddRoom}
+                            >
+                                Save
+                            </Button>
+                            {roomList.map((room, id) => {
+                                return (
+                                    <>
+                                        <Typography key={id}>
+                                            {room.name}: {room.patientCount}
+                                        </Typography>
+                                        <Button onClick={() => {
+                                            const newList = [...roomList];
+                                            newList.splice(id, 1);
+                                            setRoomList(newList);
+                                        }}>
+                                            Delete
+                                        </Button>
+                                    </>
+                                )
+                            })}
+                        </Grid>
                     </Grid>
-                    <Grid direction='column'>
+                    <Grid
+                        direction='column'
+                        xs={9}
+                    >
                         {
                             Object.entries(parentList).map(([key, val]) => {
                                 const roomId = key;
@@ -176,26 +152,28 @@ export default function Home() {
                                 }
                             })
                         }
-                    </Grid>
-                    {
-                        dummyNurses.map(nurse => (
-                            <RoomZone key={nurse} nurseId={nurse} patientCount={userAssigned[nurse] ? userAssigned[nurse].reduce((prev, curr) => prev + curr.patientCount, 0) : 0}>
-                                {
-                                    Object.entries(parentList).map(([key, val]) => {
-                                        const roomId = key;
-                                        const parentId = val;
-                                        if (parentId === nurse) {
-                                            return (
-                                                <DraggableRoom key={`room-${roomId}`} roomId={roomId}>{roomId}</DraggableRoom>
-                                            )
-                                        } else {
-                                            return null;
+                        <Grid item container direction='row' xs={12}>
+                            {
+                                nurseList.map(nurse => (
+                                    <RoomZone key={nurse} nurseId={nurse} patientCount={userAssigned[nurse] ? userAssigned[nurse].reduce((prev, curr) => prev + curr.patientCount, 0) : 0}>
+                                        {
+                                            Object.entries(parentList).map(([key, val]) => {
+                                                const roomId = key;
+                                                const parentId = val;
+                                                if (parentId === nurse) {
+                                                    return (
+                                                        <DraggableRoom key={`room-${roomId}`} roomId={roomId}>{roomId}</DraggableRoom>
+                                                    )
+                                                } else {
+                                                    return null;
+                                                }
+                                            })
                                         }
-                                    })
-                                }
-                            </RoomZone>
-                        ))
-                    }
+                                    </RoomZone>
+                                ))
+                            }
+                        </Grid>
+                    </Grid>
                 </Grid>
             </DndContext>
         </main >

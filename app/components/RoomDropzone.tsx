@@ -12,8 +12,8 @@ export default function RoomZone({ nurseId, patientCount, children }: Props) {
     return (
         <div ref={setNodeRef} className={`border-2 w-96 ml-6 h-96 bg-white flex flex-col`}>
             <Grid container direction='row' justifyContent='space-between' className='border-b-2'>
-                <Typography className="w-fit">{nurseId}</Typography>
-                <Typography className={'w-fit border-l-2'}>{patientCount}</Typography>
+                <Typography variant='h5' className="w-fit">{nurseId}</Typography>
+                <Typography variant='h5' className={'w-fit border-l-2'}>{patientCount}</Typography>
             </Grid>
             <Grid container>
                 {children}
