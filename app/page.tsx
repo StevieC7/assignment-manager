@@ -129,7 +129,7 @@ export default function Home() {
     }
 
     const handleAutoAssign = () => {
-        const { assignments } = roomMatcher(nurseList, roomList);
+        const { assignments } = roomMatcher(nurseList, roomList, averagePatientCount);
         setNurseAssignments(assignments);
     }
 

@@ -1,9 +1,7 @@
 import { Room } from "../page";
 
-export function roomMatcher(nurses: string[], rooms: Room[]) {
+export function roomMatcher(nurses: string[], rooms: Room[], averageAssignments: number) {
     const assignments: Record<string, Room[]> = {};
-    const totalAssignments = rooms.reduce((prev, curr) => prev + curr.patientCount, 0);
-    const averageAssignments = Math.floor(totalAssignments / nurses.length);
 
     const usedRooms: Room[] = [];
     for (const nurse of nurses) {
