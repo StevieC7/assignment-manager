@@ -27,6 +27,21 @@ export default function Home() {
         setParentList({ ...parentList, [room.name]: null })
     }
 
+    const handleDeleteRoom = (id: number, name: string) => {
+        const newList = [...roomList];
+        newList.splice(id, 1);
+        setRoomList(newList);
+        let newUserAssigned = { ...userAssigned };
+        for (const [nurseName, roomList] of Object.entries(newUserAssigned)) {
+            const newList = roomList.filter(room => room.name !== name);
+            newUserAssigned[nurseName] = newList;
+        }
+        setUserAssigned(newUserAssigned);
+        const newParentList = { ...parentList };
+        delete newParentList[name];
+        setParentList(newParentList);
+    }
+
     const handleDragEnd = (event: DragEndEvent) => {
         const { over, active } = event;
         const parent = parentList[active.id];
@@ -123,11 +138,7 @@ export default function Home() {
                                         <Typography key={id}>
                                             {room.name}: {room.patientCount}
                                         </Typography>
-                                        <Button onClick={() => {
-                                            const newList = [...roomList];
-                                            newList.splice(id, 1);
-                                            setRoomList(newList);
-                                        }}>
+                                        <Button onClick={() => handleDeleteRoom(id, room.name)}>
                                             Delete
                                         </Button>
                                     </>
