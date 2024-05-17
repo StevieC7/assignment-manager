@@ -67,21 +67,45 @@ export default function Home() {
         }
     }
 
+    const handleSaveToLocal = () => {
+        localStorage.setItem("nurses", JSON.stringify(nurseList))
+        localStorage.setItem("rooms", JSON.stringify(roomList))
+        localStorage.setItem("nurseAssignments", JSON.stringify(nurseAssignments))
+    }
+
+    const handleLoadLocal = () => {
+        const nurses = localStorage.getItem("nurses");
+        const rooms = localStorage.getItem("rooms");
+        const assignments = localStorage.getItem("nurseAssignments");
+        if (nurses) setNurseList(JSON.parse(nurses));
+        if (rooms) setRoomList(JSON.parse(rooms));
+        if (assignments) setNurseAssignments(JSON.parse(assignments));
+    }
+
     return (
         <main>
             <DndContext onDragEnd={handleDragEnd}>
-                <h1>Room Assigner</h1>
+                <Grid container direction='row' justifyContent='space-between' alignItems='center' className='bg-black text-white p-4'>
+                    <Typography variant="h1">Room Assigner</Typography>
+                    <Grid item>
+                        <Button variant="contained" onClick={handleSaveToLocal} className='h-12 mr-4'>Save</Button>
+                        <Button variant="contained" onClick={handleLoadLocal} className='h-12'>Load</Button>
+                    </Grid>
+                </Grid>
                 <Grid
                     container
                     direction='row'
+                    className='p-4'
                 >
                     <Grid
+                        item
                         container
                         direction='column'
                         xs={3}
                         className='h-dvh'
                     >
                         <Grid item container direction='column' xs={6}>
+                            <Typography variant='h4'>Nurses</Typography>
                             <TextField
                                 placeholder="Nurse Name"
                                 value={nurseName}
@@ -113,6 +137,7 @@ export default function Home() {
                             })}
                         </Grid>
                         <Grid item container direction='column' xs={6}>
+                            <Typography variant='h4'>Rooms</Typography>
                             <TextField
                                 placeholder="Room Name"
                                 value={room.name}
