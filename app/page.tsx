@@ -20,7 +20,6 @@ export default function Home() {
 
     // TODO: handle delete nurse (specifically, handle updating parent list and user assignment list when nurse deleted)
 
-    // TODO: room name validation (prevent adding room name that already exists)
     const isRoomNameDuplicate = room.name !== '' && roomList.find(existingRoom => existingRoom.name === room.name) ? true : false;
 
     const handleAddRoom = () => {
