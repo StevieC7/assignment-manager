@@ -1,9 +1,9 @@
 'use client';
-import { Button, Divider, Grid, Paper, TextField, Tooltip, Typography } from "@mui/material";
+import { Button, Grid, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 import RoomZone from "./components/RoomDropzone";
 import DraggableRoom from "./components/DraggableRoom";
-import { DndContext, DragEndEvent, UniqueIdentifier } from "@dnd-kit/core";
+import { DndContext, DragEndEvent } from "@dnd-kit/core";
 
 export type Room = {
     name: string,
