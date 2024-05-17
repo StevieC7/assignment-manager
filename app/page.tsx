@@ -175,18 +175,20 @@ export default function Home() {
                             >
                                 Save
                             </Button>
-                            {nurseList.map((nurse, id) => {
-                                return (
-                                    <Grid key={id} item container direction='row' alignItems='center'>
-                                        <Typography>
-                                            {nurse}
-                                        </Typography>
-                                        <Button onClick={() => handleDeleteNurse(id, nurse)}>
-                                            Delete
-                                        </Button>
-                                    </Grid>
-                                )
-                            })}
+                            <Grid item className='overflow-y-scroll max-h-96'>
+                                {nurseList.map((nurse, id) => {
+                                    return (
+                                        <Grid key={id} item container direction='row' alignItems='center'>
+                                            <Typography>
+                                                {nurse}
+                                            </Typography>
+                                            <Button onClick={() => handleDeleteNurse(id, nurse)}>
+                                                Delete
+                                            </Button>
+                                        </Grid>
+                                    )
+                                })}
+                            </Grid>
                         </Grid>
                         <Grid item container direction='column'>
                             <Typography variant='h4'>Rooms</Typography>
@@ -204,28 +206,30 @@ export default function Home() {
                             >
                                 Save
                             </Button>
-                            {roomList.map((room, id) => {
-                                // TODO: add an "update" functionality for the patient count
-                                return (
-                                    <Grid key={id} item container direction='row' alignItems='center' justifyContent='space-between'>
-                                        <Typography>
-                                            {room.name}
-                                        </Typography>
-                                        <Grid item container justifyContent='flex-end' alignItems='center' xs={9}>
-                                            <TextField
-                                                type='number'
-                                                value={room.patientCount}
-                                                onChange={(e) => handleUpdateRoomPatientCount(room.name, parseInt(e.currentTarget.value))}
-                                                className='w-16'
-                                            />
-                                            <Typography variant='body1'>patients</Typography>
-                                            <Button onClick={() => handleDeleteRoom(id, room.name)}>
-                                                Delete
-                                            </Button>
+                            <Grid item container className='overflow-y-scroll max-h-96'>
+                                {roomList.map((room, id) => {
+                                    // TODO: add an "update" functionality for the patient count
+                                    return (
+                                        <Grid key={id} item container direction='row' alignItems='center' justifyContent='space-between'>
+                                            <Typography>
+                                                {room.name}
+                                            </Typography>
+                                            <Grid item container justifyContent='flex-end' alignItems='center' xs={9}>
+                                                <TextField
+                                                    type='number'
+                                                    value={room.patientCount}
+                                                    onChange={(e) => handleUpdateRoomPatientCount(room.name, parseInt(e.currentTarget.value))}
+                                                    className='w-16'
+                                                />
+                                                <Typography variant='body1'>patients</Typography>
+                                                <Button onClick={() => handleDeleteRoom(id, room.name)}>
+                                                    Delete
+                                                </Button>
+                                            </Grid>
                                         </Grid>
-                                    </Grid>
-                                )
-                            })}
+                                    )
+                                })}
+                            </Grid>
                         </Grid>
                     </Grid>
                     <Grid
