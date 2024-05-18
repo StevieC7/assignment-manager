@@ -161,9 +161,9 @@ export default function Home() {
                         className='h-dvh'
                     >
                         <Grid item container direction='column'>
-                            <Typography variant='h4'>Nurses</Typography>
+                            <Typography variant='h4'>Team</Typography>
                             <TextField
-                                placeholder="Nurse Name"
+                                placeholder="Team Members"
                                 value={nurseName}
                                 onChange={e => setNurseName(e.currentTarget.value)}
                             />
@@ -191,9 +191,9 @@ export default function Home() {
                             </Grid>
                         </Grid>
                         <Grid item container direction='column'>
-                            <Typography variant='h4'>Rooms</Typography>
+                            <Typography variant='h4'>Providers</Typography>
                             <TextField
-                                placeholder="Room Name"
+                                placeholder="Provider Name"
                                 value={room.name}
                                 onChange={e => setRoom({ name: e.currentTarget.value, patientCount: room.patientCount })}
                                 error={isRoomNameDuplicate}
