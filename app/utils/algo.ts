@@ -1,6 +1,6 @@
 import { Provider } from "../page";
 
-export function roomMatcher(nurses: string[], providers: Provider[], averageAssignments: number) {
+export function providerMatcher(nurses: string[], providers: Provider[], averageAssignments: number) {
     const assignments: Record<string, Provider[]> = {};
 
     const usedProviders: Provider[] = [];

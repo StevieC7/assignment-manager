@@ -6,7 +6,7 @@ type Props = {
     averagePatientCount: number
     children: DragOverlayProps['children']
 }
-export default function RoomZone({ nurseId, patientCount, averagePatientCount, children }: Props) {
+export default function ProviderZone({ nurseId, patientCount, averagePatientCount, children }: Props) {
     const { isOver, setNodeRef } = useDroppable({
         id: nurseId
     })

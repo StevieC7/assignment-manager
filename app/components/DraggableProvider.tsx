@@ -2,13 +2,13 @@ import React from 'react';
 import { useDraggable, DragOverlayProps } from '@dnd-kit/core';
 
 type Props = {
-    roomId: string
+    providerId: string
     children: DragOverlayProps['children']
 }
 
-export default function DraggableRoom({ roomId, children }: Props) {
+export default function DraggableProvider({ providerId, children }: Props) {
     const { attributes, listeners, setNodeRef, transform } = useDraggable({
-        id: roomId,
+        id: providerId,
     });
     const style = transform ? {
         transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
