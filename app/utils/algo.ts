@@ -1,20 +1,20 @@
-import { Room } from "../page";
+import { Provider } from "../page";
 
-export function roomMatcher(nurses: string[], rooms: Room[], averageAssignments: number) {
-    const assignments: Record<string, Room[]> = {};
+export function roomMatcher(nurses: string[], providers: Provider[], averageAssignments: number) {
+    const assignments: Record<string, Provider[]> = {};
 
-    const usedRooms: Room[] = [];
+    const usedProviders: Provider[] = [];
     for (const nurse of nurses) {
         let runningPatientCount = 0;
-        const nurseRooms: Room[] = [];
-        for (const room of rooms) {
-            if (!usedRooms.find(usedRoom => usedRoom == room) && runningPatientCount + room.patientCount <= averageAssignments) {
-                usedRooms.push(room);
-                runningPatientCount += room.patientCount;
-                nurseRooms.push(room);
+        const nurseProviders: Provider[] = [];
+        for (const provider of providers) {
+            if (!usedProviders.find(usedProvider => usedProvider == provider) && runningPatientCount + provider.patientCount <= averageAssignments) {
+                usedProviders.push(provider);
+                runningPatientCount += provider.patientCount;
+                nurseProviders.push(provider);
             }
         }
-        assignments[nurse] = nurseRooms;
+        assignments[nurse] = nurseProviders;
     }
 
     return { assignments };

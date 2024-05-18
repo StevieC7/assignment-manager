@@ -9,35 +9,35 @@ import { roomMatcher } from "./utils/algo";
 // @ts-ignore
 import * as Papa from 'papaparse';
 
-export type Room = {
+export type Provider = {
     name: string,
     patientCount: number,
 }
 export default function Home() {
     const [nurseName, setNurseName] = useState<string>('');
-    const [room, setRoom] = useState<Room>({ name: '', patientCount: 0 });
+    const [provider, setProvider] = useState<Provider>({ name: '', patientCount: 0 });
 
     const [nurseList, setNurseList] = useState<string[]>([]);
-    const [roomList, setRoomList] = useState<Room[]>([]);
+    const [providerList, setProviderList] = useState<Provider[]>([]);
 
-    const averagePatientCount = Math.ceil(roomList.reduce((prev, curr) => prev + curr.patientCount, 0) / nurseList.length);
-    const [nurseAssignments, setNurseAssignments] = useState<Record<string, Room[]>>({});
+    const averagePatientCount = Math.ceil(providerList.reduce((prev, curr) => prev + curr.patientCount, 0) / nurseList.length);
+    const [nurseAssignments, setNurseAssignments] = useState<Record<string, Provider[]>>({});
 
-    const unassignedRooms = roomList.filter(room => !Object.values(nurseAssignments).flat().map(val => val.name).includes(room.name));
+    const unassignedRooms = providerList.filter(room => !Object.values(nurseAssignments).flat().map(val => val.name).includes(room.name));
 
-    const isRoomNameDuplicate = room.name !== '' && roomList.find(existingRoom => existingRoom.name === room.name) ? true : false;
+    const isRoomNameDuplicate = provider.name !== '' && providerList.find(existingRoom => existingRoom.name === provider.name) ? true : false;
 
     const handleAddRoom = () => {
-        setRoomList([...roomList, room])
-        setRoom({ name: '', patientCount: 0 })
+        setProviderList([...providerList, provider])
+        setProvider({ name: '', patientCount: 0 })
     }
 
     const handleUpdateRoomPatientCount = (name: string, patientCount: number) => {
-        const foundRoomIndex = roomList.findIndex(room => room.name === name);
+        const foundRoomIndex = providerList.findIndex(room => room.name === name);
         if (foundRoomIndex !== -1) {
-            const newRoomList = [...roomList];
+            const newRoomList = [...providerList];
             newRoomList.splice(foundRoomIndex, 1, { name, patientCount });
-            setRoomList(newRoomList);
+            setProviderList(newRoomList);
             let newNurseAssignments = { ...nurseAssignments };
             for (const [nurseName, roomList] of Object.entries(newNurseAssignments)) {
                 if (roomList.find(room => room.name === name)) {
@@ -59,10 +59,10 @@ export default function Home() {
         setNurseAssignments(newNurseAssignments);
     }
 
-    const handleDeleteRoom = (id: number, name: string) => {
-        const newList = [...roomList];
+    const handleDeleteProvider = (id: number, name: string) => {
+        const newList = [...providerList];
         newList.splice(id, 1);
-        setRoomList(newList);
+        setProviderList(newList);
         let newUserAssigned = { ...nurseAssignments };
         for (const [nurseName, roomList] of Object.entries(newUserAssigned)) {
             const newList = roomList.filter(room => room.name !== name);
@@ -84,7 +84,7 @@ export default function Home() {
                 const updatedOldNurse = nurseAssignments[parent].filter(assignment => assignment.name !== active.id);
                 updatedAssigned[parent] = updatedOldNurse;
             }
-            const activeRoom = roomList.find(room => room.name === active.id);
+            const activeRoom = providerList.find(room => room.name === active.id);
             const alreadyAssigned = nurseAssignments[over.id] || [];
             updatedAssigned[over.id] = activeRoom ? [...alreadyAssigned, activeRoom] : alreadyAssigned;
             setNurseAssignments(updatedAssigned);
@@ -100,7 +100,7 @@ export default function Home() {
 
     const handleSaveToLocal = () => {
         localStorage.setItem("nurses", JSON.stringify(nurseList))
-        localStorage.setItem("rooms", JSON.stringify(roomList))
+        localStorage.setItem("rooms", JSON.stringify(providerList))
         localStorage.setItem("nurseAssignments", JSON.stringify(nurseAssignments))
     }
 
@@ -109,7 +109,7 @@ export default function Home() {
         const rooms = localStorage.getItem("rooms");
         const assignments = localStorage.getItem("nurseAssignments");
         if (nurses) setNurseList(JSON.parse(nurses));
-        if (rooms) setRoomList(JSON.parse(rooms));
+        if (rooms) setProviderList(JSON.parse(rooms));
         if (assignments) setNurseAssignments(JSON.parse(assignments));
     }
 
@@ -129,7 +129,7 @@ export default function Home() {
     }
 
     const handleAutoAssign = () => {
-        const { assignments } = roomMatcher(nurseList, roomList, averagePatientCount);
+        const { assignments } = roomMatcher(nurseList, providerList, averagePatientCount);
         setNurseAssignments(assignments);
     }
 
@@ -194,11 +194,11 @@ export default function Home() {
                             <Typography variant='h4'>Providers</Typography>
                             <TextField
                                 placeholder="Provider Name"
-                                value={room.name}
-                                onChange={e => setRoom({ name: e.currentTarget.value, patientCount: room.patientCount })}
+                                value={provider.name}
+                                onChange={e => setProvider({ name: e.currentTarget.value, patientCount: provider.patientCount })}
                                 error={isRoomNameDuplicate}
                             />
-                            <TextField type='number' placeholder="0" value={room.patientCount} onChange={e => setRoom({ name: room.name, patientCount: parseInt(e.currentTarget.value) })} />
+                            <TextField type='number' placeholder="0" value={provider.patientCount} onChange={e => setProvider({ name: provider.name, patientCount: parseInt(e.currentTarget.value) })} />
                             <Button
                                 variant="contained"
                                 onClick={handleAddRoom}
@@ -207,7 +207,7 @@ export default function Home() {
                                 Save
                             </Button>
                             <Grid item container className='overflow-y-scroll max-h-96'>
-                                {roomList.map((room, id) => {
+                                {providerList.map((room, id) => {
                                     // TODO: add an "update" functionality for the patient count
                                     return (
                                         <Grid key={id} item container direction='row' alignItems='center' justifyContent='space-between'>
@@ -222,7 +222,7 @@ export default function Home() {
                                                     className='w-16'
                                                 />
                                                 <Typography variant='body1'>patients</Typography>
-                                                <Button onClick={() => handleDeleteRoom(id, room.name)}>
+                                                <Button onClick={() => handleDeleteProvider(id, room.name)}>
                                                     Delete
                                                 </Button>
                                             </Grid>
