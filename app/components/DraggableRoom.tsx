@@ -22,7 +22,8 @@ export default function DraggableRoom({ roomId, nurseName, nurseAssignments }: P
                 nurseName
                 && (
                     <ProviderZone
-                        key={`providers-${nurseName}`}
+                        key={`nurse-room-${roomId}`}
+                        roomId={roomId}
                         nurseId={nurseName}
                     >
                         {
@@ -31,7 +32,8 @@ export default function DraggableRoom({ roomId, nurseName, nurseAssignments }: P
                                 if (providerRooms.length && key === nurseName) {
                                     const providerList = providerRooms.map(pr => {
                                         const providerName = pr.provider?.name;
-                                        if (providerName) {
+                                        const roomName = pr.room;
+                                        if (providerName && roomName === roomId) {
                                             return (
                                                 <DraggableProvider key={`provider-${providerName}`} providerId={providerName}>{providerName}: {pr.provider?.patientCount}</DraggableProvider>
                                             )

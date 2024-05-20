@@ -1,11 +1,9 @@
 'use client';
 import { Button, Grid, TextField, Typography } from "@mui/material";
 import { useState } from "react";
-import ProviderZone from "./components/ProviderDropzone";
 import DraggableProvider from "./components/DraggableProvider";
 import { DndContext, DragEndEvent } from "@dnd-kit/core";
 import { CheckCircle } from "@mui/icons-material";
-import { providerMatcher } from "./utils/algo";
 // @ts-ignore
 import * as Papa from 'papaparse';
 import RoomZone from "./components/RoomDropzone";
@@ -31,6 +29,7 @@ export default function Home() {
 
     const averagePatientCount = Math.ceil(providerList.reduce((prev, curr) => prev + curr.patientCount, 0) / nurseList.length);
     const [nurseAssignments, setNurseAssignments] = useState<Record<string, ProviderRooms[]>>({});
+    console.log({ nurseAssignments })
 
     const unassignedRooms = roomList.filter(room => !Object.values(nurseAssignments).flat().map(val => val.room).includes(room));
     const unassignedProviders = providerList.filter(provider => !Object.values(nurseAssignments).flat().map(val => val.provider?.name).includes(provider.name));
@@ -93,13 +92,12 @@ export default function Home() {
     }
 
     const handleDragEnd = (event: DragEndEvent) => {
-        // TODO: handle drag events differently if the active element is a provider vs a room
-        // over id format: nurse-{nurseName} | nurse-room-{roomName}
+        // over id format: nurse-{nurseName} | nurse-{nurseName}-room-{roomName}
         // active id format: room-{roomName} | provider-{providerName}
         const { over, active } = event;
         const splitOver = over && (over.id as string).split('-');
         const overNurse = splitOver && splitOver[1];
-        const overRoom = splitOver && splitOver.length > 2 ? splitOver[2] : null;
+        const overRoom = splitOver && splitOver.length > 2 ? splitOver[3] : null;
         const splitActive = active && (active.id as string).split('-');
         const activeType = splitActive[0];
         const activeValue = splitActive[1];
@@ -116,14 +114,14 @@ export default function Home() {
                 return;
             }
             if (overNurse && overRoom) {
+                // TODO: fix duplicate assignments when adding provider to empty room
                 let updatedAssigned = { ...nurseAssignments };
-                if (parentRoom) {
-                    const updatedOldNurse = nurseAssignments[parentRoom].filter(providerRoom => providerRoom.room !== activeValue);
-                    updatedAssigned[parentRoom] = updatedOldNurse;
+                const activeProvider = providerList.find(provider => provider.name === activeValue);
+                const allProviderRoomsButActive = updatedAssigned[overNurse].filter(pr => pr.room !== overRoom);
+                if (activeProvider && allProviderRoomsButActive) {
+                    updatedAssigned[overNurse] = [...allProviderRoomsButActive, { provider: activeProvider, room: overRoom }]
+                    setNurseAssignments(updatedAssigned)
                 }
-                const alreadyAssigned = nurseAssignments[overNurse] || [];
-                updatedAssigned[overNurse] = activeValue ? [...alreadyAssigned, { provider: { name: activeValue, patientCount: providerList.find(prov => prov.name === activeValue)?.patientCount || 0 }, room: overRoom }] : alreadyAssigned;
-                setNurseAssignments(updatedAssigned);
             } else {
                 if (parentRoom && parentNurse) {
                     let updatedAssigned = { ...nurseAssignments };
@@ -396,24 +394,24 @@ export default function Home() {
                             xs={12}
                         >
                             {
-                                nurseList.map(nurse => {
+                                nurseList.map((nurse, index) => {
                                     const patientCount = nurseAssignments[nurse] ? nurseAssignments[nurse].reduce((prev, curr) => prev + (curr.provider?.patientCount ?? 0), 0) : 0;
                                     return (
-                                        <>
+                                        <Grid key={`${index}-${nurse}`}>
                                             <Grid container direction='row' justifyContent='space-between' className='border-b-2'>
                                                 <Typography variant='h5' className="w-fit">{nurse}</Typography>
                                                 <Typography variant='h5' className={`w-8 text-center border-l-2 ${patientCount <= averagePatientCount ? patientCount === 0 ? 'bg-red-100' : 'bg-green-100' : 'bg-yellow-100'}`}>{patientCount}</Typography>
                                             </Grid>
-                                            <RoomZone key={`nurse-${nurse}`} nurseId={nurse}>
+                                            <RoomZone nurseId={nurse}>
                                                 {
-                                                    nurseAssignments[nurse] && nurseAssignments[nurse].map(pr => {
+                                                    nurseAssignments[nurse] && nurseAssignments[nurse].map((pr, index) => {
                                                         return (
-                                                            <DraggableRoom key={`${nurse}-${room}`} roomId={pr.room} nurseName={nurse} nurseAssignments={nurseAssignments} />
+                                                            <DraggableRoom key={`${index}-${room}`} roomId={pr.room} nurseName={nurse} nurseAssignments={nurseAssignments} />
                                                         )
                                                     })
                                                 }
                                             </RoomZone>
-                                        </>
+                                        </Grid>
                                     )
                                 })
                             }

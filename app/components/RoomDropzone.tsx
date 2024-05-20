@@ -6,7 +6,7 @@ type Props = {
 }
 export default function RoomZone({ nurseId, children }: Props) {
     const { isOver, setNodeRef } = useDroppable({
-        id: `room-${nurseId}`
+        id: `nurse-${nurseId}`
     })
     return (
         <div ref={setNodeRef} className={`border-2 w-48 ml-6 h-96 bg-white flex flex-col`}>

@@ -2,11 +2,12 @@ import { useDroppable, DragOverlayProps } from "@dnd-kit/core"
 import { Grid, Typography } from "@mui/material"
 type Props = {
     nurseId: string
+    roomId: string
     children: DragOverlayProps['children']
 }
-export default function ProviderZone({ nurseId, children }: Props) {
+export default function ProviderZone({ nurseId, roomId, children }: Props) {
     const { isOver, setNodeRef } = useDroppable({
-        id: `provider-${nurseId}`
+        id: `nurse-${nurseId}-room-${roomId}`
     })
     return (
         <div ref={setNodeRef} className={`border-2 bg-white flex flex-col`}>
