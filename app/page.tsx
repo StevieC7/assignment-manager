@@ -29,7 +29,6 @@ export default function Home() {
 
     const averagePatientCount = Math.ceil(providerList.reduce((prev, curr) => prev + curr.patientCount, 0) / nurseList.length);
     const [nurseAssignments, setNurseAssignments] = useState<Record<string, ProviderRooms[]>>({});
-    console.log({ nurseAssignments })
 
     const unassignedRooms = roomList.filter(room => !Object.values(nurseAssignments).flat().map(val => val.room).includes(room));
     const unassignedProviders = providerList.filter(provider => !Object.values(nurseAssignments).flat().map(val => val.provider?.name).includes(provider.name));
@@ -187,7 +186,6 @@ export default function Home() {
         }
         const csv = Papa.unparse(data);
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8,' });
-        console.log({ csv, blob })
         const objUrl = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.setAttribute('href', objUrl);
@@ -357,7 +355,7 @@ export default function Home() {
                                     unassignedRooms.length
                                         ? unassignedRooms.map(room => {
                                             return (
-                                                <DraggableRoom key={`room-${room}`} roomId={room} nurseName={null} nurseAssignments={nurseAssignments} />
+                                                <DraggableRoom key={`room-${room}`} roomId={room} nurseName={null} nurseAssignments={nurseAssignments} isMinimized />
                                             )
                                         })
                                         : (

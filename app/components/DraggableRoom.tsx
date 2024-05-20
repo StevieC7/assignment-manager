@@ -6,9 +6,10 @@ import { Typography } from "@mui/material";
 type Props = {
     roomId: string,
     nurseName: string | null,
-    nurseAssignments: Record<string, ProviderRooms[]>
+    nurseAssignments: Record<string, ProviderRooms[]>,
+    isMinimized: boolean,
 }
-export default function DraggableRoom({ roomId, nurseName, nurseAssignments }: Props) {
+export default function DraggableRoom({ roomId, nurseName, nurseAssignments, isMinimized }: Props) {
     const { attributes, listeners, setNodeRef, transform } = useDraggable({
         id: `room-${roomId}`,
     });
@@ -16,7 +17,7 @@ export default function DraggableRoom({ roomId, nurseName, nurseAssignments }: P
         transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
     } : undefined;
     return (
-        <div ref={setNodeRef} style={style} {...listeners} {...attributes} className='flex flex-row w-full justify-between'>
+        <div ref={setNodeRef} style={style} {...listeners} {...attributes} className={`flex flex-row ${isMinimized ? 'w-fit' : 'w-full'} justify-between`}>
             <Typography variant='h5' className={'h-16 w-fit'}>{roomId}</Typography>
             {
                 nurseName
