@@ -16,13 +16,14 @@ export default function DraggableRoom({ roomId, nurseName, nurseAssignments }: P
         transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
     } : undefined;
     return (
-        <div ref={setNodeRef} style={style} {...listeners} {...attributes} >
-            <Typography variant='h5' className={'h-16 w-16'}>{roomId}</Typography>
+        <div ref={setNodeRef} style={style} {...listeners} {...attributes} className='flex flex-row w-full justify-between'>
+            <Typography variant='h5' className={'h-16 w-fit'}>{roomId}</Typography>
             {
                 nurseName
                 && (
                     <ProviderZone
                         key={`nurse-room-${roomId}`}
+                        isFull={!!nurseAssignments[nurseName].find(val => val.room === roomId && val.provider)}
                         roomId={roomId}
                         nurseId={nurseName}
                     >
