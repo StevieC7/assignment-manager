@@ -104,8 +104,6 @@ export default function Home() {
         if (over && active && overRoom === null && activeType === 'provider') {
             return;
         }
-        // TODO: handle moving to self for providers
-        // TODO: handle moving to self for rooms
         if (activeType === 'provider') {
             const parentTuple = Object.entries(nurseAssignments).find(nurse => nurse[1].map(providerRoom => providerRoom.provider?.name).includes(activeValue));
             const parentNurse = parentTuple ? parentTuple[0] : undefined;
@@ -114,8 +112,12 @@ export default function Home() {
                 return;
             }
             if (overNurse && overRoom) {
-                // TODO: fix duplicate assignments when adding provider to empty room
                 let updatedAssigned = { ...nurseAssignments };
+                // TODO: handle moving to other providers
+                if (parentRoom) {
+                    const indexToUpdate = updatedAssigned[overNurse].findIndex(val => val.room === parentRoom);
+                    updatedAssigned[overNurse].splice(indexToUpdate, 1, { room: parentRoom, provider: null });
+                }
                 const activeProvider = providerList.find(provider => provider.name === activeValue);
                 const allProviderRoomsButActive = updatedAssigned[overNurse].filter(pr => pr.room !== overRoom);
                 if (activeProvider && allProviderRoomsButActive) {
@@ -141,6 +143,7 @@ export default function Home() {
             }
             if (overNurse) {
                 let updatedAssigned = { ...nurseAssignments };
+                // TODO: handle moving to other rooms
                 if (parentVal) {
                     const updatedOldNurse = nurseAssignments[parentVal].filter(providerRoom => providerRoom.room !== activeValue);
                     updatedAssigned[parentVal] = updatedOldNurse;

@@ -1,4 +1,4 @@
-import { DragOverlayProps, useDraggable } from "@dnd-kit/core";
+import { useDraggable } from "@dnd-kit/core";
 import ProviderZone from "./ProviderDropzone";
 import { ProviderRooms } from "../page";
 import DraggableProvider from "./DraggableProvider";
