@@ -8,7 +8,7 @@ type Props = {
 
 export default function DraggableProvider({ providerId, children }: Props) {
     const { attributes, listeners, setNodeRef, transform } = useDraggable({
-        id: providerId,
+        id: `provider-${providerId}`,
     });
     const style = transform ? {
         transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,

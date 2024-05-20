@@ -4,12 +4,12 @@ type Props = {
     nurseId: string
     children: DragOverlayProps['children']
 }
-export default function ProviderZone({ nurseId, children }: Props) {
+export default function RoomZone({ nurseId, children }: Props) {
     const { isOver, setNodeRef } = useDroppable({
-        id: `provider-${nurseId}`
+        id: `room-${nurseId}`
     })
     return (
-        <div ref={setNodeRef} className={`border-2 bg-white flex flex-col`}>
+        <div ref={setNodeRef} className={`border-2 w-48 ml-6 h-96 bg-white flex flex-col`}>
             <Grid container>
                 {children}
             </Grid>

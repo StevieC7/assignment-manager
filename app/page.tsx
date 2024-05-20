@@ -8,24 +8,44 @@ import { CheckCircle } from "@mui/icons-material";
 import { providerMatcher } from "./utils/algo";
 // @ts-ignore
 import * as Papa from 'papaparse';
+import RoomZone from "./components/RoomDropzone";
+import DraggableRoom from "./components/DraggableRoom";
 
 export type Provider = {
     name: string,
     patientCount: number,
 }
+export type ProviderRooms = {
+    provider: Provider | null,
+    room: string,
+}
+
 export default function Home() {
     const [nurseName, setNurseName] = useState<string>('');
+    const [room, setRoom] = useState<string>('');
     const [provider, setProvider] = useState<Provider>({ name: '', patientCount: 0 });
 
     const [nurseList, setNurseList] = useState<string[]>([]);
+    const [roomList, setRoomList] = useState<string[]>([]);
     const [providerList, setProviderList] = useState<Provider[]>([]);
 
     const averagePatientCount = Math.ceil(providerList.reduce((prev, curr) => prev + curr.patientCount, 0) / nurseList.length);
-    const [nurseAssignments, setNurseAssignments] = useState<Record<string, Provider[]>>({});
+    const [nurseAssignments, setNurseAssignments] = useState<Record<string, ProviderRooms[]>>({});
 
-    const unassignedProviders = providerList.filter(provider => !Object.values(nurseAssignments).flat().map(val => val.name).includes(provider.name));
+    const unassignedRooms = roomList.filter(room => !Object.values(nurseAssignments).flat().map(val => val.room).includes(room));
+    const unassignedProviders = providerList.filter(provider => !Object.values(nurseAssignments).flat().map(val => val.provider?.name).includes(provider.name));
 
     const isProviderNameDuplicate = provider.name !== '' && providerList.find(existingProvider => existingProvider.name === provider.name) ? true : false;
+
+    const handleAddNurse = () => {
+        setNurseList([...nurseList, nurseName])
+        setNurseName('')
+    }
+
+    const handleAddRoom = () => {
+        setRoomList([...roomList, room])
+        setRoom('')
+    }
 
     const handleAddProvider = () => {
         setProviderList([...providerList, provider])
@@ -39,10 +59,11 @@ export default function Home() {
             newProviderList.splice(foundProviderIndex, 1, { name, patientCount });
             setProviderList(newProviderList);
             let newNurseAssignments = { ...nurseAssignments };
-            for (const [nurseName, providerList] of Object.entries(newNurseAssignments)) {
-                if (providerList.find(provider => provider.name === name)) {
-                    const newList = providerList.filter(provider => provider.name !== name);
-                    newList.push({ name, patientCount });
+            for (const [nurseName, providerRoomsList] of Object.entries(newNurseAssignments)) {
+                const existingProviderRoom = providerRoomsList.find(providerRoom => providerRoom.provider?.name === name);
+                if (existingProviderRoom) {
+                    const newList = providerRoomsList.filter(providerRoom => providerRoom.provider?.name !== name);
+                    newList.push({ provider: { name, patientCount }, room: existingProviderRoom.room });
                     newNurseAssignments[nurseName] = newList;
                 }
             }
@@ -65,37 +86,80 @@ export default function Home() {
         setProviderList(newList);
         let newUserAssigned = { ...nurseAssignments };
         for (const [nurseName, providerList] of Object.entries(newUserAssigned)) {
-            const newList = providerList.filter(provider => provider.name !== name);
+            const newList = providerList.filter(providerRoom => providerRoom.provider?.name !== name);
             newUserAssigned[nurseName] = newList;
         }
         setNurseAssignments(newUserAssigned);
     }
 
     const handleDragEnd = (event: DragEndEvent) => {
+        // TODO: handle drag events differently if the active element is a provider vs a room
+        // over id format: nurse-{nurseName} | nurse-room-{roomName}
+        // active id format: room-{roomName} | provider-{providerName}
         const { over, active } = event;
-        const parentTuple = Object.entries(nurseAssignments).find(nurse => nurse[1].map(provider => provider.name).includes(active.id as string));
-        const parent = parentTuple ? parentTuple[0] : undefined;
-        if (over && parent && over.id === parent) {
+        const splitOver = over && (over.id as string).split('-');
+        const overNurse = splitOver && splitOver[1];
+        const overRoom = splitOver && splitOver.length > 2 ? splitOver[2] : null;
+        const splitActive = active && (active.id as string).split('-');
+        const activeType = splitActive[0];
+        const activeValue = splitActive[1];
+        if (over && active && overRoom === null && activeType === 'provider') {
             return;
         }
-        if (over) {
-            let updatedAssigned = { ...nurseAssignments };
-            if (parent) {
-                const updatedOldNurse = nurseAssignments[parent].filter(assignment => assignment.name !== active.id);
-                updatedAssigned[parent] = updatedOldNurse;
+        // TODO: handle moving to self for providers
+        // TODO: handle moving to self for rooms
+        if (activeType === 'provider') {
+            const parentTuple = Object.entries(nurseAssignments).find(nurse => nurse[1].map(providerRoom => providerRoom.provider?.name).includes(activeValue));
+            const parentNurse = parentTuple ? parentTuple[0] : undefined;
+            const parentRoom = parentTuple ? parentTuple[1].find(pr => pr.provider?.name === activeValue)?.room : undefined;
+            if (over && parentRoom && overRoom === parentRoom) {
+                return;
             }
-            const activeProvider = providerList.find(provider => provider.name === active.id);
-            const alreadyAssigned = nurseAssignments[over.id] || [];
-            updatedAssigned[over.id] = activeProvider ? [...alreadyAssigned, activeProvider] : alreadyAssigned;
-            setNurseAssignments(updatedAssigned);
-        } else {
-            if (parent) {
+            if (overNurse && overRoom) {
                 let updatedAssigned = { ...nurseAssignments };
-                const updatedOldNurse = nurseAssignments[parent].filter(assignment => assignment.name !== active.id);
-                updatedAssigned[parent] = updatedOldNurse;
+                if (parentRoom) {
+                    const updatedOldNurse = nurseAssignments[parentRoom].filter(providerRoom => providerRoom.room !== activeValue);
+                    updatedAssigned[parentRoom] = updatedOldNurse;
+                }
+                const alreadyAssigned = nurseAssignments[overNurse] || [];
+                updatedAssigned[overNurse] = activeValue ? [...alreadyAssigned, { provider: { name: activeValue, patientCount: providerList.find(prov => prov.name === activeValue)?.patientCount || 0 }, room: overRoom }] : alreadyAssigned;
                 setNurseAssignments(updatedAssigned);
+            } else {
+                if (parentRoom && parentNurse) {
+                    let updatedAssigned = { ...nurseAssignments };
+                    const updatedProviderRoom = nurseAssignments[parentNurse].find(pr => pr.provider?.name === activeValue);
+                    if (updatedProviderRoom?.room) {
+                        const updatedOldNurse = [...nurseAssignments[parentNurse].filter(pr => pr.provider?.name !== activeValue), { provider: null, room: updatedProviderRoom.room }]
+                        updatedAssigned[parentNurse] = updatedOldNurse;
+                        setNurseAssignments(updatedAssigned);
+                    }
+                }
+            }
+        } else if (activeType === 'room') {
+            const parentTuple = Object.entries(nurseAssignments).find(nurse => nurse[1].map(providerRoom => providerRoom.room).includes(activeValue));
+            const parentVal = parentTuple ? parentTuple[0] : undefined;
+            if (over && parentVal && overNurse === parentVal) {
+                return;
+            }
+            if (overNurse) {
+                let updatedAssigned = { ...nurseAssignments };
+                if (parentVal) {
+                    const updatedOldNurse = nurseAssignments[parentVal].filter(providerRoom => providerRoom.room !== activeValue);
+                    updatedAssigned[parentVal] = updatedOldNurse;
+                }
+                const alreadyAssigned = nurseAssignments[overNurse] || [];
+                updatedAssigned[overNurse] = activeValue ? [...alreadyAssigned, { provider: alreadyAssigned.find(room => room.room === activeValue)?.provider ?? null, room: activeValue }] : alreadyAssigned;
+                setNurseAssignments(updatedAssigned);
+            } else {
+                if (parentVal) {
+                    let updatedAssigned = { ...nurseAssignments };
+                    const updatedOldNurse = nurseAssignments[parentVal].filter(assignment => assignment.room !== activeValue);
+                    updatedAssigned[parentVal] = updatedOldNurse;
+                    setNurseAssignments(updatedAssigned);
+                }
             }
         }
+
     }
 
     const handleSaveToLocal = () => {
@@ -116,7 +180,7 @@ export default function Home() {
     const handleExport = () => {
         const data = {
             fields: ['Nurse', 'Provider', 'Patient Count'],
-            data: Object.entries(nurseAssignments).map(assignmentTuple => [assignmentTuple[0], assignmentTuple[1].map(assignment => assignment.name), assignmentTuple[1].map(assignment => assignment.patientCount)])
+            data: Object.entries(nurseAssignments).map(assignmentTuple => [assignmentTuple[0], assignmentTuple[1].map(assignment => assignment.provider?.name), assignmentTuple[1].map(assignment => assignment.provider?.patientCount)])
         }
         const csv = Papa.unparse(data);
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8,' });
@@ -129,8 +193,10 @@ export default function Home() {
     }
 
     const handleAutoAssign = () => {
-        const { assignments } = providerMatcher(nurseList, providerList, averagePatientCount);
-        setNurseAssignments(assignments);
+        // TODO: fix this to work with new data model
+        // const { assignments } = providerMatcher(nurseList, providerList, averagePatientCount);
+        // setNurseAssignments(assignments);
+        console.log("Happy birthday idiot")
     }
 
     const handleResetAssignments = () => {
@@ -168,10 +234,7 @@ export default function Home() {
                                 onChange={e => setNurseName(e.currentTarget.value)}
                             />
                             <Button
-                                onClick={() => {
-                                    setNurseList([...nurseList, nurseName])
-                                    setNurseName('')
-                                }}
+                                onClick={handleAddNurse}
                             >
                                 Save
                             </Button>
@@ -183,6 +246,33 @@ export default function Home() {
                                                 {nurse}
                                             </Typography>
                                             <Button onClick={() => handleDeleteNurse(id, nurse)}>
+                                                Delete
+                                            </Button>
+                                        </Grid>
+                                    )
+                                })}
+                            </Grid>
+                        </Grid>
+                        <Grid item container direction='column'>
+                            <Typography variant='h4'>Rooms</Typography>
+                            <TextField
+                                placeholder="Team Members"
+                                value={room}
+                                onChange={e => setRoom(e.currentTarget.value)}
+                            />
+                            <Button
+                                onClick={handleAddRoom}
+                            >
+                                Save
+                            </Button>
+                            <Grid item className='overflow-y-scroll max-h-96'>
+                                {roomList.map((room, id) => {
+                                    return (
+                                        <Grid key={id} item container direction='row' alignItems='center'>
+                                            <Typography>
+                                                {room}
+                                            </Typography>
+                                            <Button onClick={() => handleDeleteNurse(id, room)}>
                                                 Delete
                                             </Button>
                                         </Grid>
@@ -208,7 +298,6 @@ export default function Home() {
                             </Button>
                             <Grid item container className='overflow-y-scroll max-h-96'>
                                 {providerList.map((provider, id) => {
-                                    // TODO: add an "update" functionality for the patient count
                                     return (
                                         <Grid key={id} item container direction='row' alignItems='center' justifyContent='space-between'>
                                             <Typography>
@@ -260,6 +349,22 @@ export default function Home() {
                                         )
                                 }
                             </Grid>
+                            <Grid item container direction='row' xs={9} className='pl-6'>
+                                {
+                                    unassignedRooms.length
+                                        ? unassignedRooms.map(room => {
+                                            return (
+                                                <DraggableRoom key={`room-${room}`} roomId={room} nurseName={null} nurseAssignments={nurseAssignments} />
+                                            )
+                                        })
+                                        : (
+                                            <>
+                                                <CheckCircle className='text-green-500' />
+                                                <Typography>All Assigned</Typography>
+                                            </>
+                                        )
+                                }
+                            </Grid>
                             <Grid
                                 item
                                 container
@@ -291,30 +396,26 @@ export default function Home() {
                             xs={12}
                         >
                             {
-                                nurseList.map(nurse => (
-                                    <ProviderZone
-                                        key={nurse}
-                                        nurseId={nurse}
-                                        patientCount={nurseAssignments[nurse] ? nurseAssignments[nurse].reduce((prev, curr) => prev + curr.patientCount, 0) : 0}
-                                        averagePatientCount={averagePatientCount}
-                                    >
-                                        {
-                                            Object.entries(nurseAssignments).map(([key, val]) => {
-                                                const providers = val;
-                                                if (providers.length && key === nurse) {
-                                                    const providerList = providers.map(provider => {
+                                nurseList.map(nurse => {
+                                    const patientCount = nurseAssignments[nurse] ? nurseAssignments[nurse].reduce((prev, curr) => prev + (curr.provider?.patientCount ?? 0), 0) : 0;
+                                    return (
+                                        <>
+                                            <Grid container direction='row' justifyContent='space-between' className='border-b-2'>
+                                                <Typography variant='h5' className="w-fit">{nurse}</Typography>
+                                                <Typography variant='h5' className={`w-8 text-center border-l-2 ${patientCount <= averagePatientCount ? patientCount === 0 ? 'bg-red-100' : 'bg-green-100' : 'bg-yellow-100'}`}>{patientCount}</Typography>
+                                            </Grid>
+                                            <RoomZone key={`nurse-${nurse}`} nurseId={nurse}>
+                                                {
+                                                    nurseAssignments[nurse] && nurseAssignments[nurse].map(pr => {
                                                         return (
-                                                            <DraggableProvider key={`provider-${provider.name}`} providerId={provider.name}>{provider.name}: {provider.patientCount}</DraggableProvider>
+                                                            <DraggableRoom key={`${nurse}-${room}`} roomId={pr.room} nurseName={nurse} nurseAssignments={nurseAssignments} />
                                                         )
                                                     })
-                                                    return providerList;
-                                                } else {
-                                                    return null;
                                                 }
-                                            })
-                                        }
-                                    </ProviderZone>
-                                ))
+                                            </RoomZone>
+                                        </>
+                                    )
+                                })
                             }
                         </Grid>
                     </Grid>
