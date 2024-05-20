@@ -7,7 +7,7 @@ type Props = {
     roomId: string,
     nurseName: string | null,
     nurseAssignments: Record<string, ProviderRooms[]>,
-    isMinimized: boolean,
+    isMinimized?: boolean,
 }
 export default function DraggableRoom({ roomId, nurseName, nurseAssignments, isMinimized }: Props) {
     const { attributes, listeners, setNodeRef, transform } = useDraggable({
