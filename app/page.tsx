@@ -143,7 +143,6 @@ export default function Home() {
             }
             if (overNurse) {
                 let updatedAssigned = { ...nurseAssignments };
-                // TODO: handle moving to other rooms
                 if (parentVal) {
                     const updatedOldNurse = nurseAssignments[parentVal].filter(providerRoom => providerRoom.room !== activeValue);
                     updatedAssigned[parentVal] = updatedOldNurse;
@@ -164,16 +163,19 @@ export default function Home() {
     }
 
     const handleSaveToLocal = () => {
-        localStorage.setItem("nurses", JSON.stringify(nurseList))
-        localStorage.setItem("providers", JSON.stringify(providerList))
-        localStorage.setItem("nurseAssignments", JSON.stringify(nurseAssignments))
+        localStorage.setItem("nurses", JSON.stringify(nurseList));
+        localStorage.setItem("rooms", JSON.stringify(roomList));
+        localStorage.setItem("providers", JSON.stringify(providerList));
+        localStorage.setItem("nurseAssignments", JSON.stringify(nurseAssignments));
     }
 
     const handleLoadLocal = () => {
         const nurses = localStorage.getItem("nurses");
+        const rooms = localStorage.getItem("rooms");
         const providers = localStorage.getItem("providers");
         const assignments = localStorage.getItem("nurseAssignments");
         if (nurses) setNurseList(JSON.parse(nurses));
+        if (rooms) setRoomList(JSON.parse(rooms));
         if (providers) setProviderList(JSON.parse(providers));
         if (assignments) setNurseAssignments(JSON.parse(assignments));
     }
