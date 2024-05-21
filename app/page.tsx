@@ -123,7 +123,6 @@ export default function Home() {
                 return;
             }
             if (overNurse && overRoom) {
-                // Handle case when moving from pm to am or vice versa
                 const existingProvider = Object.entries(providerParents)?.find(([providerName, room]) => room[overShift as 'am' | 'pm'] === overRoom)?.[0];
                 let newSetting = {
                     ...providerParents
