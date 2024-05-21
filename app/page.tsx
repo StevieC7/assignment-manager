@@ -111,11 +111,13 @@ export default function Home() {
                 return;
             }
             if (overNurse && overRoom) {
+                console.log('provider if')
                 let updatedAssigned = { ...nurseAssignments };
                 // TODO: handle moving to other providers
-                if (parentRoom) {
-                    const indexToUpdate = updatedAssigned[overNurse].findIndex(val => val.room === parentRoom);
-                    updatedAssigned[overNurse].splice(indexToUpdate, 1, { room: parentRoom, provider: null });
+                if (parentRoom && parentNurse) {
+                    console.log('parentRoom')
+                    const indexToUpdate = updatedAssigned[parentNurse].findIndex(val => val.room === parentRoom);
+                    updatedAssigned[parentNurse].splice(indexToUpdate, 1, { room: parentRoom, provider: null });
                 }
                 const activeProvider = providerList.find(provider => provider.name === activeValue);
                 const allProviderRoomsButActive = updatedAssigned[overNurse].filter(pr => pr.room !== overRoom);
@@ -136,24 +138,27 @@ export default function Home() {
             }
         } else if (activeType === 'room') {
             const parentTuple = Object.entries(nurseAssignments).find(nurse => nurse[1].map(providerRoom => providerRoom.room).includes(activeValue));
-            const parentVal = parentTuple ? parentTuple[0] : undefined;
-            if (over && parentVal && overNurse === parentVal) {
+            const parentNurse = parentTuple ? parentTuple[0] : undefined;
+            if (over && parentNurse && overNurse === parentNurse) {
                 return;
             }
             if (overNurse) {
                 let updatedAssigned = { ...nurseAssignments };
-                if (parentVal) {
-                    const updatedOldNurse = nurseAssignments[parentVal].filter(providerRoom => providerRoom.room !== activeValue);
-                    updatedAssigned[parentVal] = updatedOldNurse;
+                let newProvider: Provider | null = null;
+                if (parentNurse) {
+                    const updatedOldNurse = nurseAssignments[parentNurse].filter(providerRoom => providerRoom.room !== activeValue);
+                    newProvider = nurseAssignments[parentNurse].find(rp => rp.room === activeValue)?.provider ?? null;
+                    updatedAssigned[parentNurse] = updatedOldNurse;
                 }
                 const alreadyAssigned = nurseAssignments[overNurse] || [];
-                updatedAssigned[overNurse] = activeValue ? [...alreadyAssigned, { provider: alreadyAssigned.find(room => room.room === activeValue)?.provider ?? null, room: activeValue }] : alreadyAssigned;
+                // TODO: move the provider with the room
+                updatedAssigned[overNurse] = activeValue ? [...alreadyAssigned, { provider: newProvider, room: activeValue }] : alreadyAssigned;
                 setNurseAssignments(updatedAssigned);
             } else {
-                if (parentVal) {
+                if (parentNurse) {
                     let updatedAssigned = { ...nurseAssignments };
-                    const updatedOldNurse = nurseAssignments[parentVal].filter(assignment => assignment.room !== activeValue);
-                    updatedAssigned[parentVal] = updatedOldNurse;
+                    const updatedOldNurse = nurseAssignments[parentNurse].filter(assignment => assignment.room !== activeValue);
+                    updatedAssigned[parentNurse] = updatedOldNurse;
                     setNurseAssignments(updatedAssigned);
                 }
             }
