@@ -1,6 +1,6 @@
-import { Provider } from "../page";
+import { Provider, ProviderRooms } from "../page";
 
-export function providerMatcher(nurses: string[], providers: Provider[], averageAssignments: number) {
+export function providerMatcher(nurses: string[], providers: Provider[], rooms: string[], averageAssignments: number) {
     const assignments: Record<string, Provider[]> = {};
 
     const usedProviders: Provider[] = [];
@@ -17,5 +17,17 @@ export function providerMatcher(nurses: string[], providers: Provider[], average
         assignments[nurse] = nurseProviders;
     }
 
-    return { assignments };
+    const roomAssignments: Record<string, ProviderRooms[]> = {};
+    let roomPointer = 0;
+    for (const nurse of nurses) {
+        for (const provider of assignments[nurse]) {
+            if (roomPointer < rooms.length) {
+                if (!roomAssignments[nurse]) roomAssignments[nurse] = [];
+                roomAssignments[nurse].push({ provider, room: rooms[roomPointer] });
+                roomPointer++;
+            }
+        }
+    }
+
+    return { roomAssignments };
 }

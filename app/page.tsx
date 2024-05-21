@@ -8,6 +8,7 @@ import { CheckCircle } from "@mui/icons-material";
 import * as Papa from 'papaparse';
 import RoomZone from "./components/RoomDropzone";
 import DraggableRoom from "./components/DraggableRoom";
+import { providerMatcher } from "./utils/algo";
 
 export type Provider = {
     name: string,
@@ -198,8 +199,8 @@ export default function Home() {
 
     const handleAutoAssign = () => {
         // TODO: fix this to work with new data model
-        // const { assignments } = providerMatcher(nurseList, providerList, averagePatientCount);
-        // setNurseAssignments(assignments);
+        const { roomAssignments } = providerMatcher(nurseList, providerList, roomList, averagePatientCount);
+        setNurseAssignments(roomAssignments);
     }
 
     const handleResetAssignments = () => {
