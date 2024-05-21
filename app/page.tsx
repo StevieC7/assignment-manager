@@ -130,8 +130,8 @@ export default function Home() {
                 let newSetting = {
                     ...providerParents
                     , [activeValue]: {
-                        am: overShift === 'am' ? overRoom : null
-                        , pm: overShift === 'pm' ? overRoom : null
+                        am: overShift === 'am' ? overRoom : (providerParents[activeValue] ? providerParents[activeValue]['am'] : null)
+                        , pm: overShift === 'pm' ? overRoom : (providerParents[activeValue] ? providerParents[activeValue]['pm'] : null)
                     }
                 }
                 if (existingProvider) {
