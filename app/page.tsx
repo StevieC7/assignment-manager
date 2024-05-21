@@ -198,7 +198,6 @@ export default function Home() {
     }
 
     const handleAutoAssign = () => {
-        // TODO: fix this to work with new data model
         const { roomAssignments } = providerMatcher(nurseList, providerList, roomList, averagePatientCount);
         setNurseAssignments(roomAssignments);
     }
