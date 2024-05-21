@@ -1,4 +1,6 @@
-// TODO: split average patient count into AM and PM
+// TODO: split and make visually different the AM and PM provider chips
+// TODO: when dragging provider onto existing provider assignment, swap them
+// TODO: show AM total and PM total on each nurse team card
 'use client';
 import { Button, Grid, TextField, Typography } from "@mui/material";
 import { useState } from "react";
