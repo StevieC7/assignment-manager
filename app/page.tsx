@@ -189,7 +189,8 @@ export default function Home() {
 
     const handleResetAssignments = () => {
         // TODO: fix this
-        // setNurseAssignments({});
+        setRoomParents({});
+        setProviderParents({});
     }
 
     return (
