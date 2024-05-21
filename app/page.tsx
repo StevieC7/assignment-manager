@@ -1,5 +1,3 @@
-// TODO: fix providers getting assigned where they shouldn't be
-// TODO: handle dragging to nothing for providers
 'use client';
 import { Button, Grid, TextField, Typography } from "@mui/material";
 import { useState } from "react";
@@ -57,7 +55,6 @@ export default function Home() {
         return nurseRecord;
     }
     const nurseAssignments = assignNurses();
-    console.log({ nurseAssignments })
 
     const unassignedRooms = roomList.filter(room => !roomParents[room]);
     const unassignedProviders = providerList.filter(provider => !providerParents[provider.name]?.['pm'] && !providerParents[provider.name]?.['am']);
@@ -112,7 +109,6 @@ export default function Home() {
         const activeType = splitActive[0];
         const activeValue = splitActive[1];
         if (active && overRoom === null && activeType === 'provider') {
-            console.log('attempted to do nothing')
             return;
         }
         if (activeType === 'provider') {
