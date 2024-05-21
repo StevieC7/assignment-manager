@@ -60,7 +60,6 @@ export default function Home() {
         return nurseRecord;
     }
     const nurseAssignments = assignNurses();
-    console.log({ nurseAssignments, roomParents, providerParents })
 
     const unassignedRooms = roomList.filter(room => !roomParents[room]);
     const unassignedProvidersAM = providerList.filter(provider => !providerParents[provider.name]?.am);
@@ -116,7 +115,6 @@ export default function Home() {
         const activeType = splitActive[0];
         const activeValue = splitActive[1];
         if (active && overRoom === null && activeType === 'provider' && !providerParents[activeValue]) {
-            console.log('doing nothing')
             return;
         }
         if (activeType === 'provider') {
@@ -143,7 +141,6 @@ export default function Home() {
                         }
                     };
                 }
-                console.log('what you are doing here', newSetting)
                 setProviderParents(newSetting);
             } else {
                 setProviderParents({
