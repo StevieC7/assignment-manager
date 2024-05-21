@@ -1,38 +1,24 @@
-import { Provider } from "../page";
+import { NurseAssignments, Provider } from "../page";
 
-type ProviderRooms = {
-    provider: Provider,
-    room: string,
-}
-
-export function providerMatcher(nurses: string[], providers: Provider[], rooms: string[], averageAssignments: number) {
-    const assignments: Record<string, Provider[]> = {};
-
-    const usedProviders: Provider[] = [];
-    for (const nurse of nurses) {
-        let runningPatientCount = 0;
-        const nurseProviders: Provider[] = [];
-        for (const provider of providers) {
-            if (!usedProviders.find(usedProvider => usedProvider == provider) && runningPatientCount + provider.patientCount <= averageAssignments) {
-                usedProviders.push(provider);
-                runningPatientCount += provider.patientCount;
-                nurseProviders.push(provider);
-            }
-        }
-        assignments[nurse] = nurseProviders;
-    }
-
-    const roomAssignments: Record<string, ProviderRooms[]> = {};
-    let roomPointer = 0;
-    for (const nurse of nurses) {
-        for (const provider of assignments[nurse]) {
-            if (roomPointer < rooms.length) {
-                if (!roomAssignments[nurse]) roomAssignments[nurse] = [];
-                roomAssignments[nurse].push({ provider, room: rooms[roomPointer] });
-                roomPointer++;
+export function autoAssigner(nurseList: string[], roomList: string[], providerList: Provider[]): NurseAssignments {
+    return {
+        'Elizabeth': {
+            'Room A': {
+                am: {
+                    name: 'Doc Mike'
+                    , patientCount: {
+                        am: 5,
+                        pm: 7
+                    }
+                },
+                pm: {
+                    name: 'Doc Mike'
+                    , patientCount: {
+                        am: 5,
+                        pm: 7
+                    }
+                }
             }
         }
     }
-
-    return { roomAssignments };
 }
