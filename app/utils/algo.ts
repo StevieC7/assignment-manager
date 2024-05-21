@@ -1,4 +1,9 @@
-import { Provider, ProviderRooms } from "../page";
+import { Provider } from "../page";
+
+type ProviderRooms = {
+    provider: Provider,
+    room: string,
+}
 
 export function providerMatcher(nurses: string[], providers: Provider[], rooms: string[], averageAssignments: number) {
     const assignments: Record<string, Provider[]> = {};

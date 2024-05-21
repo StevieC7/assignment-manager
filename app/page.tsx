@@ -14,12 +14,12 @@ export type Provider = {
     name: string,
     patientCount: number,
 }
-export type ProviderRooms = {
-    provider: Provider | null,
-    room: string,
-}
 
-export type Rooms = Record<string, Provider | null>;
+export type ShiftSlots = {
+    am: Provider | null,
+    pm: Provider | null,
+};
+export type Rooms = Record<string, ShiftSlots>;
 export type NurseAssignments = Record<string, Rooms>;
 
 export default function Home() {
@@ -32,7 +32,7 @@ export default function Home() {
     const [providerList, setProviderList] = useState<Provider[]>([]);
 
     const [roomParents, setRoomParents] = useState<Record<string, string | null>>({});
-    const [providerParents, setProviderParents] = useState<Record<string, string | null>>({});
+    const [providerParents, setProviderParents] = useState<Record<string, { am: string | null, pm: string | null }>>({});
 
     const averagePatientCount = Math.ceil(providerList.reduce((prev, curr) => prev + curr.patientCount, 0) / nurseList.length);
     const assignNurses = () => {
@@ -41,10 +41,10 @@ export default function Home() {
             for (const [room, roomParent] of Object.entries(roomParents)) {
                 if (roomParent === nurse) {
                     if (!nurseRecord[nurse]) nurseRecord[nurse] = {};
-                    nurseRecord[nurse][room] = null;
+                    nurseRecord[nurse][room] = { am: null, pm: null };
                     for (const [provider, providerParent] of Object.entries(providerParents)) {
-                        if (providerParent === room && roomParent === nurse) {
-                            nurseRecord[nurse][room] = providerList.find(val => val.name === provider) ?? null;
+                        for (const shiftSlot of Object.keys(providerParent) as ('am' | 'pm')[]) {
+                            nurseRecord[nurse][room][shiftSlot] = providerList.find(prov => prov.name === provider) ?? null;
                         }
                     }
                 }
@@ -96,12 +96,13 @@ export default function Home() {
     }
 
     const handleDragEnd = (event: DragEndEvent) => {
-        // over id format: nurse-{nurseName} | nurse-{nurseName}-room-{roomName}
+        // over id format: nurse-{nurseName} | nurse-{nurseName}-room-{roomName}-shift-{shiftType}
         // active id format: room-{roomName} | provider-{providerName}
         const { over, active } = event;
         const splitOver = over && (over.id as string).split('-');
         const overNurse = splitOver && splitOver[1];
-        const overRoom = splitOver && splitOver.length > 2 ? splitOver[3] : null;
+        const overRoom = splitOver && splitOver.length > 3 ? splitOver[3] : null;
+        const overShift = splitOver && splitOver.length > 5 ? splitOver[5] : null;
         const splitActive = active && (active.id as string).split('-');
         const activeType = splitActive[0];
         const activeValue = splitActive[1];
@@ -110,16 +111,36 @@ export default function Home() {
         }
         if (activeType === 'provider') {
             const parentRoom = providerParents[activeValue];
-            if (over && parentRoom && overRoom === parentRoom) {
+            if (over && parentRoom && overShift && overRoom === parentRoom[overShift as 'am' | 'pm']) {
                 return;
             }
             if (overNurse && overRoom) {
-                const existingProvider = Object.entries(providerParents)?.find(([providerName, room]) => room === overRoom)?.[0];
-                let newSetting = { ...providerParents, [activeValue]: overRoom };
-                if (existingProvider) newSetting = { ...newSetting, [existingProvider]: null };
+                const existingProvider = Object.entries(providerParents)?.find(([providerName, room]) => room[overShift as 'am' | 'pm'] === overRoom)?.[0];
+                let newSetting = {
+                    ...providerParents
+                    , [activeValue]: {
+                        ...providerParents[activeValue],
+                        [overShift as 'am' | 'pm']: overRoom
+                    }
+                }
+                if (existingProvider) {
+                    newSetting = {
+                        ...newSetting
+                        , [existingProvider]: {
+                            ...newSetting[existingProvider]
+                            , [overShift as 'am' | 'pm']: null
+                        }
+                    };
+                }
                 setProviderParents(newSetting);
             } else {
-                setProviderParents({ ...providerParents, [activeValue]: null })
+                setProviderParents({
+                    ...providerParents,
+                    [activeValue]: {
+                        am: null,
+                        pm: null
+                    }
+                })
             }
         } else if (activeType === 'room') {
             const parentNurse = roomParents[activeValue];
@@ -132,10 +153,10 @@ export default function Home() {
                 if (parentNurse) {
                     // Handle providers attached to rooms
                     setRoomParents({ ...roomParents, [activeValue]: null })
-                    const dependentProviders = Object.entries(providerParents)?.filter(([providerName, room]) => room === activeValue).map(tuple => tuple[0])
+                    const dependentProviders = Object.entries(providerParents)?.filter(([providerName, room]) => room[overShift as 'am' | 'pm'] === activeValue).map(tuple => tuple[0])
                     let newProviderParents = { ...providerParents };
                     dependentProviders.forEach(provider => {
-                        newProviderParents[provider] = null;
+                        newProviderParents[provider] = { am: null, pm: null };
                     })
                     setProviderParents(newProviderParents);
                 }
@@ -386,7 +407,7 @@ export default function Home() {
                             {
                                 nurseList.map((nurse, index) => {
                                     const nurseProviders = nurseAssignments[nurse] ? Object.entries(nurseAssignments[nurse]).map(([_, provider]) => provider) : [];
-                                    const patientCount = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.patientCount ?? 0), 0) : 0;
+                                    const patientCount = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount ?? 0) + (curr?.pm?.patientCount ?? 0), 0) : 0;
                                     return (
                                         <Grid key={`${index}-${nurse}`}>
                                             <Grid container direction='row' justifyContent='space-between' className='border-b-2'>

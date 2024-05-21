@@ -3,12 +3,13 @@ import { Grid, Typography } from "@mui/material"
 type Props = {
     nurseId: string
     roomId: string
+    shift: 'am' | 'pm'
     isFull: boolean
     children: DragOverlayProps['children']
 }
-export default function ProviderZone({ nurseId, roomId, isFull, children }: Props) {
+export default function ProviderZone({ nurseId, roomId, shift, isFull, children }: Props) {
     const { isOver, setNodeRef } = useDroppable({
-        id: `nurse-${nurseId}-room-${roomId}`
+        id: `nurse-${nurseId}-room-${roomId}-shift-${shift}`
     })
     return (
         <div ref={setNodeRef} className={`border-2 bg-white flex flex-col w-48`}>

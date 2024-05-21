@@ -1,6 +1,6 @@
 import { useDraggable } from "@dnd-kit/core";
 import ProviderZone from "./ProviderDropzone";
-import { NurseAssignments, ProviderRooms } from "../page";
+import { NurseAssignments } from "../page";
 import DraggableProvider from "./DraggableProvider";
 import { Typography } from "@mui/material";
 type Props = {
@@ -22,31 +22,60 @@ export default function DraggableRoom({ roomId, nurseName, nurseAssignments, isM
             {
                 nurseName
                 && (
-                    <ProviderZone
-                        key={`nurse-room-${roomId}`}
-                        isFull={!!nurseAssignments[nurseName][roomId]}
-                        roomId={roomId}
-                        nurseId={nurseName}
-                    >
-                        {
-                            Object.entries(nurseAssignments).map(([nurse, rooms]) => {
-                                if (rooms && nurse === nurseName) {
-                                    const providerList = Object.entries(rooms).map(([room, provider]) => {
-                                        const providerName = provider?.name;
-                                        const patientCount = provider?.patientCount;
-                                        if (providerName && room === roomId) {
-                                            return (
-                                                <DraggableProvider key={`provider-${providerName}`} providerId={providerName}>{providerName}: {patientCount}</DraggableProvider>
-                                            )
-                                        }
-                                    })
-                                    return providerList;
-                                } else {
-                                    return null;
-                                }
-                            })
-                        }
-                    </ProviderZone>
+                    <>
+                        <ProviderZone
+                            key={`nurse-room-${roomId}`}
+                            isFull={!!nurseAssignments[nurseName][roomId]}
+                            roomId={roomId}
+                            nurseId={nurseName}
+                            shift={'am'}
+                        >
+                            {
+                                Object.entries(nurseAssignments).map(([nurse, rooms]) => {
+                                    if (rooms && nurse === nurseName) {
+                                        const providerList = Object.entries(rooms).map(([room, shiftSlots]) => {
+                                            const providerName = shiftSlots.am?.name;
+                                            const patientCount = shiftSlots.am?.patientCount;
+                                            if (providerName && room === roomId) {
+                                                return (
+                                                    <DraggableProvider key={`provider-${providerName}`} providerId={providerName}>{providerName}: {patientCount}</DraggableProvider>
+                                                )
+                                            }
+                                        })
+                                        return providerList;
+                                    } else {
+                                        return null;
+                                    }
+                                })
+                            }
+                        </ProviderZone>
+                        <ProviderZone
+                            key={`nurse-room-${roomId}`}
+                            isFull={!!nurseAssignments[nurseName][roomId]}
+                            roomId={roomId}
+                            nurseId={nurseName}
+                            shift={'pm'}
+                        >
+                            {
+                                Object.entries(nurseAssignments).map(([nurse, rooms]) => {
+                                    if (rooms && nurse === nurseName) {
+                                        const providerList = Object.entries(rooms).map(([room, shiftSlots]) => {
+                                            const providerName = shiftSlots.pm?.name;
+                                            const patientCount = shiftSlots.pm?.patientCount;
+                                            if (providerName && room === roomId) {
+                                                return (
+                                                    <DraggableProvider key={`provider-${providerName}`} providerId={providerName}>{providerName}: {patientCount}</DraggableProvider>
+                                                )
+                                            }
+                                        })
+                                        return providerList;
+                                    } else {
+                                        return null;
+                                    }
+                                })
+                            }
+                        </ProviderZone>
+                    </>
                 )
             }
         </div>
