@@ -24,8 +24,8 @@ export default function DraggableRoom({ roomId, nurseName, nurseAssignments, isM
                 && (
                     <>
                         <ProviderZone
-                            key={`nurse-room-${roomId}`}
-                            isFull={!!nurseAssignments[nurseName][roomId]}
+                            key={`nurse-room-${roomId}-am`}
+                            isFull={!!nurseAssignments[nurseName][roomId]['am']}
                             roomId={roomId}
                             nurseId={nurseName}
                             shift={'am'}
@@ -50,8 +50,8 @@ export default function DraggableRoom({ roomId, nurseName, nurseAssignments, isM
                             }
                         </ProviderZone>
                         <ProviderZone
-                            key={`nurse-room-${roomId}`}
-                            isFull={!!nurseAssignments[nurseName][roomId]}
+                            key={`nurse-room-${roomId}-pm`}
+                            isFull={!!nurseAssignments[nurseName][roomId]['pm']}
                             roomId={roomId}
                             nurseId={nurseName}
                             shift={'pm'}

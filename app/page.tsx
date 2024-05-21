@@ -1,3 +1,5 @@
+// TODO: fix providers getting assigned where they shouldn't be
+// TODO: handle dragging to nothing for providers
 'use client';
 import { Button, Grid, TextField, Typography } from "@mui/material";
 import { useState } from "react";
@@ -44,7 +46,9 @@ export default function Home() {
                     nurseRecord[nurse][room] = { am: null, pm: null };
                     for (const [provider, providerParent] of Object.entries(providerParents)) {
                         for (const shiftSlot of Object.keys(providerParent) as ('am' | 'pm')[]) {
-                            nurseRecord[nurse][room][shiftSlot] = providerList.find(prov => prov.name === provider) ?? null;
+                            if (providerParent[shiftSlot] === room) {
+                                nurseRecord[nurse][room][shiftSlot] = providerList.find(prov => prov.name === provider) ?? null;
+                            }
                         }
                     }
                 }
@@ -53,9 +57,10 @@ export default function Home() {
         return nurseRecord;
     }
     const nurseAssignments = assignNurses();
+    console.log({ nurseAssignments })
 
     const unassignedRooms = roomList.filter(room => !roomParents[room]);
-    const unassignedProviders = providerList.filter(provider => !providerParents[provider.name]);
+    const unassignedProviders = providerList.filter(provider => !providerParents[provider.name]?.['pm'] && !providerParents[provider.name]?.['am']);
 
     const isProviderNameDuplicate = provider.name !== '' && providerList.find(existingProvider => existingProvider.name === provider.name) ? true : false;
 
@@ -106,7 +111,8 @@ export default function Home() {
         const splitActive = active && (active.id as string).split('-');
         const activeType = splitActive[0];
         const activeValue = splitActive[1];
-        if (over && active && overRoom === null && activeType === 'provider') {
+        if (active && overRoom === null && activeType === 'provider') {
+            console.log('attempted to do nothing')
             return;
         }
         if (activeType === 'provider') {
@@ -115,20 +121,21 @@ export default function Home() {
                 return;
             }
             if (overNurse && overRoom) {
+                // Handle case when moving from pm to am or vice versa
                 const existingProvider = Object.entries(providerParents)?.find(([providerName, room]) => room[overShift as 'am' | 'pm'] === overRoom)?.[0];
                 let newSetting = {
                     ...providerParents
                     , [activeValue]: {
-                        ...providerParents[activeValue],
-                        [overShift as 'am' | 'pm']: overRoom
+                        am: overShift === 'am' ? overRoom : null
+                        , pm: overShift === 'pm' ? overRoom : null
                     }
                 }
                 if (existingProvider) {
                     newSetting = {
                         ...newSetting
                         , [existingProvider]: {
-                            ...newSetting[existingProvider]
-                            , [overShift as 'am' | 'pm']: null
+                            am: overShift === 'am' ? null : (newSetting[existingProvider]['am'] ?? null)
+                            , pm: overShift === 'pm' ? null : (newSetting[existingProvider]['pm'] ?? null)
                         }
                     };
                 }
@@ -138,7 +145,7 @@ export default function Home() {
                     ...providerParents,
                     [activeValue]: {
                         am: null,
-                        pm: null
+                        pm: null,
                     }
                 })
             }
