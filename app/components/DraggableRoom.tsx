@@ -30,12 +30,11 @@ export default function DraggableRoom({ roomId, nurseName, nurseAssignments, isM
                     >
                         {
                             Object.entries(nurseAssignments).map(([nurse, rooms]) => {
-                                console.log({ nurse, rooms })
                                 if (rooms && nurse === nurseName) {
-                                    const providerList = Object.entries(rooms).map(([_, provider]) => {
+                                    const providerList = Object.entries(rooms).map(([room, provider]) => {
                                         const providerName = provider?.name;
                                         const patientCount = provider?.patientCount;
-                                        if (providerName) {
+                                        if (providerName && room === roomId) {
                                             return (
                                                 <DraggableProvider key={`provider-${providerName}`} providerId={providerName}>{providerName}: {patientCount}</DraggableProvider>
                                             )

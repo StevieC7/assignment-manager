@@ -50,6 +50,7 @@ export default function Home() {
                 }
             }
         }
+        console.log({ nurseRecord })
         return nurseRecord;
     }
     const nurseAssignments = assignNurses();
@@ -114,7 +115,10 @@ export default function Home() {
                 return;
             }
             if (overNurse && overRoom) {
-                setProviderParents({ ...providerParents, [activeValue]: overRoom });
+                const existingProvider = Object.entries(providerParents)?.find(([providerName, room]) => room === overRoom)?.[0];
+                let newSetting = { ...providerParents, [activeValue]: overRoom };
+                if (existingProvider) newSetting = { ...newSetting, [existingProvider]: null };
+                setProviderParents(newSetting);
             } else {
                 setProviderParents({ ...providerParents, [activeValue]: null })
             }
@@ -127,7 +131,14 @@ export default function Home() {
                 setRoomParents({ ...roomParents, [activeValue]: overNurse })
             } else {
                 if (parentNurse) {
+                    // Handle providers attached to rooms
                     setRoomParents({ ...roomParents, [activeValue]: null })
+                    const dependentProviders = Object.entries(providerParents)?.filter(([providerName, room]) => room === activeValue).map(tuple => tuple[0])
+                    let newProviderParents = { ...providerParents };
+                    dependentProviders.forEach(provider => {
+                        newProviderParents[provider] = null;
+                    })
+                    setProviderParents(newProviderParents);
                 }
             }
         }
@@ -138,16 +149,21 @@ export default function Home() {
         localStorage.setItem("nurses", JSON.stringify(nurseList));
         localStorage.setItem("rooms", JSON.stringify(roomList));
         localStorage.setItem("providers", JSON.stringify(providerList));
-        localStorage.setItem("nurseAssignments", JSON.stringify(nurseAssignments));
+        localStorage.setItem("roomParents", JSON.stringify(roomParents));
+        localStorage.setItem("providerParents", JSON.stringify(providerParents));
     }
 
     const handleLoadLocal = () => {
         const nurses = localStorage.getItem("nurses");
         const rooms = localStorage.getItem("rooms");
         const providers = localStorage.getItem("providers");
+        const roomParents = localStorage.getItem("roomParents");
+        const providerParents = localStorage.getItem("providerParents");
         if (nurses) setNurseList(JSON.parse(nurses));
         if (rooms) setRoomList(JSON.parse(rooms));
         if (providers) setProviderList(JSON.parse(providers));
+        if (roomParents) setRoomParents(JSON.parse(roomParents));
+        if (providerParents) setProviderParents(JSON.parse(providerParents));
     }
 
     const handleExport = () => {
