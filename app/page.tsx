@@ -111,11 +111,9 @@ export default function Home() {
                 return;
             }
             if (overNurse && overRoom) {
-                console.log('provider if')
                 let updatedAssigned = { ...nurseAssignments };
                 // TODO: handle moving to other providers
                 if (parentRoom && parentNurse) {
-                    console.log('parentRoom')
                     const indexToUpdate = updatedAssigned[parentNurse].findIndex(val => val.room === parentRoom);
                     updatedAssigned[parentNurse].splice(indexToUpdate, 1, { room: parentRoom, provider: null });
                 }
@@ -202,7 +200,6 @@ export default function Home() {
         // TODO: fix this to work with new data model
         // const { assignments } = providerMatcher(nurseList, providerList, averagePatientCount);
         // setNurseAssignments(assignments);
-        console.log("Happy birthday idiot")
     }
 
     const handleResetAssignments = () => {
