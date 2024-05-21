@@ -1,12 +1,12 @@
 import { useDraggable } from "@dnd-kit/core";
 import ProviderZone from "./ProviderDropzone";
-import { ProviderRooms } from "../page";
+import { NurseAssignments, ProviderRooms } from "../page";
 import DraggableProvider from "./DraggableProvider";
 import { Typography } from "@mui/material";
 type Props = {
     roomId: string,
     nurseName: string | null,
-    nurseAssignments: Record<string, ProviderRooms[]>,
+    nurseAssignments: NurseAssignments,
     isMinimized?: boolean,
 }
 export default function DraggableRoom({ roomId, nurseName, nurseAssignments, isMinimized }: Props) {
@@ -24,20 +24,20 @@ export default function DraggableRoom({ roomId, nurseName, nurseAssignments, isM
                 && (
                     <ProviderZone
                         key={`nurse-room-${roomId}`}
-                        isFull={!!nurseAssignments[nurseName].find(val => val.room === roomId && val.provider)}
+                        isFull={!!nurseAssignments[nurseName][roomId]}
                         roomId={roomId}
                         nurseId={nurseName}
                     >
                         {
-                            Object.entries(nurseAssignments).map(([key, val]) => {
-                                const providerRooms = val;
-                                if (providerRooms.length && key === nurseName) {
-                                    const providerList = providerRooms.map(pr => {
-                                        const providerName = pr.provider?.name;
-                                        const roomName = pr.room;
-                                        if (providerName && roomName === roomId) {
+                            Object.entries(nurseAssignments).map(([nurse, rooms]) => {
+                                console.log({ nurse, rooms })
+                                if (rooms && nurse === nurseName) {
+                                    const providerList = Object.entries(rooms).map(([_, provider]) => {
+                                        const providerName = provider?.name;
+                                        const patientCount = provider?.patientCount;
+                                        if (providerName) {
                                             return (
-                                                <DraggableProvider key={`provider-${providerName}`} providerId={providerName}>{providerName}: {pr.provider?.patientCount}</DraggableProvider>
+                                                <DraggableProvider key={`provider-${providerName}`} providerId={providerName}>{providerName}: {patientCount}</DraggableProvider>
                                             )
                                         }
                                     })

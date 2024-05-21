@@ -19,6 +19,9 @@ export type ProviderRooms = {
     room: string,
 }
 
+export type Rooms = Record<string, Provider | null>;
+export type NurseAssignments = Record<string, Rooms>;
+
 export default function Home() {
     const [nurseName, setNurseName] = useState<string>('');
     const [room, setRoom] = useState<string>('');
@@ -28,11 +31,31 @@ export default function Home() {
     const [roomList, setRoomList] = useState<string[]>([]);
     const [providerList, setProviderList] = useState<Provider[]>([]);
 
-    const averagePatientCount = Math.ceil(providerList.reduce((prev, curr) => prev + curr.patientCount, 0) / nurseList.length);
-    const [nurseAssignments, setNurseAssignments] = useState<Record<string, ProviderRooms[]>>({});
+    const [roomParents, setRoomParents] = useState<Record<string, string | null>>({});
+    const [providerParents, setProviderParents] = useState<Record<string, string | null>>({});
 
-    const unassignedRooms = roomList.filter(room => !Object.values(nurseAssignments).flat().map(val => val.room).includes(room));
-    const unassignedProviders = providerList.filter(provider => !Object.values(nurseAssignments).flat().map(val => val.provider?.name).includes(provider.name));
+    const averagePatientCount = Math.ceil(providerList.reduce((prev, curr) => prev + curr.patientCount, 0) / nurseList.length);
+    const assignNurses = () => {
+        const nurseRecord: NurseAssignments = {};
+        for (const nurse of nurseList) {
+            for (const [room, roomParent] of Object.entries(roomParents)) {
+                if (roomParent === nurse) {
+                    if (!nurseRecord[nurse]) nurseRecord[nurse] = {};
+                    nurseRecord[nurse][room] = null;
+                    for (const [provider, providerParent] of Object.entries(providerParents)) {
+                        if (providerParent === room && roomParent === nurse) {
+                            nurseRecord[nurse][room] = providerList.find(val => val.name === provider) ?? null;
+                        }
+                    }
+                }
+            }
+        }
+        return nurseRecord;
+    }
+    const nurseAssignments = assignNurses();
+
+    const unassignedRooms = roomList.filter(room => !roomParents[room]);
+    const unassignedProviders = providerList.filter(provider => !providerParents[provider.name]);
 
     const isProviderNameDuplicate = provider.name !== '' && providerList.find(existingProvider => existingProvider.name === provider.name) ? true : false;
 
@@ -57,16 +80,6 @@ export default function Home() {
             const newProviderList = [...providerList];
             newProviderList.splice(foundProviderIndex, 1, { name, patientCount });
             setProviderList(newProviderList);
-            let newNurseAssignments = { ...nurseAssignments };
-            for (const [nurseName, providerRoomsList] of Object.entries(newNurseAssignments)) {
-                const existingProviderRoom = providerRoomsList.find(providerRoom => providerRoom.provider?.name === name);
-                if (existingProviderRoom) {
-                    const newList = providerRoomsList.filter(providerRoom => providerRoom.provider?.name !== name);
-                    newList.push({ provider: { name, patientCount }, room: existingProviderRoom.room });
-                    newNurseAssignments[nurseName] = newList;
-                }
-            }
-            setNurseAssignments(newNurseAssignments);
         }
     }
 
@@ -74,21 +87,12 @@ export default function Home() {
         const newList = [...nurseList];
         newList.splice(id, 1);
         setNurseList(newList);
-        const newNurseAssignments = { ...nurseAssignments };
-        delete newNurseAssignments[name];
-        setNurseAssignments(newNurseAssignments);
     }
 
     const handleDeleteProvider = (id: number, name: string) => {
         const newList = [...providerList];
         newList.splice(id, 1);
         setProviderList(newList);
-        let newUserAssigned = { ...nurseAssignments };
-        for (const [nurseName, providerList] of Object.entries(newUserAssigned)) {
-            const newList = providerList.filter(providerRoom => providerRoom.provider?.name !== name);
-            newUserAssigned[nurseName] = newList;
-        }
-        setNurseAssignments(newUserAssigned);
     }
 
     const handleDragEnd = (event: DragEndEvent) => {
@@ -105,60 +109,25 @@ export default function Home() {
             return;
         }
         if (activeType === 'provider') {
-            const parentTuple = Object.entries(nurseAssignments).find(nurse => nurse[1].map(providerRoom => providerRoom.provider?.name).includes(activeValue));
-            const parentNurse = parentTuple ? parentTuple[0] : undefined;
-            const parentRoom = parentTuple ? parentTuple[1].find(pr => pr.provider?.name === activeValue)?.room : undefined;
+            const parentRoom = providerParents[activeValue];
             if (over && parentRoom && overRoom === parentRoom) {
                 return;
             }
             if (overNurse && overRoom) {
-                let updatedAssigned = { ...nurseAssignments };
-                // TODO: handle moving to other providers
-                if (parentRoom && parentNurse) {
-                    const indexToUpdate = updatedAssigned[parentNurse].findIndex(val => val.room === parentRoom);
-                    updatedAssigned[parentNurse].splice(indexToUpdate, 1, { room: parentRoom, provider: null });
-                }
-                const activeProvider = providerList.find(provider => provider.name === activeValue);
-                const allProviderRoomsButActive = updatedAssigned[overNurse].filter(pr => pr.room !== overRoom);
-                if (activeProvider && allProviderRoomsButActive) {
-                    updatedAssigned[overNurse] = [...allProviderRoomsButActive, { provider: activeProvider, room: overRoom }]
-                    setNurseAssignments(updatedAssigned)
-                }
+                setProviderParents({ ...providerParents, [activeValue]: overRoom });
             } else {
-                if (parentRoom && parentNurse) {
-                    let updatedAssigned = { ...nurseAssignments };
-                    const updatedProviderRoom = nurseAssignments[parentNurse].find(pr => pr.provider?.name === activeValue);
-                    if (updatedProviderRoom?.room) {
-                        const updatedOldNurse = [...nurseAssignments[parentNurse].filter(pr => pr.provider?.name !== activeValue), { provider: null, room: updatedProviderRoom.room }]
-                        updatedAssigned[parentNurse] = updatedOldNurse;
-                        setNurseAssignments(updatedAssigned);
-                    }
-                }
+                setProviderParents({ ...providerParents, [activeValue]: null })
             }
         } else if (activeType === 'room') {
-            const parentTuple = Object.entries(nurseAssignments).find(nurse => nurse[1].map(providerRoom => providerRoom.room).includes(activeValue));
-            const parentNurse = parentTuple ? parentTuple[0] : undefined;
+            const parentNurse = roomParents[activeValue];
             if (over && parentNurse && overNurse === parentNurse) {
                 return;
             }
             if (overNurse) {
-                let updatedAssigned = { ...nurseAssignments };
-                let newProvider: Provider | null = null;
-                if (parentNurse) {
-                    const updatedOldNurse = nurseAssignments[parentNurse].filter(providerRoom => providerRoom.room !== activeValue);
-                    newProvider = nurseAssignments[parentNurse].find(rp => rp.room === activeValue)?.provider ?? null;
-                    updatedAssigned[parentNurse] = updatedOldNurse;
-                }
-                const alreadyAssigned = nurseAssignments[overNurse] || [];
-                // TODO: move the provider with the room
-                updatedAssigned[overNurse] = activeValue ? [...alreadyAssigned, { provider: newProvider, room: activeValue }] : alreadyAssigned;
-                setNurseAssignments(updatedAssigned);
+                setRoomParents({ ...roomParents, [activeValue]: overNurse })
             } else {
                 if (parentNurse) {
-                    let updatedAssigned = { ...nurseAssignments };
-                    const updatedOldNurse = nurseAssignments[parentNurse].filter(assignment => assignment.room !== activeValue);
-                    updatedAssigned[parentNurse] = updatedOldNurse;
-                    setNurseAssignments(updatedAssigned);
+                    setRoomParents({ ...roomParents, [activeValue]: null })
                 }
             }
         }
@@ -176,34 +145,35 @@ export default function Home() {
         const nurses = localStorage.getItem("nurses");
         const rooms = localStorage.getItem("rooms");
         const providers = localStorage.getItem("providers");
-        const assignments = localStorage.getItem("nurseAssignments");
         if (nurses) setNurseList(JSON.parse(nurses));
         if (rooms) setRoomList(JSON.parse(rooms));
         if (providers) setProviderList(JSON.parse(providers));
-        if (assignments) setNurseAssignments(JSON.parse(assignments));
     }
 
     const handleExport = () => {
-        const data = {
-            fields: ['Nurse', 'Provider', 'Patient Count'],
-            data: Object.entries(nurseAssignments).map(assignmentTuple => [assignmentTuple[0], assignmentTuple[1].map(assignment => assignment.provider?.name), assignmentTuple[1].map(assignment => assignment.provider?.patientCount)])
-        }
-        const csv = Papa.unparse(data);
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8,' });
-        const objUrl = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.setAttribute('href', objUrl);
-        link.setAttribute('download', 'schedule.csv');
-        link.click();
+        // TODO: fix this
+        // const data = {
+        //     fields: ['Nurse', 'Provider', 'Patient Count'],
+        //     data: Object.entries(nurseAssignments).map(assignmentTuple => [assignmentTuple[0], assignmentTuple[1].map(assignment => assignment.provider?.name), assignmentTuple[1].map(assignment => assignment.provider?.patientCount)])
+        // }
+        // const csv = Papa.unparse(data);
+        // const blob = new Blob([csv], { type: 'text/csv;charset=utf-8,' });
+        // const objUrl = URL.createObjectURL(blob);
+        // const link = document.createElement('a');
+        // link.setAttribute('href', objUrl);
+        // link.setAttribute('download', 'schedule.csv');
+        // link.click();
     }
 
     const handleAutoAssign = () => {
-        const { roomAssignments } = providerMatcher(nurseList, providerList, roomList, averagePatientCount);
-        setNurseAssignments(roomAssignments);
+        // TODO: fix this
+        // const { roomAssignments } = providerMatcher(nurseList, providerList, roomList, averagePatientCount);
+        // setNurseAssignments(roomAssignments);
     }
 
     const handleResetAssignments = () => {
-        setNurseAssignments({});
+        // TODO: fix this
+        // setNurseAssignments({});
     }
 
     return (
@@ -400,7 +370,8 @@ export default function Home() {
                         >
                             {
                                 nurseList.map((nurse, index) => {
-                                    const patientCount = nurseAssignments[nurse] ? nurseAssignments[nurse].reduce((prev, curr) => prev + (curr.provider?.patientCount ?? 0), 0) : 0;
+                                    const nurseProviders = nurseAssignments[nurse] ? Object.entries(nurseAssignments[nurse]).map(([_, provider]) => provider) : [];
+                                    const patientCount = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.patientCount ?? 0), 0) : 0;
                                     return (
                                         <Grid key={`${index}-${nurse}`}>
                                             <Grid container direction='row' justifyContent='space-between' className='border-b-2'>
@@ -409,9 +380,9 @@ export default function Home() {
                                             </Grid>
                                             <RoomZone nurseId={nurse}>
                                                 {
-                                                    nurseAssignments[nurse] && nurseAssignments[nurse].map((pr, index) => {
+                                                    nurseAssignments[nurse] && Object.keys(nurseAssignments[nurse]).map((room, index) => {
                                                         return (
-                                                            <DraggableRoom key={`${index}-${room}`} roomId={pr.room} nurseName={nurse} nurseAssignments={nurseAssignments} />
+                                                            <DraggableRoom key={`${index}-${room}`} roomId={room} nurseName={nurse} nurseAssignments={nurseAssignments} />
                                                         )
                                                     })
                                                 }
