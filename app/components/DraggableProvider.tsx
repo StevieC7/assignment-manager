@@ -17,7 +17,7 @@ export default function DraggableProvider({ providerId, shift, children }: Props
 
 
     return (
-        <button ref={setNodeRef} style={style} {...listeners} {...attributes} className='bg-blue-100 p-4 rounded-full h-12 items-center flex'>
+        <button ref={setNodeRef} style={style} {...listeners} {...attributes} className={`${shift === 'am' ? 'bg-orange-100' : 'bg-blue-100'} p-4 rounded-full h-12 items-center flex`}>
             {children}
         </button>
     );

@@ -1,5 +1,5 @@
 'use client';
-import { Button, Grid, TextField, Typography } from "@mui/material";
+import { Button, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 import DraggableProvider from "./components/DraggableProvider";
 import { DndContext, DragEndEvent } from "@dnd-kit/core";
@@ -349,45 +349,32 @@ export default function Home() {
                         direction='column'
                         xs={9}
                     >
-                        <Grid
-                            item
-                            container
-                            direction='row'
-                            justifyContent='space-between'
-                            xs={12}
-                            className='p-2 h-24'
-                        >
-                            <Grid item container direction='row' xs={9} className='pl-6'>
-                                {
-                                    unassignedProvidersAM.length
-                                        ? unassignedProvidersAM.map(provider => {
-                                            return (
-                                                <DraggableProvider key={`provider-${provider.name}-am`} providerId={provider.name} shift='am'>{provider.name}: {provider.patientCount.am}</DraggableProvider>
-                                            )
-                                        })
-                                        : (
-                                            <>
-                                                <CheckCircle className='text-green-500' />
-                                                <Typography>All Assigned</Typography>
-                                            </>
-                                        )
-                                }
-                                {
-                                    unassignedProvidersPM.length
-                                        ? unassignedProvidersPM.map(provider => {
-                                            return (
-                                                <DraggableProvider key={`provider-${provider.name}-pm`} providerId={provider.name} shift='pm'>{provider.name}: {provider.patientCount.pm}</DraggableProvider>
-                                            )
-                                        })
-                                        : (
-                                            <>
-                                                <CheckCircle className='text-green-500' />
-                                                <Typography>All Assigned</Typography>
-                                            </>
-                                        )
-                                }
+                        <Grid item container direction='column' className='pl-6 mb-16'>
+                            <Grid
+                                item
+                                container
+                                direction='row'
+                                justifyContent='space-between'
+                            >
+                                <Typography variant='h4'>Rooms</Typography>
+                                <Grid item container xs={6} justifyContent='flex-end'>
+                                    <Button
+                                        variant='outlined'
+                                        onClick={handleResetAssignments}
+                                        className='h-12'
+                                    >
+                                        Reset Assignments
+                                    </Button>
+                                    <Button
+                                        variant='contained'
+                                        onClick={handleAutoAssign}
+                                        className='h-12 ml-4'
+                                    >
+                                        Quick-fill
+                                    </Button>
+                                </Grid>
                             </Grid>
-                            <Grid item container direction='row' xs={9} className='pl-6'>
+                            <Grid item container direction='row'>
                                 {
                                     unassignedRooms.length
                                         ? unassignedRooms.map(room => {
@@ -403,60 +390,150 @@ export default function Home() {
                                         )
                                 }
                             </Grid>
-                            <Grid
-                                item
-                                container
-                                direction='row'
-                                justifyContent='flex-end'
-                                xs={3}
-                            >
-                                <Button
-                                    variant='outlined'
-                                    onClick={handleResetAssignments}
-                                    className='h-12'
-                                >
-                                    Reset Assignments
-                                </Button>
-                                <Button
-                                    variant='contained'
-                                    onClick={handleAutoAssign}
-                                    className='h-12 ml-4'
-                                >
-                                    Quick-fill
-                                </Button>
-                            </Grid>
                         </Grid>
-                        <Typography variant='h4' className='pl-6 mb-4'>Target patient count AM: {averagePatientCountAM}</Typography>
-                        <Typography variant='h4' className='pl-6 mb-4'>Target patient count PM: {averagePatientCountPM}</Typography>
                         <Grid
                             item
                             container
                             direction='row'
+                            justifyContent='space-between'
                             xs={12}
+                            className='h-24 mb-16'
                         >
-                            {
-                                nurseList.map((nurse, index) => {
-                                    const nurseProviders = nurseAssignments[nurse] ? Object.entries(nurseAssignments[nurse]).map(([_, provider]) => provider) : [];
-                                    const patientCount = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am ?? 0) + (curr?.pm?.patientCount?.pm ?? 0), 0) : 0;
-                                    return (
-                                        <Grid key={`${index}-${nurse}`}>
-                                            <Grid container direction='row' justifyContent='space-between' className='border-b-2'>
+                            <Grid item container direction='row' xs={9} className='pl-6'>
+                                <Grid item container direction='column' xs={6}>
+                                    <Typography variant='h4'>AM Providers</Typography>
+                                    <Grid item container direction='row'>
+                                        {
+                                            unassignedProvidersAM.length
+                                                ? unassignedProvidersAM.map(provider => {
+                                                    return (
+                                                        <DraggableProvider key={`provider-${provider.name}-am`} providerId={provider.name} shift='am'>{provider.name}: {provider.patientCount.am}</DraggableProvider>
+                                                    )
+                                                })
+                                                : (
+                                                    <>
+                                                        <CheckCircle className='text-green-500' />
+                                                        <Typography>All Assigned</Typography>
+                                                    </>
+                                                )
+                                        }
+                                    </Grid>
+                                    <Typography variant='h5' className='mb-4'>Target patient count AM: {averagePatientCountAM}</Typography>
+                                </Grid>
+                                <Grid item container direction='column' xs={6}>
+                                    <Typography variant='h4'>PM Providers</Typography>
+                                    <Grid item container direction='row'>
+                                        {
+                                            unassignedProvidersPM.length
+                                                ? unassignedProvidersPM.map(provider => {
+                                                    return (
+                                                        <DraggableProvider key={`provider-${provider.name}-pm`} providerId={provider.name} shift='pm'>{provider.name}: {provider.patientCount.pm}</DraggableProvider>
+                                                    )
+                                                })
+                                                : (
+                                                    <>
+                                                        <CheckCircle className='text-green-500' />
+                                                        <Typography>All Assigned</Typography>
+                                                    </>
+                                                )
+                                        }
+                                    </Grid>
+                                    <Typography variant='h5' className='mb-4'>Target patient count PM: {averagePatientCountPM}</Typography>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                        <Grid item container direction='column'>
+                            <Typography variant='h4'>Assignments</Typography>
+                            {/* ----CONDENSED VIEW---- */}
+                            <TableContainer sx={{ maxWidth: 120 * (nurseList.length + 1) }} component={Paper} className='mb-12'>
+                                <Table size='small'>
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell></TableCell>
+                                            <TableCell>Total</TableCell>
+                                            <TableCell>Pt/Nurse</TableCell>
+                                            {
+                                                nurseList.map((nurse, index) => {
+                                                    return (
+                                                        <TableCell key={index}>{nurse}</TableCell>
+                                                    )
+                                                })
+                                            }
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        <TableRow>
+                                            <TableCell>AM</TableCell>
+                                            <TableCell>z</TableCell>
+                                            <TableCell>z</TableCell>
+                                            {
+                                                nurseList.map((nurse, index) => {
+                                                    const nurseProviders = nurseAssignments[nurse] ? Object.entries(nurseAssignments[nurse]).map(([_, provider]) => provider) : [];
+                                                    const patientCountAM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am ?? 0), 0) : 0;
+                                                    return (
+                                                        <TableCell key={index}>{patientCountAM}</TableCell>
+                                                    )
+                                                })
+                                            }
+                                        </TableRow>
+                                        <TableRow>
+                                            <TableCell>PM</TableCell>
+                                            <TableCell>z</TableCell>
+                                            <TableCell>z</TableCell>
+                                            {
+                                                nurseList.map((nurse, index) => {
+                                                    const nurseProviders = nurseAssignments[nurse] ? Object.entries(nurseAssignments[nurse]).map(([_, provider]) => provider) : [];
+                                                    const patientCountPM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.pm?.patientCount?.pm ?? 0), 0) : 0;
+                                                    return (
+                                                        <TableCell key={index}>{patientCountPM}</TableCell>
+                                                    )
+                                                })
+                                            }
+                                        </TableRow>
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
+                            {/* ----END CONDENSED VIEW---- */}
+                            <Grid
+                                item
+                                container
+                                direction='row'
+                                xs={12}
+                            >
+                                {
+                                    nurseList.map((nurse, index) => {
+                                        const nurseProviders = nurseAssignments[nurse] ? Object.entries(nurseAssignments[nurse]).map(([_, provider]) => provider) : [];
+                                        const patientCount = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am ?? 0) + (curr?.pm?.patientCount?.pm ?? 0), 0) : 0;
+                                        const patientCountAM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am ?? 0), 0) : 0;
+                                        const patientCountPM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.pm?.patientCount?.pm ?? 0), 0) : 0;
+                                        return (
+                                            <Grid key={`${index}-${nurse}`} item container className='ml-6 mb-6 w-4/12 min-w-96 max-w-lg bg-white' direction='column'>
                                                 <Typography variant='h5' className="w-fit">{nurse}</Typography>
-                                                <Typography variant='h5' className={`w-8 text-center border-l-2 ${patientCount <= averagePatientCountAM + averagePatientCountPM ? patientCount === 0 ? 'bg-red-100' : 'bg-green-100' : 'bg-yellow-100'}`}>{patientCount}</Typography>
+                                                <Grid item container direction='row'>
+                                                    <Grid item xs={4}></Grid>
+                                                    <Grid item container xs={4} justifyContent='space-between'>
+                                                        AM
+                                                        <Typography className={` w-8 text-center border-1-2 ${patientCountAM <= averagePatientCountAM ? patientCount === 0 ? 'bg-red-100' : 'bg-green-100' : 'bg-yellow-100'}`}>{patientCountAM}</Typography>
+                                                    </Grid>
+                                                    <Grid item container xs={4} justifyContent='center'>
+                                                        PM
+                                                        <Typography className={` w-8 text-center border-1-2 ${patientCountPM <= averagePatientCountPM ? patientCount === 0 ? 'bg-red-100' : 'bg-green-100' : 'bg-yellow-100'}`}>{patientCountPM}</Typography>
+                                                    </Grid>
+                                                </Grid>
+                                                <RoomZone nurseId={nurse}>
+                                                    {
+                                                        nurseAssignments[nurse] && Object.keys(nurseAssignments[nurse]).map((room, index) => {
+                                                            return (
+                                                                <DraggableRoom key={`${index}-${room}`} roomId={room} nurseName={nurse} nurseAssignments={nurseAssignments} />
+                                                            )
+                                                        })
+                                                    }
+                                                </RoomZone>
                                             </Grid>
-                                            <RoomZone nurseId={nurse}>
-                                                {
-                                                    nurseAssignments[nurse] && Object.keys(nurseAssignments[nurse]).map((room, index) => {
-                                                        return (
-                                                            <DraggableRoom key={`${index}-${room}`} roomId={room} nurseName={nurse} nurseAssignments={nurseAssignments} />
-                                                        )
-                                                    })
-                                                }
-                                            </RoomZone>
-                                        </Grid>
-                                    )
-                                })
-                            }
+                                        )
+                                    })
+                                }
+                            </Grid>
                         </Grid>
                     </Grid>
                 </Grid>

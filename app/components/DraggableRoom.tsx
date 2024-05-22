@@ -18,7 +18,7 @@ export default function DraggableRoom({ roomId, nurseName, nurseAssignments, isM
     } : undefined;
     return (
         <div ref={setNodeRef} style={style} {...listeners} {...attributes} className={`flex flex-row ${isMinimized ? 'w-fit' : 'w-full'} justify-between`}>
-            <Typography variant='h5' className={'h-16 w-fit'}>{roomId}</Typography>
+            <Typography variant='h6' className={'h-16 w-4/12'}>{roomId}</Typography>
             {
                 nurseName
                 && (

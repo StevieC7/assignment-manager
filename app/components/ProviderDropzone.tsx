@@ -12,7 +12,7 @@ export default function ProviderZone({ nurseId, roomId, shift, isFull, children 
         id: `nurse-${nurseId}-room-${roomId}-shift-${shift}`
     })
     return (
-        <div ref={setNodeRef} className={`border-2 bg-white flex flex-col w-48`}>
+        <div ref={setNodeRef} className={`border-2 bg-white flex flex-col w-4/12`}>
             <Grid container>
                 {children}
             </Grid>
