@@ -37,8 +37,11 @@ export default function Home() {
     const [roomParents, setRoomParents] = useState<Record<string, string | null>>({});
     const [providerParents, setProviderParents] = useState<Record<string, { am: string | null, pm: string | null }>>({});
 
+    const patientTotalAM = providerList.reduce((prev, curr) => prev + curr.patientCount.am, 0);
+    const patientTotalPM = providerList.reduce((prev, curr) => prev + curr.patientCount.pm, 0);
     const averagePatientCountAM = Math.ceil(providerList.reduce((prev, curr) => prev + curr.patientCount.am, 0) / nurseList.length);
     const averagePatientCountPM = Math.ceil(providerList.reduce((prev, curr) => prev + curr.patientCount.pm, 0) / nurseList.length);
+
     const assignNurses = () => {
         const nurseRecord: NurseAssignments = {};
         for (const nurse of nurseList) {
@@ -63,6 +66,11 @@ export default function Home() {
     const unassignedRooms = roomList.filter(room => !roomParents[room]);
     const unassignedProvidersAM = providerList.filter(provider => !providerParents[provider.name]?.am);
     const unassignedProvidersPM = providerList.filter(provider => !providerParents[provider.name]?.pm);
+
+    const assignedPatientTotalAM = Object.values(nurseAssignments).map(room => Object.values(room).map(shiftSlots => shiftSlots?.am?.patientCount?.am ?? 0)).flat().reduce((prev, curr) => prev + curr, 0);
+    const assignedPatientTotalPM = Object.values(nurseAssignments).map(room => Object.values(room).map(shiftSlots => shiftSlots?.pm?.patientCount?.pm ?? 0)).flat().reduce((prev, curr) => prev + curr, 0);
+    const anyAssignedGreaterThanTargetAM = Object.values(nurseAssignments).map(room => Object.values(room).map(shiftSlots => shiftSlots?.am?.patientCount?.am ?? 0).reduce((prev, curr) => prev + curr)).some(val => val > averagePatientCountAM);
+    const anyAssignedGreaterThanTargetPM = Object.values(nurseAssignments).map(room => Object.values(room).map(shiftSlots => shiftSlots?.pm?.patientCount?.pm ?? 0).reduce((prev, curr) => prev + curr)).some(val => val > averagePatientCountPM);
 
     const isProviderNameDuplicate = provider.name !== '' && providerList.find(existingProvider => existingProvider.name === provider.name) ? true : false;
 
@@ -445,12 +453,13 @@ export default function Home() {
                         <Grid item container direction='column'>
                             <Typography variant='h4'>Assignments</Typography>
                             {/* ----CONDENSED VIEW---- */}
-                            <TableContainer sx={{ maxWidth: 120 * (nurseList.length + 1) }} component={Paper} className='mb-12'>
+                            <TableContainer sx={{ maxWidth: 120 * (nurseList.length + 4) }} component={Paper} className='mb-12'>
                                 <Table size='small'>
                                     <TableHead>
                                         <TableRow>
                                             <TableCell></TableCell>
                                             <TableCell>Total</TableCell>
+                                            <TableCell>Assigned</TableCell>
                                             <TableCell>Pt/Nurse</TableCell>
                                             {
                                                 nurseList.map((nurse, index) => {
@@ -464,28 +473,30 @@ export default function Home() {
                                     <TableBody>
                                         <TableRow>
                                             <TableCell>AM</TableCell>
-                                            <TableCell>z</TableCell>
-                                            <TableCell>z</TableCell>
+                                            <TableCell>{patientTotalAM}</TableCell>
+                                            <TableCell className={`${assignedPatientTotalAM < patientTotalAM ? 'bg-yellow-100' : 'bg-inherit'}`}>{assignedPatientTotalAM}</TableCell>
+                                            <TableCell className={`${anyAssignedGreaterThanTargetAM ? 'bg-yellow-100' : 'bg-inherit'}`}>{averagePatientCountAM}</TableCell>
                                             {
                                                 nurseList.map((nurse, index) => {
                                                     const nurseProviders = nurseAssignments[nurse] ? Object.entries(nurseAssignments[nurse]).map(([_, provider]) => provider) : [];
                                                     const patientCountAM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am ?? 0), 0) : 0;
                                                     return (
-                                                        <TableCell key={index}>{patientCountAM}</TableCell>
+                                                        <TableCell className={`${patientCountAM > averagePatientCountAM ? 'bg-yellow-100' : 'bg-inherit'}`} key={index}>{patientCountAM}</TableCell>
                                                     )
                                                 })
                                             }
                                         </TableRow>
                                         <TableRow>
                                             <TableCell>PM</TableCell>
-                                            <TableCell>z</TableCell>
-                                            <TableCell>z</TableCell>
+                                            <TableCell>{patientTotalPM}</TableCell>
+                                            <TableCell className={`${assignedPatientTotalPM < patientTotalPM ? 'bg-yellow-100' : 'bg-inherit'}`}>{assignedPatientTotalPM}</TableCell>
+                                            <TableCell className={`${anyAssignedGreaterThanTargetPM ? 'bg-yellow-100' : 'bg-inherit'}`}>{averagePatientCountPM}</TableCell>
                                             {
                                                 nurseList.map((nurse, index) => {
                                                     const nurseProviders = nurseAssignments[nurse] ? Object.entries(nurseAssignments[nurse]).map(([_, provider]) => provider) : [];
                                                     const patientCountPM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.pm?.patientCount?.pm ?? 0), 0) : 0;
                                                     return (
-                                                        <TableCell key={index}>{patientCountPM}</TableCell>
+                                                        <TableCell className={`${patientCountPM > averagePatientCountPM ? 'bg-yellow-100' : 'bg-inherit'}`} key={index}>{patientCountPM}</TableCell>
                                                     )
                                                 })
                                             }
@@ -503,7 +514,6 @@ export default function Home() {
                                 {
                                     nurseList.map((nurse, index) => {
                                         const nurseProviders = nurseAssignments[nurse] ? Object.entries(nurseAssignments[nurse]).map(([_, provider]) => provider) : [];
-                                        const patientCount = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am ?? 0) + (curr?.pm?.patientCount?.pm ?? 0), 0) : 0;
                                         const patientCountAM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am ?? 0), 0) : 0;
                                         const patientCountPM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.pm?.patientCount?.pm ?? 0), 0) : 0;
                                         return (
@@ -513,11 +523,11 @@ export default function Home() {
                                                     <Grid item xs={4}></Grid>
                                                     <Grid item container xs={4} justifyContent='space-between'>
                                                         AM
-                                                        <Typography className={` w-8 text-center border-1-2 ${patientCountAM <= averagePatientCountAM ? patientCount === 0 ? 'bg-red-100' : 'bg-green-100' : 'bg-yellow-100'}`}>{patientCountAM}</Typography>
+                                                        <Typography className={` w-8 text-center border-1-2 ${patientCountAM <= averagePatientCountAM ? patientCountAM === 0 ? 'bg-red-100' : 'bg-green-100' : 'bg-yellow-100'}`}>{patientCountAM}</Typography>
                                                     </Grid>
                                                     <Grid item container xs={4} justifyContent='center'>
                                                         PM
-                                                        <Typography className={` w-8 text-center border-1-2 ${patientCountPM <= averagePatientCountPM ? patientCount === 0 ? 'bg-red-100' : 'bg-green-100' : 'bg-yellow-100'}`}>{patientCountPM}</Typography>
+                                                        <Typography className={` w-8 text-center border-1-2 ${patientCountPM <= averagePatientCountPM ? patientCountPM === 0 ? 'bg-red-100' : 'bg-green-100' : 'bg-yellow-100'}`}>{patientCountPM}</Typography>
                                                     </Grid>
                                                 </Grid>
                                                 <RoomZone nurseId={nurse}>
