@@ -122,7 +122,6 @@ export default function Home() {
         const activeType = splitActive[0];
         const activeValue = splitActive[1];
         const activeShift = splitActive && splitActive.length > 3 ? splitActive[3] : null;
-        console.log({ active, splitActive, activeShift })
         if (active && overRoom === null && activeType === 'provider' && !providerParents[activeValue]) {
             return;
         }
