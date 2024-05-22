@@ -112,7 +112,7 @@ export default function Home() {
 
     const handleDragEnd = (event: DragEndEvent) => {
         // over id format: nurse-{nurseName} | nurse-{nurseName}-room-{roomName}-shift-{shiftType}
-        // active id format: room-{roomName} | provider-{providerName}
+        // active id format: room-{roomName} | provider-{providerName}-shift-{shiftType}
         const { over, active } = event;
         const splitOver = over && (over.id as string).split('-');
         const overNurse = splitOver && splitOver[1];
@@ -121,6 +121,8 @@ export default function Home() {
         const splitActive = active && (active.id as string).split('-');
         const activeType = splitActive[0];
         const activeValue = splitActive[1];
+        const activeShift = splitActive && splitActive.length > 3 ? splitActive[3] : null;
+        console.log({ active, splitActive, activeShift })
         if (active && overRoom === null && activeType === 'provider' && !providerParents[activeValue]) {
             return;
         }
@@ -152,8 +154,8 @@ export default function Home() {
                 setProviderParents({
                     ...providerParents,
                     [activeValue]: {
-                        am: null,
-                        pm: null,
+                        am: activeShift === 'am' ? null : providerParents[activeValue]['am'],
+                        pm: activeShift === 'pm' ? null : providerParents[activeValue]['pm'],
                     }
                 })
             }
