@@ -111,6 +111,7 @@ export default function Home() {
     }
 
     const handleDragEnd = (event: DragEndEvent) => {
+        console.log(event)
         // over id format: nurse-{nurseName} | nurse-{nurseName}-room-{roomName}-shift-{shiftType}
         // active id format: room-{roomName} | provider-{providerName}
         const { over, active } = event;
@@ -142,8 +143,9 @@ export default function Home() {
                     newSetting = {
                         ...newSetting
                         , [existingProvider]: {
-                            am: overShift === 'am' ? null : (newSetting[existingProvider]['am'] ?? null)
-                            , pm: overShift === 'pm' ? null : (newSetting[existingProvider]['pm'] ?? null)
+                            // TODO: replace the placeholder nulls on left of ternary with active provider's previous location
+                            am: overShift === 'am' ? parentRoom.am : (newSetting[existingProvider]['am'] ?? null)
+                            , pm: overShift === 'pm' ? parentRoom.pm : (newSetting[existingProvider]['pm'] ?? null)
                         }
                     };
                 }
