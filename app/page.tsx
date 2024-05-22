@@ -1,9 +1,9 @@
 'use client';
-import { Button, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from "@mui/material";
-import { useState } from "react";
+import { Button, Drawer, Grid, Menu, MenuItem, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from "@mui/material";
+import { MouseEvent, useState } from "react";
 import DraggableProvider from "./components/DraggableProvider";
 import { DndContext, DragEndEvent } from "@dnd-kit/core";
-import { CheckCircle } from "@mui/icons-material";
+import { ArrowDownward, ArrowRight, CheckCircle } from "@mui/icons-material";
 // @ts-ignore
 import * as Papa from 'papaparse';
 import RoomZone from "./components/RoomDropzone";
@@ -26,6 +26,9 @@ export type Rooms = Record<string, ShiftSlots>;
 export type NurseAssignments = Record<string, Rooms>;
 
 export default function Home() {
+    const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
     const [nurseName, setNurseName] = useState<string>('');
     const [room, setRoom] = useState<string>('');
     const [provider, setProvider] = useState<Provider>({ name: '', patientCount: { am: 0, pm: 0 } });
@@ -227,42 +230,67 @@ export default function Home() {
         setRoomParents({});
         setProviderParents({});
     }
+    enum ResetOptions {
+        ALL,
+        PROVIDERS,
+    }
+    const handleOpenMenu = (event: MouseEvent<HTMLElement>) => {
+        setAnchorEl(event.currentTarget);
+    }
+    const handleCloseMenu = () => {
+        setAnchorEl(null);
+    }
+    const handleMenuOptions = (item: ResetOptions) => {
+        switch (item) {
+            case ResetOptions.ALL:
+                setRoomParents({});
+                setProviderParents({});
+                break;
+            case ResetOptions.PROVIDERS:
+                setProviderParents({});
+                break;
+        }
+    }
 
     return (
         <main>
             <DndContext onDragEnd={handleDragEnd}>
-                <Grid container direction='row' justifyContent='space-between' alignItems='center' className='bg-black text-white p-4'>
-                    <Typography variant="h1">Provider Assigner</Typography>
+                <Grid container direction='row' justifyContent='space-between' alignItems='center' className='bg-black text-white p-4 fixed top-0'>
+                    <Typography variant="h1" fontSize={36}>Assignment Manager Pro Plus (Extreme Edition)</Typography>
                     <Grid item>
                         <Button variant="contained" onClick={handleSaveToLocal} className='h-12 mr-4'>Save</Button>
                         <Button variant="contained" onClick={handleLoadLocal} className='h-12'>Load</Button>
                         <Button variant="contained" onClick={handleExport} className='h-12'>Export</Button>
                     </Grid>
                 </Grid>
-                <Grid
-                    container
-                    direction='row'
-                    className='p-4'
-                >
+                <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} anchor='right'>
                     <Grid
                         item
                         container
                         direction='column'
-                        xs={3}
-                        className='h-dvh'
+                        className='h-fit w-96 p-3'
                     >
-                        <Grid item container direction='column'>
+                        <Grid item container direction='column' sx={{ mb: '2rem' }}>
                             <Typography variant='h4'>Team</Typography>
-                            <TextField
-                                placeholder="Team Members"
-                                value={nurseName}
-                                onChange={e => setNurseName(e.currentTarget.value)}
-                            />
-                            <Button
-                                onClick={handleAddNurse}
-                            >
-                                Save
-                            </Button>
+                            <Grid item container>
+                                <Grid item container xs={8}>
+                                    <TextField
+                                        placeholder="Team Members"
+                                        value={nurseName}
+                                        onChange={e => setNurseName(e.currentTarget.value)}
+                                        sx={{ width: '100%' }}
+                                    />
+                                </Grid>
+                                <Grid item container justifyContent='center' alignItems='center' xs={4}>
+                                    <Button
+                                        onClick={handleAddNurse}
+                                        variant='contained'
+                                        sx={{ width: '100%', height: '100%' }}
+                                    >
+                                        Save
+                                    </Button>
+                                </Grid>
+                            </Grid>
                             <Grid item className='overflow-y-scroll max-h-96'>
                                 {nurseList.map((nurse, id) => {
                                     return (
@@ -278,18 +306,27 @@ export default function Home() {
                                 })}
                             </Grid>
                         </Grid>
-                        <Grid item container direction='column'>
+                        <Grid item container direction='column' sx={{ mb: '2rem' }}>
                             <Typography variant='h4'>Rooms</Typography>
-                            <TextField
-                                placeholder="Team Members"
-                                value={room}
-                                onChange={e => setRoom(e.currentTarget.value)}
-                            />
-                            <Button
-                                onClick={handleAddRoom}
-                            >
-                                Save
-                            </Button>
+                            <Grid item container>
+                                <Grid item container xs={8}>
+                                    <TextField
+                                        placeholder="Team Members"
+                                        value={room}
+                                        onChange={e => setRoom(e.currentTarget.value)}
+                                        sx={{ width: '100%' }}
+                                    />
+                                </Grid>
+                                <Grid item container justifyContent='center' alignItems='center' xs={4}>
+                                    <Button
+                                        onClick={handleAddRoom}
+                                        variant='contained'
+                                        sx={{ width: '100%', height: '100%' }}
+                                    >
+                                        Save
+                                    </Button>
+                                </Grid>
+                            </Grid>
                             <Grid item className='overflow-y-scroll max-h-96'>
                                 {roomList.map((room, id) => {
                                     return (
@@ -354,107 +391,17 @@ export default function Home() {
                             </Grid>
                         </Grid>
                     </Grid>
-                    <Grid
-                        direction='column'
-                        xs={9}
-                    >
-                        <Grid item container direction='column' className='pl-6 mb-16'>
-                            <Grid
-                                item
-                                container
-                                direction='row'
-                                justifyContent='space-between'
-                            >
-                                <Typography variant='h4'>Rooms</Typography>
-                                <Grid item container xs={6} justifyContent='flex-end'>
-                                    <Button
-                                        variant='outlined'
-                                        onClick={handleResetAssignments}
-                                        className='h-12'
-                                    >
-                                        Reset Assignments
-                                    </Button>
-                                    <Button
-                                        variant='contained'
-                                        onClick={handleAutoAssign}
-                                        className='h-12 ml-4'
-                                    >
-                                        Quick-fill
-                                    </Button>
-                                </Grid>
-                            </Grid>
-                            <Grid item container direction='row'>
-                                {
-                                    unassignedRooms.length
-                                        ? unassignedRooms.map(room => {
-                                            return (
-                                                <DraggableRoom key={`room-${room}`} roomId={room} nurseName={null} nurseAssignments={nurseAssignments} isMinimized />
-                                            )
-                                        })
-                                        : (
-                                            <>
-                                                <CheckCircle className='text-green-500' />
-                                                <Typography>All Assigned</Typography>
-                                            </>
-                                        )
-                                }
-                            </Grid>
-                        </Grid>
-                        <Grid
-                            item
-                            container
-                            direction='row'
-                            justifyContent='space-between'
-                            xs={12}
-                            className='h-24 mb-16'
-                        >
-                            <Grid item container direction='row' xs={9} className='pl-6'>
-                                <Grid item container direction='column' xs={6}>
-                                    <Typography variant='h4'>AM Providers</Typography>
-                                    <Grid item container direction='row'>
-                                        {
-                                            unassignedProvidersAM.length
-                                                ? unassignedProvidersAM.map(provider => {
-                                                    return (
-                                                        <DraggableProvider key={`provider-${provider.name}-am`} providerId={provider.name} shift='am'>{provider.name}: {provider.patientCount.am}</DraggableProvider>
-                                                    )
-                                                })
-                                                : (
-                                                    <>
-                                                        <CheckCircle className='text-green-500' />
-                                                        <Typography>All Assigned</Typography>
-                                                    </>
-                                                )
-                                        }
-                                    </Grid>
-                                    <Typography variant='h5' className='mb-4'>Target patient count AM: {averagePatientCountAM}</Typography>
-                                </Grid>
-                                <Grid item container direction='column' xs={6}>
-                                    <Typography variant='h4'>PM Providers</Typography>
-                                    <Grid item container direction='row'>
-                                        {
-                                            unassignedProvidersPM.length
-                                                ? unassignedProvidersPM.map(provider => {
-                                                    return (
-                                                        <DraggableProvider key={`provider-${provider.name}-pm`} providerId={provider.name} shift='pm'>{provider.name}: {provider.patientCount.pm}</DraggableProvider>
-                                                    )
-                                                })
-                                                : (
-                                                    <>
-                                                        <CheckCircle className='text-green-500' />
-                                                        <Typography>All Assigned</Typography>
-                                                    </>
-                                                )
-                                        }
-                                    </Grid>
-                                    <Typography variant='h5' className='mb-4'>Target patient count PM: {averagePatientCountPM}</Typography>
-                                </Grid>
-                            </Grid>
-                        </Grid>
+                </Drawer>
+                <Grid
+                    container
+                    direction='row'
+                    className='p-4 absolute top-[80px]'
+                >
+                    <Grid direction='column' xs={9} overflow='scroll'>
                         <Grid item container direction='column'>
-                            <Typography variant='h4'>Assignments</Typography>
+                            <Typography variant='h4' className='pl-5 mb-2'>Summary</Typography>
                             {/* ----CONDENSED VIEW---- */}
-                            <TableContainer sx={{ maxWidth: 120 * (nurseList.length + 4) }} component={Paper} className='mb-12'>
+                            <TableContainer sx={{ maxWidth: 120 * (nurseList.length + 4) }} component={Paper} className='ml-5 mb-6'>
                                 <Table size='small'>
                                     <TableHead>
                                         <TableRow>
@@ -506,6 +453,7 @@ export default function Home() {
                                 </Table>
                             </TableContainer>
                             {/* ----END CONDENSED VIEW---- */}
+                            <Typography variant='h4' className='pl-5 mb-2'>Assignments</Typography>
                             <Grid
                                 item
                                 container
@@ -522,14 +470,26 @@ export default function Home() {
                                                 <Typography variant='h5' className="w-fit">{nurse}</Typography>
                                                 <Grid item container direction='row'>
                                                     <Grid item xs={4}></Grid>
-                                                    <Grid item container xs={4} justifyContent='space-between'>
-                                                        AM
-                                                        <Typography className={` w-8 text-center border-1-2 ${patientCountAM <= averagePatientCountAM ? patientCountAM === 0 ? 'bg-red-100' : 'bg-green-100' : 'bg-yellow-100'}`}>{patientCountAM}</Typography>
-                                                    </Grid>
-                                                    <Grid item container xs={4} justifyContent='center'>
-                                                        PM
-                                                        <Typography className={` w-8 text-center border-1-2 ${patientCountPM <= averagePatientCountPM ? patientCountPM === 0 ? 'bg-red-100' : 'bg-green-100' : 'bg-yellow-100'}`}>{patientCountPM}</Typography>
-                                                    </Grid>
+                                                    {
+                                                        patientCountAM > 0
+                                                            ? (
+                                                                <Grid item container xs={4} justifyContent='space-between'>
+                                                                    AM
+                                                                    <Typography className={`w-8 text-center border-1-2 ${patientCountAM <= averagePatientCountAM ? patientCountAM === 0 ? 'bg-red-100' : 'bg-green-100' : 'bg-yellow-100'}`}>{patientCountAM}</Typography>
+                                                                </Grid>
+                                                            )
+                                                            : <Grid item xs={4} />
+                                                    }
+                                                    {
+                                                        patientCountPM > 0
+                                                            ? (
+                                                                <Grid item container xs={4} justifyContent='space-between'>
+                                                                    PM
+                                                                    <Typography className={`w-8 text-center border-1-2 ${patientCountPM <= averagePatientCountPM ? patientCountPM === 0 ? 'bg-red-100' : 'bg-green-100' : 'bg-yellow-100'}`}>{patientCountPM}</Typography>
+                                                                </Grid>
+                                                            )
+                                                            : <Grid item xs={4} />
+                                                    }
                                                 </Grid>
                                                 <RoomZone nurseId={nurse}>
                                                     {
@@ -544,6 +504,92 @@ export default function Home() {
                                         )
                                     })
                                 }
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                    <Grid item container direction='column' xs={3} className='h-full fixed top-[80px] right-0 pt-5 pr-5'>
+                        <Button onClick={() => setDrawerOpen(true)} variant='contained' color='primary' className='mb-6' endIcon={<ArrowRight />}>
+                            Staff Setup
+                        </Button>
+                        <Grid item container>
+                            <Grid item xs={6}>
+                                <Button variant='outlined' color='warning' endIcon={<ArrowDownward />} onClick={e => handleOpenMenu(e)}>
+                                    Reset
+                                </Button>
+                                <Menu open={!!anchorEl} anchorEl={anchorEl} onClose={handleCloseMenu}>
+                                    <MenuItem onClick={() => handleMenuOptions(ResetOptions.PROVIDERS)}>
+                                        Reset Providers
+                                    </MenuItem>
+                                    <MenuItem onClick={() => handleMenuOptions(ResetOptions.ALL)}>
+                                        Reset All
+                                    </MenuItem>
+                                </Menu>
+                            </Grid>
+                            <Grid item xs={6}>
+                                <Button
+                                    variant='outlined'
+                                    onClick={handleAutoAssign}
+                                    className='h-12 ml-4'
+                                >
+                                    Quick-fill
+                                </Button>
+                            </Grid>
+                        </Grid>
+                        <Typography variant='h4'>Rooms</Typography>
+                        <Grid item container direction='row'>
+                            {
+                                unassignedRooms.length
+                                    ? unassignedRooms.map(room => {
+                                        return (
+                                            <DraggableRoom key={`room-${room}`} roomId={room} nurseName={null} nurseAssignments={nurseAssignments} isMinimized />
+                                        )
+                                    })
+                                    : (
+                                        <>
+                                            <CheckCircle className='text-green-500' />
+                                            <Typography>All Assigned</Typography>
+                                        </>
+                                    )
+                            }
+                        </Grid>
+                        <Grid item container direction='row'>
+                            <Grid item container direction='column'>
+                                <Typography variant='h4'>AM Providers</Typography>
+                                <Grid item container direction='row'>
+                                    {
+                                        unassignedProvidersAM.length
+                                            ? unassignedProvidersAM.map(provider => {
+                                                return (
+                                                    <DraggableProvider key={`provider-${provider.name}-am`} providerId={provider.name} shift='am'>{provider.name}: {provider.patientCount.am}</DraggableProvider>
+                                                )
+                                            })
+                                            : (
+                                                <>
+                                                    <CheckCircle className='text-green-500' />
+                                                    <Typography>All Assigned</Typography>
+                                                </>
+                                            )
+                                    }
+                                </Grid>
+                            </Grid>
+                            <Grid item container direction='column'>
+                                <Typography variant='h4'>PM Providers</Typography>
+                                <Grid item container direction='row'>
+                                    {
+                                        unassignedProvidersPM.length
+                                            ? unassignedProvidersPM.map(provider => {
+                                                return (
+                                                    <DraggableProvider key={`provider-${provider.name}-pm`} providerId={provider.name} shift='pm'>{provider.name}: {provider.patientCount.pm}</DraggableProvider>
+                                                )
+                                            })
+                                            : (
+                                                <>
+                                                    <CheckCircle className='text-green-500' />
+                                                    <Typography>All Assigned</Typography>
+                                                </>
+                                            )
+                                    }
+                                </Grid>
                             </Grid>
                         </Grid>
                     </Grid>

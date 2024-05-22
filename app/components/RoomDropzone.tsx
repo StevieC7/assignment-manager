@@ -9,11 +9,11 @@ export default function RoomZone({ nurseId, children }: Props) {
         id: `nurse-${nurseId}`
     })
     return (
-        <div ref={setNodeRef} className={`border-2 h-96 flex flex-col`}>
+        <div ref={setNodeRef} className={`border-2 flex flex-col flex-grow`}>
             <Grid container>
                 {children}
             </Grid>
-            <Grid container direction='row' justifyContent='center' alignItems='center' className={`border-dotted border-2 ${isOver && 'bg-green-100'} flex-grow`}>
+            <Grid container direction='row' justifyContent='center' alignItems='center' className={`h-16 border-dotted border-2 ${isOver && 'bg-green-100'} flex-grow`}>
                 <Typography className="w-fit">+</Typography>
             </Grid>
         </div>
