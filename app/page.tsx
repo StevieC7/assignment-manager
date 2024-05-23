@@ -1,5 +1,7 @@
 'use client';
 import { Button, Drawer, Grid, Menu, MenuItem, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from "@mui/material";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { MouseEvent, useState } from "react";
 import DraggableProvider from "./components/DraggableProvider";
 import { DndContext, DragEndEvent } from "@dnd-kit/core";
@@ -9,6 +11,7 @@ import * as Papa from 'papaparse';
 import RoomZone from "./components/RoomDropzone";
 import DraggableRoom from "./components/DraggableRoom";
 import { autoAssigner } from "./utils/algo";
+import dayjs, { Dayjs } from "dayjs";
 
 export type Provider = {
     name: string,
@@ -29,6 +32,7 @@ export default function Home() {
     const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
+    const [dateValue, setDateValue] = useState<Dayjs>(dayjs(new Date()));
     const [nurseName, setNurseName] = useState<string>('');
     const [room, setRoom] = useState<string>('');
     const [provider, setProvider] = useState<Provider>({ name: '', patientCount: { am: 0, pm: 0 } });
@@ -185,6 +189,7 @@ export default function Home() {
     }
 
     const handleSaveToLocal = () => {
+        localStorage.setItem("dateValue", dateValue.toISOString());
         localStorage.setItem("nurses", JSON.stringify(nurseList));
         localStorage.setItem("rooms", JSON.stringify(roomList));
         localStorage.setItem("providers", JSON.stringify(providerList));
@@ -193,11 +198,13 @@ export default function Home() {
     }
 
     const handleLoadLocal = () => {
+        const dateValue = localStorage.getItem("dateValue");
         const nurses = localStorage.getItem("nurses");
         const rooms = localStorage.getItem("rooms");
         const providers = localStorage.getItem("providers");
         const roomParents = localStorage.getItem("roomParents");
         const providerParents = localStorage.getItem("providerParents");
+        if (dateValue) setDateValue(dayjs(dateValue));
         if (nurses) setNurseList(JSON.parse(nurses));
         if (rooms) setRoomList(JSON.parse(rooms));
         if (providers) setProviderList(JSON.parse(providers));
@@ -270,6 +277,15 @@ export default function Home() {
                         direction='column'
                         className='h-fit w-96 p-3'
                     >
+                        <Grid item container direction='column' sx={{ mb: '2rem' }}>
+                            <Typography variant='h4'>Date</Typography>
+                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                <DatePicker
+                                    value={dateValue}
+                                    onChange={(newVal) => setDateValue(dayjs(newVal))}
+                                />
+                            </LocalizationProvider>
+                        </Grid>
                         <Grid item container direction='column' sx={{ mb: '2rem' }}>
                             <Typography variant='h4'>Team</Typography>
                             <Grid item container>
@@ -399,7 +415,10 @@ export default function Home() {
                 >
                     <Grid direction='column' xs={9} overflow='scroll'>
                         <Grid item container direction='column'>
-                            <Typography variant='h4' className='pl-5 mb-2'>Summary</Typography>
+                            <Grid item container direction='row' alignItems='center'>
+                                <Typography variant='h4' className='pl-5 mb-2 mr-4'>Summary</Typography>
+                                {dayjs(dateValue).format('MM/DD/YYYY')}
+                            </Grid>
                             {/* ----CONDENSED VIEW---- */}
                             <TableContainer sx={{ maxWidth: 120 * (nurseList.length + 4) }} component={Paper} className='ml-5 mb-6'>
                                 <Table size='small'>
