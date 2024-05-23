@@ -10,7 +10,7 @@ import { ArrowDownward, ArrowRight, CheckCircle, Delete } from "@mui/icons-mater
 import * as Papa from 'papaparse';
 import RoomZone from "./components/RoomDropzone";
 import DraggableRoom from "./components/DraggableRoom";
-import { autoAssigner } from "./utils/algo";
+import { autoAssigner } from "./utils/autoAssigner";
 import dayjs, { Dayjs } from "dayjs";
 
 export type Provider = {
@@ -231,6 +231,7 @@ export default function Home() {
         // TODO: fix this
         // const { roomAssignments } = providerMatcher(nurseList, providerList, roomList, averagePatientCount);
         // setNurseAssignments(roomAssignments);
+        autoAssigner(nurseList, roomList, providerList);
     }
 
     const handleResetAssignments = () => {
