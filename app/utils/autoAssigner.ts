@@ -1,14 +1,17 @@
+// TODO: handle case when there aren't enough rooms for all providers
 import { Provider } from "../page";
 
 export function autoAssigner(nurseList: string[], roomList: string[], providerList: Provider[], existingRoomParents?: Record<string, string | null>, existingProviderParents?: Record<string, { am: string | null, pm: string | null }>) {
     const roomParents: Record<string, string | null> = {};
     const providerParents: Record<string, { am: string | null, pm: string | null }> = {};
+    let warningMessage = '';
+    if (providerList.length > roomList.length) warningMessage = 'Not enough rooms for all providers.';
 
     /*
     * Begin by initializing the parents objects if there are parents passed in
     */
 
-    // Assign providers to rooms for AM, skipping assignment if patientCount = 0 and keeping patientCount as even as possible
+    // Assign providers to groups for AM, skipping assignment if patientCount = 0 and keeping patientCount as even as possible
     let providerPointerAM = 0;
     const providerGroupingsAM: { name: string, amCount: number }[][] = new Array(roomList.length);
     roomList.forEach(() => providerGroupingsAM.push([]));
@@ -23,7 +26,7 @@ export function autoAssigner(nurseList: string[], roomList: string[], providerLi
         providerPointerAM++;
     }
 
-    // Assign providers to rooms for PM, skipping assignment if patientCount = 0, maintaining same room if already in a room for AM, and keeping patientCount as even as possible
+    // Assign providers to groups for PM, skipping assignment if patientCount = 0, maintaining same room if already in a room for AM, and keeping patientCount as even as possible
     let providerPointerPM = 0;
     const providerGroupingsPM: { name: string, pmCount: number }[][] = new Array(roomList.length);
     roomList.forEach(() => providerGroupingsPM.push([]));
@@ -45,9 +48,9 @@ export function autoAssigner(nurseList: string[], roomList: string[], providerLi
     let nursePointerAM = 0;
     while (providerGroupingsAMPointer < providerGroupingsAM.length && roomPointerAM < roomList.length) {
         if (nursePointerAM >= nurseList.length) nursePointerAM = 0;
-        const providerAMList = providerGroupingsAM[providerGroupingsAMPointer];
-        for (const providerAM of providerAMList) {
-            providerParents[providerAM.name] = { am: roomList[roomPointerAM], pm: null }
+        const providerGrouping = providerGroupingsAM[providerGroupingsAMPointer];
+        for (const provider of providerGrouping) {
+            providerParents[provider.name] = { am: roomList[roomPointerAM], pm: null };
             roomParents[roomList[roomPointerAM]] = nurseList[nursePointerAM];
             roomPointerAM++;
         }
@@ -62,7 +65,7 @@ export function autoAssigner(nurseList: string[], roomList: string[], providerLi
         if (nursePointerPM >= nurseList.length) nursePointerPM = 0;
         const providerPMList = providerGroupingsPM[providerGroupingsPMPointer];
         for (const providerPM of providerPMList) {
-            providerParents[providerPM.name] = { am: providerParents[providerPM.name].am, pm: roomList[roomPointerPM] }
+            providerParents[providerPM.name] = { am: providerParents[providerPM.name]?.am ?? null, pm: roomList[roomPointerPM] }
             roomParents[roomList[roomPointerPM]] = nurseList[nursePointerPM];
             roomPointerPM++;
         }
@@ -70,5 +73,5 @@ export function autoAssigner(nurseList: string[], roomList: string[], providerLi
         providerGroupingsPMPointer++;
     }
 
-    return { providerParents, roomParents };
+    return { providerParents, roomParents, warningMessage };
 }

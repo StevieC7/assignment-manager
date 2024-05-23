@@ -1,5 +1,5 @@
 'use client';
-import { Button, Drawer, Grid, Menu, MenuItem, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from "@mui/material";
+import { Button, Drawer, Grid, Menu, MenuItem, Paper, Snackbar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { MouseEvent, useState } from "react";
@@ -31,6 +31,8 @@ export type NurseAssignments = Record<string, Rooms>;
 export default function Home() {
     const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
+    const [snackbarMessage, setSnackbarMessage] = useState<string>('');
 
     const [dateValue, setDateValue] = useState<Dayjs>(dayjs(new Date()));
     const [nurseName, setNurseName] = useState<string>('');
@@ -106,15 +108,41 @@ export default function Home() {
     }
 
     const handleDeleteNurse = (id: number) => {
+        // TODO: delete all roomParents where this nurse is referenced and all providerParents where those rooms are referenced
+        const newRoomParents = { ...roomParents };
+        const newProviderParents = { ...providerParents };
+        for (const [room, nurse] of Object.entries(newRoomParents)) {
+            if (nurse === nurseList[id]) {
+                delete newRoomParents[room]
+                for (const [provider, { am, pm }] of Object.entries(newProviderParents)) {
+                    if (am === room) newProviderParents[provider].am = null;
+                    if (pm === room) newProviderParents[provider].pm = null;
+                }
+            }
+        }
         const newList = [...nurseList];
         newList.splice(id, 1);
         setNurseList(newList);
+        setRoomParents(newRoomParents);
+        setProviderParents(newProviderParents);
     }
 
     const handleDeleteRoom = (id: number) => {
+        // TODO: delete all roomParents where this room is referenced
+        // TODO: delete all providerParents where this room is referenced
+        const newRoomParents = { ...roomParents };
+        const newProviderParents = { ...providerParents };
+        const roomToDelete = roomList[id];
+        delete newRoomParents[roomToDelete];
+        for (const [provider, { am, pm }] of Object.entries(newProviderParents)) {
+            if (am === roomToDelete) newProviderParents[provider].am = null;
+            if (pm === roomToDelete) newProviderParents[provider].pm = null;
+        }
         const newList = [...roomList];
         newList.splice(id, 1);
         setRoomList(newList);
+        setRoomParents(newRoomParents);
+        setProviderParents(newProviderParents);
     }
 
     const handleDeleteProvider = (id: number) => {
@@ -237,9 +265,17 @@ export default function Home() {
         // TODO: fix this
         // const { roomAssignments } = providerMatcher(nurseList, providerList, roomList, averagePatientCount);
         // setNurseAssignments(roomAssignments);
-        const { providerParents, roomParents } = autoAssigner(nurseList, roomList, providerList);
+        const { providerParents, roomParents, warningMessage } = autoAssigner(nurseList, roomList, providerList);
         setRoomParents(roomParents);
         setProviderParents(providerParents);
+        if (warningMessage) {
+            setSnackbarMessage(warningMessage);
+            setSnackbarOpen(true);
+        }
+        else {
+            setSnackbarMessage('Auto-assign successful!');
+            setSnackbarOpen(true);
+        }
     }
 
     const handleResetAssignments = () => {
@@ -272,7 +308,7 @@ export default function Home() {
         <main>
             <DndContext onDragEnd={handleDragEnd}>
                 <Grid container direction='row' justifyContent='space-between' alignItems='center' className='bg-black text-white p-4 fixed top-0'>
-                    <Typography variant="h1" fontSize={36}>Assignment Manager Pro Plus (Extreme Edition)</Typography>
+                    <Typography variant="h1" fontSize={36}>Assignment Manager</Typography>
                     <Grid item>
                         <Button variant="contained" onClick={handleSaveToLocal} className='h-12 mr-4'>Save</Button>
                         <Button variant="contained" onClick={handleLoadLocal} className='h-12'>Load</Button>
@@ -549,7 +585,7 @@ export default function Home() {
                             }
                         </Grid>
                     </Grid>
-                    <Grid item container direction='column' xs={3}>
+                    <Grid item container direction='column' xs={3} sx={{ paddingTop: '1rem', paddingRight: '1rem' }}>
                         <Grid item container direction='column'>
                             <Button onClick={() => setDrawerOpen(true)} variant='contained' color='primary' className='mb-6' endIcon={<ArrowRight />}>
                                 Staff Setup
@@ -557,7 +593,7 @@ export default function Home() {
                         </Grid>
                         <Grid item container>
                             <Grid item xs={6}>
-                                <Button variant='outlined' color='warning' endIcon={<ArrowDownward />} onClick={e => handleOpenMenu(e)}>
+                                <Button variant='outlined' color='warning' endIcon={<ArrowDownward />} onClick={e => handleOpenMenu(e)} sx={{ height: '3rem', width: '90%' }}>
                                     Reset
                                 </Button>
                                 <Menu open={!!anchorEl} anchorEl={anchorEl} onClose={handleCloseMenu}>
@@ -573,7 +609,7 @@ export default function Home() {
                                 <Button
                                     variant='outlined'
                                     onClick={handleAutoAssign}
-                                    className='h-12 ml-4'
+                                    sx={{ height: '3rem', width: '90%', ml: '10%' }}
                                 >
                                     Quick-fill
                                 </Button>
@@ -629,6 +665,15 @@ export default function Home() {
                                 )
                         }
                     </Grid>
+                    <Snackbar
+                        open={snackbarOpen}
+                        autoHideDuration={5000}
+                        onClose={() => {
+                            setSnackbarOpen(false)
+                            setSnackbarMessage('')
+                        }}
+                        message={snackbarMessage}
+                    />
                 </Grid>
             </DndContext>
         </main >
