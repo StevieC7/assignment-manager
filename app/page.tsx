@@ -5,7 +5,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { MouseEvent, useState } from "react";
 import DraggableProvider from "./components/DraggableProvider";
 import { DndContext, DragEndEvent } from "@dnd-kit/core";
-import { ArrowDownward, ArrowRight, CheckCircle } from "@mui/icons-material";
+import { ArrowDownward, ArrowRight, CheckCircle, Delete } from "@mui/icons-material";
 // @ts-ignore
 import * as Papa from 'papaparse';
 import RoomZone from "./components/RoomDropzone";
@@ -275,7 +275,7 @@ export default function Home() {
                         item
                         container
                         direction='column'
-                        className='h-fit w-96 p-3'
+                        sx={{ height: 'auto', width: '25rem', padding: '1rem' }}
                     >
                         <Grid item container direction='column' sx={{ mb: '2rem' }}>
                             <Typography variant='h4'>Date</Typography>
@@ -307,7 +307,7 @@ export default function Home() {
                                     </Button>
                                 </Grid>
                             </Grid>
-                            <Grid item className='overflow-y-scroll max-h-96'>
+                            <Grid item>
                                 {nurseList.map((nurse, id) => {
                                     return (
                                         <Grid key={id} item container direction='row' alignItems='center'>
@@ -343,7 +343,7 @@ export default function Home() {
                                     </Button>
                                 </Grid>
                             </Grid>
-                            <Grid item className='overflow-y-scroll max-h-96'>
+                            <Grid item>
                                 {roomList.map((room, id) => {
                                     return (
                                         <Grid key={id} item container direction='row' alignItems='center'>
@@ -372,34 +372,35 @@ export default function Home() {
                                 variant="contained"
                                 onClick={handleAddProvider}
                                 disabled={isProviderNameDuplicate}
+                                className='mb-6'
                             >
                                 Save
                             </Button>
-                            <Grid item container className='overflow-y-scroll max-h-96'>
+                            <Grid item container>
                                 {providerList.map((provider, id) => {
                                     return (
-                                        <Grid key={id} item container direction='row' alignItems='center' justifyContent='space-between'>
-                                            <Typography>
-                                                {provider.name}
-                                            </Typography>
-                                            <Grid item container justifyContent='flex-end' alignItems='center' xs={9}>
+                                        <Grid key={id} item container direction='column' alignItems='center' justifyContent='space-between' className='mb-6 border-2 p-2'>
+                                            <Grid item container justifyContent='space-between' sx={{ mb: '1rem' }}>
+                                                <Typography variant='h5'>
+                                                    {provider.name}
+                                                </Typography>
+                                                <Delete color='warning' onMouseDown={() => handleDeleteProvider(id, provider.name)} sx={{ cursor: 'pointer' }} />
+                                            </Grid>
+                                            <Grid item container justifyContent='space-between' alignItems='center'>
                                                 <TextField
                                                     type='number'
                                                     value={provider.patientCount.am}
                                                     onChange={(e) => handleUpdateProviderPatientCount(provider.name, { am: parseInt(e.currentTarget.value), pm: provider.patientCount.pm })}
-                                                    className='w-16'
+                                                    InputProps={{ sx: { height: '2rem', width: '4rem' } }}
                                                 />
                                                 <Typography variant='body1'>AM patients</Typography>
                                                 <TextField
                                                     type='number'
                                                     value={provider.patientCount.pm}
                                                     onChange={(e) => handleUpdateProviderPatientCount(provider.name, { am: provider.patientCount.am, pm: parseInt(e.currentTarget.value) })}
-                                                    className='w-16'
+                                                    InputProps={{ sx: { height: '2rem', width: '4rem' } }}
                                                 />
                                                 <Typography variant='body1'>PM patients</Typography>
-                                                <Button onClick={() => handleDeleteProvider(id, provider.name)}>
-                                                    Delete
-                                                </Button>
                                             </Grid>
                                         </Grid>
                                     )
@@ -411,125 +412,140 @@ export default function Home() {
                 <Grid
                     container
                     direction='row'
-                    className='p-4 absolute top-[80px]'
+                    sx={{ position: 'absolute', top: '80px', zIndex: -1 }}
                 >
-                    <Grid direction='column' xs={9} overflow='scroll'>
-                        <Grid item container direction='column'>
-                            <Grid item container direction='row' alignItems='center'>
-                                <Typography variant='h4' className='pl-5 mb-2 mr-4'>Summary</Typography>
-                                {dayjs(dateValue).format('MM/DD/YYYY')}
-                            </Grid>
-                            {/* ----CONDENSED VIEW---- */}
-                            <TableContainer sx={{ maxWidth: 120 * (nurseList.length + 4) }} component={Paper} className='ml-5 mb-6'>
-                                <Table size='small'>
-                                    <TableHead>
-                                        <TableRow>
-                                            <TableCell></TableCell>
-                                            <TableCell>Total</TableCell>
-                                            <TableCell>Assigned</TableCell>
-                                            <TableCell>Pt/Nurse</TableCell>
-                                            {
-                                                nurseList.map((nurse, index) => {
-                                                    return (
-                                                        <TableCell key={index}>{nurse}</TableCell>
-                                                    )
-                                                })
-                                            }
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        <TableRow>
-                                            <TableCell>AM</TableCell>
-                                            <TableCell>{patientTotalAM}</TableCell>
-                                            <TableCell className={`${assignedPatientTotalAM < patientTotalAM ? 'bg-yellow-100' : 'bg-inherit'}`}>{assignedPatientTotalAM}</TableCell>
-                                            <TableCell className={`${anyAssignedGreaterThanTargetAM ? 'bg-yellow-100' : 'bg-inherit'}`}>{averagePatientCountAM}</TableCell>
-                                            {
-                                                nurseList.map((nurse, index) => {
-                                                    const nurseProviders = nurseAssignments[nurse] ? Object.entries(nurseAssignments[nurse]).map(([_, provider]) => provider) : [];
-                                                    const patientCountAM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am ?? 0), 0) : 0;
-                                                    return (
-                                                        <TableCell className={`${patientCountAM > averagePatientCountAM ? 'bg-yellow-100' : 'bg-inherit'}`} key={index}>{patientCountAM}</TableCell>
-                                                    )
-                                                })
-                                            }
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell>PM</TableCell>
-                                            <TableCell>{patientTotalPM}</TableCell>
-                                            <TableCell className={`${assignedPatientTotalPM < patientTotalPM ? 'bg-yellow-100' : 'bg-inherit'}`}>{assignedPatientTotalPM}</TableCell>
-                                            <TableCell className={`${anyAssignedGreaterThanTargetPM ? 'bg-yellow-100' : 'bg-inherit'}`}>{averagePatientCountPM}</TableCell>
-                                            {
-                                                nurseList.map((nurse, index) => {
-                                                    const nurseProviders = nurseAssignments[nurse] ? Object.entries(nurseAssignments[nurse]).map(([_, provider]) => provider) : [];
-                                                    const patientCountPM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.pm?.patientCount?.pm ?? 0), 0) : 0;
-                                                    return (
-                                                        <TableCell className={`${patientCountPM > averagePatientCountPM ? 'bg-yellow-100' : 'bg-inherit'}`} key={index}>{patientCountPM}</TableCell>
-                                                    )
-                                                })
-                                            }
-                                        </TableRow>
-                                    </TableBody>
-                                </Table>
-                            </TableContainer>
-                            {/* ----END CONDENSED VIEW---- */}
-                            <Typography variant='h4' className='pl-5 mb-2'>Assignments</Typography>
-                            <Grid
-                                item
-                                container
-                                direction='row'
-                                xs={12}
-                            >
-                                {
-                                    nurseList.map((nurse, index) => {
-                                        const nurseProviders = nurseAssignments[nurse] ? Object.entries(nurseAssignments[nurse]).map(([_, provider]) => provider) : [];
-                                        const patientCountAM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am ?? 0), 0) : 0;
-                                        const patientCountPM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.pm?.patientCount?.pm ?? 0), 0) : 0;
-                                        return (
-                                            <Grid key={`${index}-${nurse}`} item container className='ml-6 mb-6 w-4/12 min-w-96 max-w-lg bg-white' direction='column'>
-                                                <Typography variant='h5' className="w-fit">{nurse}</Typography>
-                                                <Grid item container direction='row'>
-                                                    <Grid item xs={4}></Grid>
-                                                    {
-                                                        patientCountAM > 0
-                                                            ? (
-                                                                <Grid item container xs={4} justifyContent='space-between'>
-                                                                    AM
-                                                                    <Typography className={`w-8 text-center border-1-2 ${patientCountAM <= averagePatientCountAM ? patientCountAM === 0 ? 'bg-red-100' : 'bg-green-100' : 'bg-yellow-100'}`}>{patientCountAM}</Typography>
-                                                                </Grid>
-                                                            )
-                                                            : <Grid item xs={4} />
-                                                    }
-                                                    {
-                                                        patientCountPM > 0
-                                                            ? (
-                                                                <Grid item container xs={4} justifyContent='space-between'>
-                                                                    PM
-                                                                    <Typography className={`w-8 text-center border-1-2 ${patientCountPM <= averagePatientCountPM ? patientCountPM === 0 ? 'bg-red-100' : 'bg-green-100' : 'bg-yellow-100'}`}>{patientCountPM}</Typography>
-                                                                </Grid>
-                                                            )
-                                                            : <Grid item xs={4} />
-                                                    }
-                                                </Grid>
-                                                <RoomZone nurseId={nurse}>
-                                                    {
-                                                        nurseAssignments[nurse] && Object.keys(nurseAssignments[nurse]).map((room, index) => {
-                                                            return (
-                                                                <DraggableRoom key={`${index}-${room}`} roomId={room} nurseName={nurse} nurseAssignments={nurseAssignments} />
-                                                            )
-                                                        })
-                                                    }
-                                                </RoomZone>
+                    <Grid item direction='column' xs={9} sx={{ padding: '1rem' }}>
+                        <Grid item container direction='row' alignItems='center'>
+                            <Typography variant='h4'>Summary</Typography>
+                            {dayjs(dateValue).format('MM/DD/YYYY')}
+                        </Grid>
+                        {/* ----CONDENSED VIEW---- */}
+                        <TableContainer sx={{ maxWidth: '100%' }} component={Paper}>
+                            <Table size='small'>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell></TableCell>
+                                        <TableCell sx={{ backgroundColor: '#eeeeee', fontWeight: 'bold' }}>Total</TableCell>
+                                        <TableCell sx={{ backgroundColor: '#eeeeee', fontWeight: 'bold' }}>Assigned</TableCell>
+                                        <TableCell sx={{ backgroundColor: '#eeeeee', fontWeight: 'bold' }}>Pt/Nurse</TableCell>
+                                        {
+                                            nurseList.map((nurse, index) => {
+                                                return (
+                                                    <TableCell key={index}>{nurse}</TableCell>
+                                                )
+                                            })
+                                        }
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    <TableRow>
+                                        <TableCell sx={{ backgroundColor: '#eeeeee', fontWeight: 'bold' }}>AM</TableCell>
+                                        <TableCell>{patientTotalAM}</TableCell>
+                                        <TableCell className={`${assignedPatientTotalAM < patientTotalAM ? 'bg-yellow-100' : 'bg-inherit'}`}>{assignedPatientTotalAM}</TableCell>
+                                        <TableCell className={`${anyAssignedGreaterThanTargetAM ? 'bg-yellow-100' : 'bg-inherit'}`}>{averagePatientCountAM}</TableCell>
+                                        {
+                                            nurseList.map((nurse, index) => {
+                                                const nurseProviders = nurseAssignments[nurse] ? Object.entries(nurseAssignments[nurse]).map(([_, provider]) => provider) : [];
+                                                const patientCountAM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am ?? 0), 0) : 0;
+                                                return (
+                                                    <TableCell className={`${patientCountAM > averagePatientCountAM ? 'bg-yellow-100' : 'bg-inherit'}`} key={index}>{patientCountAM}</TableCell>
+                                                )
+                                            })
+                                        }
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell sx={{ backgroundColor: '#eeeeee', fontWeight: 'bold' }}>PM</TableCell>
+                                        <TableCell>{patientTotalPM}</TableCell>
+                                        <TableCell className={`${assignedPatientTotalPM < patientTotalPM ? 'bg-yellow-100' : 'bg-inherit'}`}>{assignedPatientTotalPM}</TableCell>
+                                        <TableCell className={`${anyAssignedGreaterThanTargetPM ? 'bg-yellow-100' : 'bg-inherit'}`}>{averagePatientCountPM}</TableCell>
+                                        {
+                                            nurseList.map((nurse, index) => {
+                                                const nurseProviders = nurseAssignments[nurse] ? Object.entries(nurseAssignments[nurse]).map(([_, provider]) => provider) : [];
+                                                const patientCountPM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.pm?.patientCount?.pm ?? 0), 0) : 0;
+                                                return (
+                                                    <TableCell className={`${patientCountPM > averagePatientCountPM ? 'bg-yellow-100' : 'bg-inherit'}`} key={index}>{patientCountPM}</TableCell>
+                                                )
+                                            })
+                                        }
+                                    </TableRow>
+                                    <TableRow sx={{ borderTop: '2px solid black' }}>
+                                        <TableCell sx={{ backgroundColor: '#eeeeee', fontWeight: 'bold' }}>Total</TableCell>
+                                        <TableCell>{patientTotalAM + patientTotalPM}</TableCell>
+                                        <TableCell className={`${assignedPatientTotalPM + assignedPatientTotalAM < patientTotalPM + patientTotalAM ? 'bg-yellow-100' : 'bg-inherit'}`}>{assignedPatientTotalPM + assignedPatientTotalAM}</TableCell>
+                                        <TableCell>{Math.ceil((averagePatientCountAM + averagePatientCountPM) / 2)}</TableCell>
+                                        {
+                                            nurseList.map((nurse, index) => {
+                                                const nurseProviders = nurseAssignments[nurse] ? Object.entries(nurseAssignments[nurse]).map(([_, provider]) => provider) : [];
+                                                const patientCountTotal = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am ?? 0) + (curr?.pm?.patientCount?.pm ?? 0), 0) : 0;
+                                                return (
+                                                    <TableCell key={index}>{patientCountTotal}</TableCell>
+                                                )
+                                            })
+                                        }
+                                    </TableRow>
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                        {/* ----END CONDENSED VIEW---- */}
+                        <Typography variant='h4' className='pl-5 mb-2'>Assignments</Typography>
+                        <Grid
+                            item
+                            container
+                            direction='row'
+                            xs={12}
+                        >
+                            {
+                                nurseList.map((nurse, index) => {
+                                    const nurseProviders = nurseAssignments[nurse] ? Object.entries(nurseAssignments[nurse]).map(([_, provider]) => provider) : [];
+                                    const patientCountAM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am ?? 0), 0) : 0;
+                                    const patientCountPM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.pm?.patientCount?.pm ?? 0), 0) : 0;
+                                    return (
+                                        <Grid key={`${index}-${nurse}`} item container className='ml-6 mb-6 w-4/12 min-w-96 max-w-lg bg-white' direction='column'>
+                                            <Typography variant='h5' className="w-fit">{nurse}</Typography>
+                                            <Grid item container direction='row'>
+                                                <Grid item xs={4}></Grid>
+                                                {
+                                                    patientCountAM > 0
+                                                        ? (
+                                                            <Grid item container xs={4} justifyContent='space-between'>
+                                                                AM
+                                                                <Typography className={`w-8 text-center border-1-2 ${patientCountAM <= averagePatientCountAM ? patientCountAM === 0 ? 'bg-red-100' : 'bg-green-100' : 'bg-yellow-100'}`}>{patientCountAM}</Typography>
+                                                            </Grid>
+                                                        )
+                                                        : <Grid item xs={4} />
+                                                }
+                                                {
+                                                    patientCountPM > 0
+                                                        ? (
+                                                            <Grid item container xs={4} justifyContent='space-between'>
+                                                                PM
+                                                                <Typography className={`w-8 text-center border-1-2 ${patientCountPM <= averagePatientCountPM ? patientCountPM === 0 ? 'bg-red-100' : 'bg-green-100' : 'bg-yellow-100'}`}>{patientCountPM}</Typography>
+                                                            </Grid>
+                                                        )
+                                                        : <Grid item xs={4} />
+                                                }
                                             </Grid>
-                                        )
-                                    })
-                                }
-                            </Grid>
+                                            <RoomZone nurseId={nurse}>
+                                                {
+                                                    nurseAssignments[nurse] && Object.keys(nurseAssignments[nurse]).map((room, index) => {
+                                                        return (
+                                                            <DraggableRoom key={`${index}-${room}`} roomId={room} nurseName={nurse} nurseAssignments={nurseAssignments} />
+                                                        )
+                                                    })
+                                                }
+                                            </RoomZone>
+                                        </Grid>
+                                    )
+                                })
+                            }
                         </Grid>
                     </Grid>
-                    <Grid item container direction='column' xs={3} className='h-full fixed top-[80px] right-0 pt-5 pr-5'>
-                        <Button onClick={() => setDrawerOpen(true)} variant='contained' color='primary' className='mb-6' endIcon={<ArrowRight />}>
-                            Staff Setup
-                        </Button>
+                    <Grid item container direction='column' xs={3}>
+                        <Grid item container direction='column'>
+                            <Button onClick={() => setDrawerOpen(true)} variant='contained' color='primary' className='mb-6' endIcon={<ArrowRight />}>
+                                Staff Setup
+                            </Button>
+                        </Grid>
                         <Grid item container>
                             <Grid item xs={6}>
                                 <Button variant='outlined' color='warning' endIcon={<ArrowDownward />} onClick={e => handleOpenMenu(e)}>
@@ -554,7 +570,9 @@ export default function Home() {
                                 </Button>
                             </Grid>
                         </Grid>
-                        <Typography variant='h4'>Rooms</Typography>
+                        <Grid item container>
+                            <Typography variant='h4'>Rooms</Typography>
+                        </Grid>
                         <Grid item container direction='row'>
                             {
                                 unassignedRooms.length
@@ -571,46 +589,36 @@ export default function Home() {
                                     )
                             }
                         </Grid>
-                        <Grid item container direction='row'>
-                            <Grid item container direction='column'>
-                                <Typography variant='h4'>AM Providers</Typography>
-                                <Grid item container direction='row'>
-                                    {
-                                        unassignedProvidersAM.length
-                                            ? unassignedProvidersAM.map(provider => {
-                                                return (
-                                                    <DraggableProvider key={`provider-${provider.name}-am`} providerId={provider.name} shift='am'>{provider.name}: {provider.patientCount.am}</DraggableProvider>
-                                                )
-                                            })
-                                            : (
-                                                <>
-                                                    <CheckCircle className='text-green-500' />
-                                                    <Typography>All Assigned</Typography>
-                                                </>
-                                            )
-                                    }
-                                </Grid>
-                            </Grid>
-                            <Grid item container direction='column'>
-                                <Typography variant='h4'>PM Providers</Typography>
-                                <Grid item container direction='row'>
-                                    {
-                                        unassignedProvidersPM.length
-                                            ? unassignedProvidersPM.map(provider => {
-                                                return (
-                                                    <DraggableProvider key={`provider-${provider.name}-pm`} providerId={provider.name} shift='pm'>{provider.name}: {provider.patientCount.pm}</DraggableProvider>
-                                                )
-                                            })
-                                            : (
-                                                <>
-                                                    <CheckCircle className='text-green-500' />
-                                                    <Typography>All Assigned</Typography>
-                                                </>
-                                            )
-                                    }
-                                </Grid>
-                            </Grid>
-                        </Grid>
+                        <Typography variant='h4'>AM Providers</Typography>
+                        {
+                            unassignedProvidersAM.length
+                                ? unassignedProvidersAM.map(provider => {
+                                    return (
+                                        <DraggableProvider key={`provider-${provider.name}-am`} providerId={provider.name} shift='am'>{provider.name}: {provider.patientCount.am}</DraggableProvider>
+                                    )
+                                })
+                                : (
+                                    <>
+                                        <CheckCircle className='text-green-500' />
+                                        <Typography>All Assigned</Typography>
+                                    </>
+                                )
+                        }
+                        <Typography variant='h4'>PM Providers</Typography>
+                        {
+                            unassignedProvidersPM.length
+                                ? unassignedProvidersPM.map(provider => {
+                                    return (
+                                        <DraggableProvider key={`provider-${provider.name}-pm`} providerId={provider.name} shift='pm'>{provider.name}: {provider.patientCount.pm}</DraggableProvider>
+                                    )
+                                })
+                                : (
+                                    <>
+                                        <CheckCircle className='text-green-500' />
+                                        <Typography>All Assigned</Typography>
+                                    </>
+                                )
+                        }
                     </Grid>
                 </Grid>
             </DndContext>

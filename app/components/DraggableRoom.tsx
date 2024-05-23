@@ -17,8 +17,8 @@ export default function DraggableRoom({ roomId, nurseName, nurseAssignments, isM
         transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
     } : undefined;
     return (
-        <div ref={setNodeRef} style={style} {...listeners} {...attributes} className={`flex flex-row ${isMinimized ? 'w-fit' : 'w-full'} justify-between`}>
-            <Typography variant='h6' className={'h-16 w-4/12'}>{roomId}</Typography>
+        <div ref={setNodeRef} style={style} {...listeners} {...attributes} className={`flex flex-row ${isMinimized ? 'h-12 w-36 rounded-full bg-purple-100 justify-center items-center' : 'h-16 w-full justify-between'}`}>
+            <Typography variant='h6' className={`${isMinimized ? '' : 'w-4/12'}`}>{roomId}</Typography>
             {
                 nurseName
                 && (
