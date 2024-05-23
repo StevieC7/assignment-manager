@@ -68,7 +68,7 @@ export default function Home() {
         }
         return nurseRecord;
     }
-    const nurseAssignments = assignNurses();
+    let nurseAssignments = assignNurses();
 
     const unassignedRooms = roomList.filter(room => !roomParents[room]);
     const unassignedProvidersAM = providerList.filter(provider => !providerParents[provider.name]?.am);
@@ -105,13 +105,19 @@ export default function Home() {
         }
     }
 
-    const handleDeleteNurse = (id: number, name: string) => {
+    const handleDeleteNurse = (id: number) => {
         const newList = [...nurseList];
         newList.splice(id, 1);
         setNurseList(newList);
     }
 
-    const handleDeleteProvider = (id: number, name: string) => {
+    const handleDeleteRoom = (id: number) => {
+        const newList = [...roomList];
+        newList.splice(id, 1);
+        setRoomList(newList);
+    }
+
+    const handleDeleteProvider = (id: number) => {
         const newList = [...providerList];
         newList.splice(id, 1);
         setProviderList(newList);
@@ -231,7 +237,9 @@ export default function Home() {
         // TODO: fix this
         // const { roomAssignments } = providerMatcher(nurseList, providerList, roomList, averagePatientCount);
         // setNurseAssignments(roomAssignments);
-        autoAssigner(nurseList, roomList, providerList);
+        const { providerParents, roomParents } = autoAssigner(nurseList, roomList, providerList);
+        setRoomParents(roomParents);
+        setProviderParents(providerParents);
     }
 
     const handleResetAssignments = () => {
@@ -351,7 +359,7 @@ export default function Home() {
                                             <Typography>
                                                 {room}
                                             </Typography>
-                                            <Button onClick={() => handleDeleteNurse(id, room)}>
+                                            <Button onClick={() => handleDeleteRoom(id)}>
                                                 Delete
                                             </Button>
                                         </Grid>

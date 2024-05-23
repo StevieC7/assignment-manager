@@ -1,36 +1,16 @@
-import { NurseAssignments, Provider } from "../page";
+import { Provider } from "../page";
 
-export function autoAssigner(nurseList: string[], roomList: string[], providerList: Provider[], roomParents?: Record<string, string | null>): NurseAssignments {
-    const nurseAssignments: NurseAssignments = {};
+export function autoAssigner(nurseList: string[], roomList: string[], providerList: Provider[], existingRoomParents?: Record<string, string | null>, existingProviderParents?: Record<string, { am: string | null, pm: string | null }>) {
+    const roomParents: Record<string, string | null> = {};
+    const providerParents: Record<string, { am: string | null, pm: string | null }> = {};
+
     /*
-    * Begin by initializing the nurse assignments if there are already rooms assigned to nurses.
-    * This is for use case when nurses are always assigned to rooms but providers are moved around.
+    * Begin by initializing the parents objects if there are parents passed in
     */
-    if (roomParents) {
-        for (const [room, nurse] of Object.entries(roomParents)) {
-            if (nurse && !nurseAssignments[nurse]) nurseAssignments[nurse] = {};
-            if (nurse && nurseAssignments[nurse]) {
-                nurseAssignments[nurse] = {
-                    ...nurseAssignments[nurse],
-                    [room]: { am: null, pm: null }
-                }
-            }
-        }
-    }
-
-    // Assign rooms equally to nurses
-    let roomPointer = 0;
-    let nursePointer = 0;
-    while (roomPointer < roomList.length) {
-        if (nursePointer >= nurseList.length) nursePointer = 0;
-        nurseAssignments[nurseList[nursePointer]] = { [roomList[roomPointer]]: { am: null, pm: null } };
-        nursePointer++;
-        roomPointer++;
-    }
 
     // Assign providers to rooms for AM, skipping assignment if patientCount = 0 and keeping patientCount as even as possible
     let providerPointerAM = 0;
-    const providerGroupingsAM: number[][] = new Array(roomList.length);
+    const providerGroupingsAM: { name: string, amCount: number }[][] = new Array(roomList.length);
     roomList.forEach(() => providerGroupingsAM.push([]));
     providerList.sort((a, z) => z.patientCount.am - a.patientCount.am);
     while (providerPointerAM < providerList.length) {
@@ -38,14 +18,14 @@ export function autoAssigner(nurseList: string[], roomList: string[], providerLi
             providerPointerAM++;
             continue;
         }
-        providerGroupingsAM.sort((a, z) => (a.length ? a.reduce((p, c) => p + c) : 0) - (z.length ? z.reduce((p, c) => p + c) : 0));
-        providerGroupingsAM[0].push(providerList[providerPointerAM].patientCount.am);
+        providerGroupingsAM.sort((a, z) => (a.length ? a.reduce((p, c) => p + c.amCount, 0) : 0) - (z.length ? z.reduce((p, c) => p + c.amCount, 0) : 0));
+        providerGroupingsAM[0].push({ name: providerList[providerPointerAM].name, amCount: providerList[providerPointerAM].patientCount.am });
         providerPointerAM++;
     }
 
     // Assign providers to rooms for PM, skipping assignment if patientCount = 0, maintaining same room if already in a room for AM, and keeping patientCount as even as possible
     let providerPointerPM = 0;
-    const providerGroupingsPM: number[][] = new Array(roomList.length);
+    const providerGroupingsPM: { name: string, pmCount: number }[][] = new Array(roomList.length);
     roomList.forEach(() => providerGroupingsPM.push([]));
     providerList.sort((a, z) => z.patientCount.pm - a.patientCount.pm);
     while (providerPointerPM < providerList.length) {
@@ -53,30 +33,42 @@ export function autoAssigner(nurseList: string[], roomList: string[], providerLi
             providerPointerPM++;
             continue;
         }
-        providerGroupingsPM.sort((a, z) => (a.length ? a.reduce((p, c) => p + c) : 0) - (z.length ? z.reduce((p, c) => p + c) : 0));
-        providerGroupingsPM[0].push(providerList[providerPointerPM].patientCount.pm);
+        providerGroupingsPM.sort((a, z) => (a.length ? a.reduce((p, c) => p + c.pmCount, 0) : 0) - (z.length ? z.reduce((p, c) => p + c.pmCount, 0) : 0));
+        providerGroupingsPM[0].push({ name: providerList[providerPointerPM].name, pmCount: providerList[providerPointerPM].patientCount.pm });
         providerPointerPM++;
     }
 
-    console.log({ providerGroupingsAM, providerGroupingsPM, nurseAssignments })
-    return {
-        'Elizabeth': {
-            'Room A': {
-                am: {
-                    name: 'Doc Mike'
-                    , patientCount: {
-                        am: 5,
-                        pm: 7
-                    }
-                },
-                pm: {
-                    name: 'Doc Mike'
-                    , patientCount: {
-                        am: 5,
-                        pm: 7
-                    }
-                }
-            }
+
+    // Build provider parents object instead
+    let providerGroupingsAMPointer = 0;
+    let roomPointerAM = 0;
+    let nursePointerAM = 0;
+    while (providerGroupingsAMPointer < providerGroupingsAM.length && roomPointerAM < roomList.length) {
+        if (nursePointerAM >= nurseList.length) nursePointerAM = 0;
+        const providerAMList = providerGroupingsAM[providerGroupingsAMPointer];
+        for (const providerAM of providerAMList) {
+            providerParents[providerAM.name] = { am: roomList[roomPointerAM], pm: null }
+            roomParents[roomList[roomPointerAM]] = nurseList[nursePointerAM];
+            roomPointerAM++;
         }
+        nursePointerAM++;
+        providerGroupingsAMPointer++;
     }
+
+    let providerGroupingsPMPointer = 0;
+    let roomPointerPM = 0;
+    let nursePointerPM = 0;
+    while (providerGroupingsPMPointer < providerGroupingsPM.length && roomPointerPM < roomList.length) {
+        if (nursePointerPM >= nurseList.length) nursePointerPM = 0;
+        const providerPMList = providerGroupingsPM[providerGroupingsPMPointer];
+        for (const providerPM of providerPMList) {
+            providerParents[providerPM.name] = { am: providerParents[providerPM.name].am, pm: roomList[roomPointerPM] }
+            roomParents[roomList[roomPointerPM]] = nurseList[nursePointerPM];
+            roomPointerPM++;
+        }
+        nursePointerPM++;
+        providerGroupingsPMPointer++;
+    }
+
+    return { providerParents, roomParents };
 }
