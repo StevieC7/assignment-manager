@@ -268,9 +268,6 @@ export default function Home() {
     }
 
     const handleAutoAssign = () => {
-        // TODO: fix this
-        // const { roomAssignments } = providerMatcher(nurseList, providerList, roomList, averagePatientCount);
-        // setNurseAssignments(roomAssignments);
         const { providerParents, roomParents: newRoomParents, warningMessage } = autoAssigner(nurseList, roomList, providerList, Object.keys(roomParents).length ? roomParents : undefined);
         setRoomParents(newRoomParents);
         setProviderParents(providerParents);
