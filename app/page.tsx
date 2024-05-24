@@ -2,7 +2,7 @@
 import { Button, Drawer, Grid, Menu, MenuItem, Paper, Select, Snackbar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { MouseEvent, useState } from "react";
+import { FormEvent, MouseEvent, useState } from "react";
 import DraggableProvider from "./components/DraggableProvider";
 import { DndContext, DragEndEvent } from "@dnd-kit/core";
 import { ArrowDownward, ArrowRight, CheckCircle, Delete, Lock, LockOpen } from "@mui/icons-material";
@@ -97,12 +97,14 @@ export default function Home() {
 
     const isProviderNameDuplicate = provider.name !== '' && providerList.find(existingProvider => existingProvider.name === provider.name) ? true : false;
 
-    const handleAddNurseTeam = () => {
+    const handleAddNurseTeam = (e: FormEvent) => {
+        e.preventDefault();
         setNurseTeamList([...nurseTeamList, nurseTeamName]);
         setNurseTeamName('');
     }
 
-    const handleAddNurse = () => {
+    const handleAddNurse = (e: FormEvent) => {
+        e.preventDefault();
         setNurseList([...nurseList, nurseName])
         setNurseName('')
     }
@@ -145,14 +147,17 @@ export default function Home() {
         setProviderParents(newProviderParents);
     }
 
-    const handleAddRoom = () => {
+    const handleAddRoom = (e: FormEvent) => {
+        e.preventDefault();
         setRoomList([...roomList, room])
         setRoom('')
     }
 
-    const handleAddProvider = () => {
+    const handleAddProvider = (e: FormEvent) => {
+        e.preventDefault();
         setProviderList([...providerList, provider])
         setProvider({ name: '', patientCount: { am: { inPerson: 0, virtual: 0 }, pm: { inPerson: 0, virtual: 0 } } })
+        document.getElementById('providerNameInput')?.focus();
     }
 
     const handleUpdateProviderPatientCount = (name: string, patientCount: Provider['patientCount']) => {
@@ -404,25 +409,27 @@ export default function Home() {
                         </Grid>
                         <Grid item container direction='column' sx={{ mb: '2rem' }}>
                             <Typography variant='h4'>Teams</Typography>
-                            <Grid item container>
-                                <Grid item container xs={8}>
-                                    <TextField
-                                        placeholder="Team name"
-                                        value={nurseTeamName}
-                                        onChange={e => setNurseTeamName(e.currentTarget.value)}
-                                        sx={{ width: '100%' }}
-                                    />
+                            <form onSubmit={handleAddNurseTeam}>
+                                <Grid item container>
+                                    <Grid item container xs={8}>
+                                        <TextField
+                                            placeholder="Team name"
+                                            value={nurseTeamName}
+                                            onChange={e => setNurseTeamName(e.currentTarget.value)}
+                                            sx={{ width: '100%' }}
+                                        />
+                                    </Grid>
+                                    <Grid item container justifyContent='center' alignItems='center' xs={4}>
+                                        <Button
+                                            type='submit'
+                                            variant='contained'
+                                            sx={{ width: '100%', height: '100%' }}
+                                        >
+                                            Save
+                                        </Button>
+                                    </Grid>
                                 </Grid>
-                                <Grid item container justifyContent='center' alignItems='center' xs={4}>
-                                    <Button
-                                        onClick={handleAddNurseTeam}
-                                        variant='contained'
-                                        sx={{ width: '100%', height: '100%' }}
-                                    >
-                                        Save
-                                    </Button>
-                                </Grid>
-                            </Grid>
+                            </form>
                             <Grid item>
                                 {
                                     nurseTeamList.map((nurseTeam, id) => {
@@ -440,25 +447,27 @@ export default function Home() {
                                 }
                             </Grid>
                             <Typography variant='h4'>Nurses</Typography>
-                            <Grid item container>
-                                <Grid item container xs={8}>
-                                    <TextField
-                                        placeholder="Nurse name"
-                                        value={nurseName}
-                                        onChange={e => setNurseName(e.currentTarget.value)}
-                                        sx={{ width: '100%' }}
-                                    />
+                            <form onSubmit={handleAddNurse}>
+                                <Grid item container>
+                                    <Grid item container xs={8}>
+                                        <TextField
+                                            placeholder="Nurse name"
+                                            value={nurseName}
+                                            onChange={e => setNurseName(e.currentTarget.value)}
+                                            sx={{ width: '100%' }}
+                                        />
+                                    </Grid>
+                                    <Grid item container justifyContent='center' alignItems='center' xs={4}>
+                                        <Button
+                                            type='submit'
+                                            variant='contained'
+                                            sx={{ width: '100%', height: '100%' }}
+                                        >
+                                            Save
+                                        </Button>
+                                    </Grid>
                                 </Grid>
-                                <Grid item container justifyContent='center' alignItems='center' xs={4}>
-                                    <Button
-                                        onClick={handleAddNurse}
-                                        variant='contained'
-                                        sx={{ width: '100%', height: '100%' }}
-                                    >
-                                        Save
-                                    </Button>
-                                </Grid>
-                            </Grid>
+                            </form>
                             <Grid item>
                                 {
                                     Object.entries(nurseTeamChildren).map(([team, nurses]) => {
@@ -529,25 +538,27 @@ export default function Home() {
                         </Grid>
                         <Grid item container direction='column' sx={{ mb: '2rem' }}>
                             <Typography variant='h4'>Rooms</Typography>
-                            <Grid item container>
-                                <Grid item container xs={8}>
-                                    <TextField
-                                        placeholder="Room Name"
-                                        value={room}
-                                        onChange={e => setRoom(e.currentTarget.value)}
-                                        sx={{ width: '100%' }}
-                                    />
+                            <form onSubmit={handleAddRoom}>
+                                <Grid item container>
+                                    <Grid item container xs={8}>
+                                        <TextField
+                                            placeholder="Room Name"
+                                            value={room}
+                                            onChange={e => setRoom(e.currentTarget.value)}
+                                            sx={{ width: '100%' }}
+                                        />
+                                    </Grid>
+                                    <Grid item container justifyContent='center' alignItems='center' xs={4}>
+                                        <Button
+                                            type='submit'
+                                            variant='contained'
+                                            sx={{ width: '100%', height: '100%' }}
+                                        >
+                                            Save
+                                        </Button>
+                                    </Grid>
                                 </Grid>
-                                <Grid item container justifyContent='center' alignItems='center' xs={4}>
-                                    <Button
-                                        onClick={handleAddRoom}
-                                        variant='contained'
-                                        sx={{ width: '100%', height: '100%' }}
-                                    >
-                                        Save
-                                    </Button>
-                                </Grid>
-                            </Grid>
+                            </form>
                             <Grid item>
                                 {
                                     roomList.map((room, id) => {
@@ -566,51 +577,116 @@ export default function Home() {
                             </Grid>
                         </Grid>
                         <Grid item container direction='column'>
-                            <Typography variant='h4'>Providers</Typography>
-                            <TextField
-                                placeholder="Provider Name"
-                                value={provider.name}
-                                onChange={e => setProvider({ name: e.currentTarget.value, patientCount: provider.patientCount })}
-                                error={isProviderNameDuplicate}
-                            />
-                            <TextField
-                                type='number'
-                                placeholder="AM Patients"
-                                value={provider.patientCount.am.inPerson}
-                                onChange={e => setProvider({
-                                    name: provider.name,
-                                    patientCount: {
-                                        am: {
-                                            ...provider.patientCount.am,
-                                            inPerson: parseInt(e.currentTarget.value)
-                                        },
-                                        pm: provider.patientCount.pm
-                                    }
-                                })}
-                            />
-                            <TextField
-                                type='number'
-                                placeholder="PM Patients"
-                                value={provider.patientCount.pm.inPerson}
-                                onChange={e => setProvider({
-                                    name: provider.name,
-                                    patientCount: {
-                                        am: provider.patientCount.am,
-                                        pm: {
-                                            ...provider.patientCount.pm,
-                                            inPerson: parseInt(e.currentTarget.value)
-                                        }
-                                    }
-                                })}
-                            />
-                            <Button
-                                variant="contained"
-                                onClick={handleAddProvider}
-                                disabled={isProviderNameDuplicate}
-                                className='mb-6'
-                            >
-                                Save
-                            </Button>
+                            <form onSubmit={handleAddProvider}>
+                                <Typography variant='h4'>Providers</Typography>
+                                <TextField
+                                    id='providerNameInput'
+                                    placeholder="Provider Name"
+                                    value={provider.name}
+                                    onChange={e => setProvider({ name: e.currentTarget.value, patientCount: provider.patientCount })}
+                                    error={isProviderNameDuplicate}
+                                />
+                                <Grid container>
+                                    <Grid item container xs={6}>
+                                        <Grid item xs={6}>
+                                            <TextField
+                                                type='number'
+                                                placeholder="AM Patients"
+                                                value={provider.patientCount.am.inPerson}
+                                                onChange={e => setProvider({
+                                                    name: provider.name,
+                                                    patientCount: {
+                                                        am: {
+                                                            ...provider.patientCount.am,
+                                                            inPerson: parseInt(e.currentTarget.value)
+                                                        },
+                                                        pm: provider.patientCount.pm
+                                                    }
+                                                })}
+                                            />
+                                        </Grid>
+                                        <Grid item container justifyContent='center' alignItems='center' xs={6}>
+                                            AM
+                                        </Grid>
+                                    </Grid>
+                                    <Grid item container xs={6}>
+                                        <Grid item xs={6}>
+                                            <TextField
+                                                type='number'
+                                                placeholder="PM Patients"
+                                                value={provider.patientCount.pm.inPerson}
+                                                onChange={e => setProvider({
+                                                    name: provider.name,
+                                                    patientCount: {
+                                                        am: provider.patientCount.am,
+                                                        pm: {
+                                                            ...provider.patientCount.pm,
+                                                            inPerson: parseInt(e.currentTarget.value)
+                                                        }
+                                                    }
+                                                })}
+                                            />
+                                        </Grid>
+                                        <Grid item container justifyContent='center' alignItems='center' xs={6}>
+                                            PM
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                                <Grid container>
+                                    <Grid item container xs={6}>
+                                        <Grid item xs={6}>
+                                            <TextField
+                                                type='number'
+                                                placeholder="AM Patients"
+                                                value={provider.patientCount.am.virtual}
+                                                onChange={e => setProvider({
+                                                    name: provider.name,
+                                                    patientCount: {
+                                                        am: {
+                                                            ...provider.patientCount.am,
+                                                            virtual: parseInt(e.currentTarget.value)
+                                                        },
+                                                        pm: provider.patientCount.pm
+                                                    }
+                                                })}
+                                            />
+                                        </Grid>
+                                        <Grid item container justifyContent='center' alignItems='center' xs={6}>
+                                            AM Virtual
+                                        </Grid>
+                                    </Grid>
+                                    <Grid item container xs={6}>
+                                        <Grid item xs={6}>
+                                            <TextField
+                                                type='number'
+                                                placeholder="PM Patients"
+                                                value={provider.patientCount.pm.virtual}
+                                                onChange={e => setProvider({
+                                                    name: provider.name,
+                                                    patientCount: {
+                                                        am: provider.patientCount.am,
+                                                        pm: {
+                                                            ...provider.patientCount.pm,
+                                                            virtual: parseInt(e.currentTarget.value)
+                                                        }
+                                                    }
+                                                })}
+                                            />
+                                        </Grid>
+                                        <Grid item container justifyContent='center' alignItems='center' xs={6}>
+                                            PM Virtual
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                                <Button
+                                    variant="contained"
+                                    type='submit'
+                                    disabled={isProviderNameDuplicate}
+                                    className='mb-6'
+                                >
+                                    Save
+                                </Button>
+                            </form>
                             <Grid item container>
                                 {providerList.map((provider, id) => {
                                     return (
