@@ -5,7 +5,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { FormEvent, MouseEvent, useState } from "react";
 import DraggableProvider from "./components/DraggableProvider";
 import { DndContext, DragEndEvent } from "@dnd-kit/core";
-import { ArrowDownward, ArrowRight, CheckCircle, Delete, Lock, LockOpen } from "@mui/icons-material";
+import { ArrowDownward, ArrowRight, CheckCircle, Delete, FileDownload, FileOpen, Lock, LockOpen, Save } from "@mui/icons-material";
 // @ts-ignore
 import * as Papa from 'papaparse';
 import RoomZone from "./components/RoomDropzone";
@@ -317,6 +317,8 @@ export default function Home() {
         localStorage.setItem("roomsLocked", JSON.stringify(roomsLocked));
         localStorage.setItem("nurseTeamList", JSON.stringify(nurseTeamList));
         localStorage.setItem("nurseTeamChildren", JSON.stringify(nurseTeamChildren));
+        setSnackbarMessage(`Saved schedule for ${dayjs(dateValue).format('MM/DD/YYYY')}`);
+        setSnackbarOpen(true);
     }
 
     const handleLoadLocal = () => {
@@ -338,6 +340,8 @@ export default function Home() {
         if (roomsLocked) setRoomsLocked(JSON.parse(roomsLocked));
         if (nurseTeamList) setNurseTeamList(JSON.parse(nurseTeamList));
         if (nurseTeamChildren) setNurseTeamChildren(JSON.parse(nurseTeamChildren));
+        setSnackbarMessage(`Loaded schedule for ${dayjs(dateValue).format('MM/DD/YYYY')}`);
+        setSnackbarOpen(true);
     }
 
     const handleExport = () => {
@@ -349,6 +353,8 @@ export default function Home() {
         link.setAttribute('href', objUrl);
         link.setAttribute('download', `schedule_${dayjs(dateValue).format('MM_DD_YYYY')}.csv`);
         link.click();
+        setSnackbarMessage(`Exported schedule for ${dayjs(dateValue).format('MM/DD/YYYY')}`);
+        setSnackbarOpen(true);
     }
 
     const handleAutoAssign = () => {
@@ -381,9 +387,13 @@ export default function Home() {
                 setRoomParents({});
                 setProviderParents({});
                 setRoomsLocked(false);
+                setSnackbarMessage(`Reset successful`);
+                setSnackbarOpen(true);
                 break;
             case ResetOptions.PROVIDERS:
                 setProviderParents({});
+                setSnackbarMessage(`Providers have been reset`);
+                setSnackbarOpen(true);
                 break;
         }
     }
@@ -394,9 +404,9 @@ export default function Home() {
                 <Grid container direction='row' justifyContent='space-between' alignItems='center' className='bg-black text-white p-4 fixed top-0'>
                     <Typography variant="h1" fontSize={36}>Assignment Manager</Typography>
                     <Grid item>
-                        <Button variant="contained" onClick={handleSaveToLocal} className='h-12 mr-4'>Save</Button>
-                        <Button variant="contained" onClick={handleLoadLocal} className='h-12'>Load</Button>
-                        <Button variant="contained" onClick={handleExport} className='h-12'>Export</Button>
+                        <Save onClick={handleSaveToLocal} sx={{ cursor: 'pointer', mr: 2 }} />
+                        <FileOpen onClick={handleLoadLocal} sx={{ cursor: 'pointer', mr: 2 }} />
+                        <FileDownload onClick={handleExport} sx={{ cursor: 'pointer' }} />
                     </Grid>
                 </Grid>
                 <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} anchor='right'>
