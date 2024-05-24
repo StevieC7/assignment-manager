@@ -48,7 +48,7 @@ export function autoAssigner(nurseList: string[], roomList: string[], providerLi
     let nursePointerAM = 0;
     while (providerGroupingsAMPointer < providerGroupingsAM.length && roomPointerAM < roomList.length) {
         if (nursePointerAM >= nurseList.length) nursePointerAM = 0;
-        const providerGrouping = providerGroupingsAM[providerGroupingsAMPointer];
+        const providerGrouping = providerGroupingsAM[providerGroupingsAMPointer] ?? [];
         for (const provider of providerGrouping) {
             providerParents[provider.name] = { am: roomList[roomPointerAM], pm: null };
             roomParents[roomList[roomPointerAM]] = nurseList[nursePointerAM];
@@ -63,7 +63,7 @@ export function autoAssigner(nurseList: string[], roomList: string[], providerLi
     let nursePointerPM = 0;
     while (providerGroupingsPMPointer < providerGroupingsPM.length && roomPointerPM < roomList.length) {
         if (nursePointerPM >= nurseList.length) nursePointerPM = 0;
-        const providerPMList = providerGroupingsPM[providerGroupingsPMPointer];
+        const providerPMList = providerGroupingsPM[providerGroupingsPMPointer] ?? [];
         for (const providerPM of providerPMList) {
             providerParents[providerPM.name] = { am: providerParents[providerPM.name]?.am ?? null, pm: roomList[roomPointerPM] }
             roomParents[roomList[roomPointerPM]] = nurseList[nursePointerPM];
