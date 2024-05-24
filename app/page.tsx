@@ -113,19 +113,24 @@ export default function Home() {
     const handleAddNurseToTeam = (nurse: string, nurseTeam: string) => {
         const newNurseTeamChildren = { ...nurseTeamChildren }
         const existingNurseTeamMembers = nurseTeamChildren[nurseTeam];
-        if (nurseTeam === '') {
-            const nursePreviousTeamEntry = Object.entries(newNurseTeamChildren).find(([nurseTeam, children]) => children.includes(nurse));
-            if (nursePreviousTeamEntry) {
-                const newPreviousTeamChildrenValue = nursePreviousTeamEntry[1].filter(teamChild => teamChild !== nurse) ?? [];
-                if (!newPreviousTeamChildrenValue.length) {
-                    delete newNurseTeamChildren[nursePreviousTeamEntry[0]]
+        const nursePreviousTeamEntry = Object.entries(newNurseTeamChildren).find(([_, children]) => children.includes(nurse));
+        if (nursePreviousTeamEntry) {
+            const newPreviousTeamChildrenValue = nursePreviousTeamEntry[1].filter(teamChild => teamChild !== nurse) ?? [];
+            if (!newPreviousTeamChildrenValue.length) {
+                delete newNurseTeamChildren[nursePreviousTeamEntry[0]]
+                if (!nurseTeam) {
                     setNurseTeamChildren(newNurseTeamChildren);
                     return;
                 }
-                setNurseTeamChildren({ ...newNurseTeamChildren, [nursePreviousTeamEntry[0]]: newPreviousTeamChildrenValue });
-                return;
+            } else {
+                newNurseTeamChildren[nursePreviousTeamEntry[0]] = newPreviousTeamChildrenValue;
+                if (!nurseTeam) {
+                    setNurseTeamChildren(newNurseTeamChildren);
+                    return;
+                }
             }
         }
+
         if (!existingNurseTeamMembers) {
             newNurseTeamChildren[nurseTeam] = [nurse]
         } else {
@@ -336,7 +341,6 @@ export default function Home() {
     }
 
     const handleExport = () => {
-        // TODO: fix this
         const data = exportHelper(nurseAssignments);
         const csv = Papa.unparse(data);
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8,' });
