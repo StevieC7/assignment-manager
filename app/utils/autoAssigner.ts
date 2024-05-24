@@ -1,4 +1,4 @@
-// TODO: handle case when there aren't enough rooms for all providers
+// TODO: fix room name "undefined" sometimes being returned with a provider attached
 import { Provider } from "../page";
 
 export function autoAssigner(nurseList: string[], roomList: string[], providerList: Provider[], existingRoomParents?: Record<string, string | null>) {

@@ -624,11 +624,20 @@ export default function Home() {
                                         <TableCell></TableCell>
                                         <TableCell sx={{ backgroundColor: '#eeeeee', fontWeight: 'bold' }}>Total</TableCell>
                                         <TableCell sx={{ backgroundColor: '#eeeeee', fontWeight: 'bold' }}>Assigned</TableCell>
-                                        <TableCell sx={{ backgroundColor: '#eeeeee', fontWeight: 'bold' }}>Pt/Nurse</TableCell>
+                                        <TableCell sx={{ backgroundColor: '#eeeeee', fontWeight: 'bold' }}>Pt/Team</TableCell>
+                                        {
+                                            nurseTeamList.map((nurseTeam, index) => {
+                                                if (!nurseTeamChildren[nurseTeam]) return null;
+                                                return (
+                                                    <TableCell key={'nurse-team' + index}>{nurseTeam}</TableCell>
+                                                )
+                                            })
+                                        }
                                         {
                                             nurseList.map((nurse, index) => {
+                                                if (Object.values(nurseTeamChildren).flat().includes(nurse)) return null;
                                                 return (
-                                                    <TableCell key={index}>{nurse}</TableCell>
+                                                    <TableCell key={'nurse' + index}>{nurse}</TableCell>
                                                 )
                                             })
                                         }
@@ -641,7 +650,18 @@ export default function Home() {
                                         <TableCell className={`${assignedPatientTotalAM < patientTotalAM ? 'bg-yellow-100' : 'bg-inherit'}`}>{assignedPatientTotalAM}</TableCell>
                                         <TableCell className={`${anyAssignedGreaterThanTargetAM ? 'bg-yellow-100' : 'bg-inherit'}`}>{averagePatientCountAM}</TableCell>
                                         {
+                                            nurseTeamList.map((nurseTeam, index) => {
+                                                if (!nurseTeamChildren[nurseTeam]) return null;
+                                                const nurseProviders = nurseAssignments[nurseTeam] ? Object.entries(nurseAssignments[nurseTeam]).map(([_, provider]) => provider) : [];
+                                                const patientCountAM = nurseAssignments[nurseTeam] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am ?? 0), 0) : 0;
+                                                return (
+                                                    <TableCell className={`${patientCountAM > averagePatientCountAM ? 'bg-yellow-100' : 'bg-inherit'}`} key={index}>{patientCountAM}</TableCell>
+                                                )
+                                            })
+                                        }
+                                        {
                                             nurseList.map((nurse, index) => {
+                                                if (Object.values(nurseTeamChildren).flat().includes(nurse)) return null;
                                                 const nurseProviders = nurseAssignments[nurse] ? Object.entries(nurseAssignments[nurse]).map(([_, provider]) => provider) : [];
                                                 const patientCountAM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am ?? 0), 0) : 0;
                                                 return (
@@ -656,7 +676,18 @@ export default function Home() {
                                         <TableCell className={`${assignedPatientTotalPM < patientTotalPM ? 'bg-yellow-100' : 'bg-inherit'}`}>{assignedPatientTotalPM}</TableCell>
                                         <TableCell className={`${anyAssignedGreaterThanTargetPM ? 'bg-yellow-100' : 'bg-inherit'}`}>{averagePatientCountPM}</TableCell>
                                         {
+                                            nurseTeamList.map((nurseTeam, index) => {
+                                                if (!nurseTeamChildren[nurseTeam]) return null;
+                                                const nurseProviders = nurseAssignments[nurseTeam] ? Object.entries(nurseAssignments[nurseTeam]).map(([_, provider]) => provider) : [];
+                                                const patientCountPM = nurseAssignments[nurseTeam] ? nurseProviders.reduce((prev, curr) => prev + (curr?.pm?.patientCount?.pm ?? 0), 0) : 0;
+                                                return (
+                                                    <TableCell className={`${patientCountPM > averagePatientCountPM ? 'bg-yellow-100' : 'bg-inherit'}`} key={index}>{patientCountPM}</TableCell>
+                                                )
+                                            })
+                                        }
+                                        {
                                             nurseList.map((nurse, index) => {
+                                                if (Object.values(nurseTeamChildren).flat().includes(nurse)) return null;
                                                 const nurseProviders = nurseAssignments[nurse] ? Object.entries(nurseAssignments[nurse]).map(([_, provider]) => provider) : [];
                                                 const patientCountPM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.pm?.patientCount?.pm ?? 0), 0) : 0;
                                                 return (
@@ -671,7 +702,18 @@ export default function Home() {
                                         <TableCell className={`${assignedPatientTotalPM + assignedPatientTotalAM < patientTotalPM + patientTotalAM ? 'bg-yellow-100' : 'bg-inherit'}`}>{assignedPatientTotalPM + assignedPatientTotalAM}</TableCell>
                                         <TableCell>{Math.ceil((averagePatientCountAM + averagePatientCountPM) / 2)}</TableCell>
                                         {
+                                            nurseTeamList.map((nurseTeam, index) => {
+                                                if (!nurseTeamChildren[nurseTeam]) return null;
+                                                const nurseProviders = nurseAssignments[nurseTeam] ? Object.entries(nurseAssignments[nurseTeam]).map(([_, provider]) => provider) : [];
+                                                const patientCountTotal = nurseAssignments[nurseTeam] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am ?? 0) + (curr?.pm?.patientCount?.pm ?? 0), 0) : 0;
+                                                return (
+                                                    <TableCell key={index}>{patientCountTotal}</TableCell>
+                                                )
+                                            })
+                                        }
+                                        {
                                             nurseList.map((nurse, index) => {
+                                                if (Object.values(nurseTeamChildren).flat().includes(nurse)) return null;
                                                 const nurseProviders = nurseAssignments[nurse] ? Object.entries(nurseAssignments[nurse]).map(([_, provider]) => provider) : [];
                                                 const patientCountTotal = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am ?? 0) + (curr?.pm?.patientCount?.pm ?? 0), 0) : 0;
                                                 return (
@@ -700,6 +742,13 @@ export default function Home() {
                                     return (
                                         <Grid key={`${index}-${nurse}`} item container className='ml-6 mb-6 w-4/12 min-w-96 max-w-lg bg-white' direction='column'>
                                             <Typography variant='h5' className="w-fit">{nurse}</Typography>
+                                            <Grid container>
+                                                {
+                                                    nurseTeamChildren[nurse].map((teamMember, index) => (
+                                                        <Grid key={teamMember} item mr={1}>{index > 0 ? `/ ${teamMember}` : teamMember}</Grid>
+                                                    ))
+                                                }
+                                            </Grid>
                                             <Grid item container direction='row'>
                                                 <Grid item xs={4}></Grid>
                                                 {
