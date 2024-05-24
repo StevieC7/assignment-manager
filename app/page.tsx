@@ -271,8 +271,8 @@ export default function Home() {
         // TODO: fix this
         // const { roomAssignments } = providerMatcher(nurseList, providerList, roomList, averagePatientCount);
         // setNurseAssignments(roomAssignments);
-        const { providerParents, roomParents, warningMessage } = autoAssigner(nurseList, roomList, providerList);
-        setRoomParents(roomParents);
+        const { providerParents, roomParents: newRoomParents, warningMessage } = autoAssigner(nurseList, roomList, providerList, Object.keys(roomParents).length ? roomParents : undefined);
+        setRoomParents(newRoomParents);
         setProviderParents(providerParents);
         if (warningMessage) {
             setSnackbarMessage(warningMessage);
