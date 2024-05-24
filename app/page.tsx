@@ -16,8 +16,14 @@ import dayjs, { Dayjs } from "dayjs";
 export type Provider = {
     name: string,
     patientCount: {
-        am: number,
-        pm: number,
+        am: {
+            inPerson: number,
+            virtual: number
+        },
+        pm: {
+            inPerson: number,
+            virtual: number
+        },
     },
 }
 
@@ -39,7 +45,7 @@ export default function Home() {
     const [nurseTeamName, setNurseTeamName] = useState<string>('');
     const [nurseName, setNurseName] = useState<string>('');
     const [room, setRoom] = useState<string>('');
-    const [provider, setProvider] = useState<Provider>({ name: '', patientCount: { am: 0, pm: 0 } });
+    const [provider, setProvider] = useState<Provider>({ name: '', patientCount: { am: { inPerson: 0, virtual: 0 }, pm: { inPerson: 0, virtual: 0 } } });
 
     const [nurseList, setNurseList] = useState<string[]>([]);
     const [roomList, setRoomList] = useState<string[]>([]);
@@ -54,10 +60,10 @@ export default function Home() {
     const activeNurseTeams = [...nurseTeamList].filter(nurseTeam => nurseTeamChildren[nurseTeam] && nurseTeamChildren[nurseTeam].length);
     const activeNurses = [...nurseList].filter(nurse => !Object.values(nurseTeamChildren).flat().includes(nurse));
     const allActiveNurseGroupings = [...activeNurseTeams, ...activeNurses];
-    const patientTotalAM = providerList.reduce((prev, curr) => prev + curr.patientCount.am, 0);
-    const patientTotalPM = providerList.reduce((prev, curr) => prev + curr.patientCount.pm, 0);
-    const averagePatientCountAM = Math.ceil(providerList.reduce((prev, curr) => prev + curr.patientCount.am, 0) / allActiveNurseGroupings.length);
-    const averagePatientCountPM = Math.ceil(providerList.reduce((prev, curr) => prev + curr.patientCount.pm, 0) / allActiveNurseGroupings.length);
+    const patientTotalAM = providerList.reduce((prev, curr) => prev + curr.patientCount.am.inPerson, 0);
+    const patientTotalPM = providerList.reduce((prev, curr) => prev + curr.patientCount.pm.inPerson, 0);
+    const averagePatientCountAM = Math.ceil(providerList.reduce((prev, curr) => prev + curr.patientCount.am.inPerson, 0) / allActiveNurseGroupings.length);
+    const averagePatientCountPM = Math.ceil(providerList.reduce((prev, curr) => prev + curr.patientCount.pm.inPerson, 0) / allActiveNurseGroupings.length);
 
     const assignNurses = () => {
         const nurseRecord: NurseAssignments = {};
@@ -84,10 +90,10 @@ export default function Home() {
     const unassignedProvidersAM = providerList.filter(provider => !providerParents[provider.name]?.am);
     const unassignedProvidersPM = providerList.filter(provider => !providerParents[provider.name]?.pm);
 
-    const assignedPatientTotalAM = Object.values(nurseAssignments).map(room => Object.values(room).map(shiftSlots => shiftSlots?.am?.patientCount?.am ?? 0)).flat().reduce((prev, curr) => prev + curr, 0);
-    const assignedPatientTotalPM = Object.values(nurseAssignments).map(room => Object.values(room).map(shiftSlots => shiftSlots?.pm?.patientCount?.pm ?? 0)).flat().reduce((prev, curr) => prev + curr, 0);
-    const anyAssignedGreaterThanTargetAM = Object.values(nurseAssignments).map(room => Object.values(room).map(shiftSlots => shiftSlots?.am?.patientCount?.am ?? 0).reduce((prev, curr) => prev + curr)).some(val => val > averagePatientCountAM);
-    const anyAssignedGreaterThanTargetPM = Object.values(nurseAssignments).map(room => Object.values(room).map(shiftSlots => shiftSlots?.pm?.patientCount?.pm ?? 0).reduce((prev, curr) => prev + curr)).some(val => val > averagePatientCountPM);
+    const assignedPatientTotalAM = Object.values(nurseAssignments).map(room => Object.values(room).map(shiftSlots => shiftSlots?.am?.patientCount?.am?.inPerson ?? 0)).flat().reduce((prev, curr) => prev + curr, 0);
+    const assignedPatientTotalPM = Object.values(nurseAssignments).map(room => Object.values(room).map(shiftSlots => shiftSlots?.pm?.patientCount?.pm?.inPerson ?? 0)).flat().reduce((prev, curr) => prev + curr, 0);
+    const anyAssignedGreaterThanTargetAM = Object.values(nurseAssignments).map(room => Object.values(room).map(shiftSlots => shiftSlots?.am?.patientCount?.am?.inPerson ?? 0).reduce((prev, curr) => prev + curr)).some(val => val > averagePatientCountAM);
+    const anyAssignedGreaterThanTargetPM = Object.values(nurseAssignments).map(room => Object.values(room).map(shiftSlots => shiftSlots?.pm?.patientCount?.pm?.inPerson ?? 0).reduce((prev, curr) => prev + curr)).some(val => val > averagePatientCountPM);
 
     const isProviderNameDuplicate = provider.name !== '' && providerList.find(existingProvider => existingProvider.name === provider.name) ? true : false;
 
@@ -146,10 +152,10 @@ export default function Home() {
 
     const handleAddProvider = () => {
         setProviderList([...providerList, provider])
-        setProvider({ name: '', patientCount: { am: 0, pm: 0 } })
+        setProvider({ name: '', patientCount: { am: { inPerson: 0, virtual: 0 }, pm: { inPerson: 0, virtual: 0 } } })
     }
 
-    const handleUpdateProviderPatientCount = (name: string, patientCount: { am: number, pm: number }) => {
+    const handleUpdateProviderPatientCount = (name: string, patientCount: Provider['patientCount']) => {
         const foundProviderIndex = providerList.findIndex(provider => provider.name === name);
         if (foundProviderIndex !== -1) {
             const newProviderList = [...providerList];
@@ -567,8 +573,36 @@ export default function Home() {
                                 onChange={e => setProvider({ name: e.currentTarget.value, patientCount: provider.patientCount })}
                                 error={isProviderNameDuplicate}
                             />
-                            <TextField type='number' placeholder="0" value={provider.patientCount.am} onChange={e => setProvider({ name: provider.name, patientCount: { am: parseInt(e.currentTarget.value), pm: provider.patientCount.pm } })} />
-                            <TextField type='number' placeholder="0" value={provider.patientCount.pm} onChange={e => setProvider({ name: provider.name, patientCount: { am: provider.patientCount.am, pm: parseInt(e.currentTarget.value) } })} />
+                            <TextField
+                                type='number'
+                                placeholder="AM Patients"
+                                value={provider.patientCount.am.inPerson}
+                                onChange={e => setProvider({
+                                    name: provider.name,
+                                    patientCount: {
+                                        am: {
+                                            ...provider.patientCount.am,
+                                            inPerson: parseInt(e.currentTarget.value)
+                                        },
+                                        pm: provider.patientCount.pm
+                                    }
+                                })}
+                            />
+                            <TextField
+                                type='number'
+                                placeholder="PM Patients"
+                                value={provider.patientCount.pm.inPerson}
+                                onChange={e => setProvider({
+                                    name: provider.name,
+                                    patientCount: {
+                                        am: provider.patientCount.am,
+                                        pm: {
+                                            ...provider.patientCount.pm,
+                                            inPerson: parseInt(e.currentTarget.value)
+                                        }
+                                    }
+                                })}
+                            />
                             <Button
                                 variant="contained"
                                 onClick={handleAddProvider}
@@ -590,18 +624,34 @@ export default function Home() {
                                             <Grid item container justifyContent='space-between' alignItems='center'>
                                                 <TextField
                                                     type='number'
-                                                    value={provider.patientCount.am}
-                                                    onChange={(e) => handleUpdateProviderPatientCount(provider.name, { am: parseInt(e.currentTarget.value), pm: provider.patientCount.pm })}
+                                                    value={provider.patientCount.am.inPerson}
+                                                    onChange={(e) => handleUpdateProviderPatientCount(provider.name, { am: { ...provider.patientCount.am, inPerson: parseInt(e.currentTarget.value) }, pm: provider.patientCount.pm })}
                                                     InputProps={{ sx: { height: '2rem', width: '4rem' } }}
                                                 />
                                                 <Typography variant='body1'>AM patients</Typography>
                                                 <TextField
                                                     type='number'
-                                                    value={provider.patientCount.pm}
-                                                    onChange={(e) => handleUpdateProviderPatientCount(provider.name, { am: provider.patientCount.am, pm: parseInt(e.currentTarget.value) })}
+                                                    value={provider.patientCount.pm.inPerson}
+                                                    onChange={(e) => handleUpdateProviderPatientCount(provider.name, { am: provider.patientCount.am, pm: { ...provider.patientCount.pm, inPerson: parseInt(e.currentTarget.value) } })}
                                                     InputProps={{ sx: { height: '2rem', width: '4rem' } }}
                                                 />
                                                 <Typography variant='body1'>PM patients</Typography>
+                                            </Grid>
+                                            <Grid item container justifyContent='space-between' alignItems='center'>
+                                                <TextField
+                                                    type='number'
+                                                    value={provider.patientCount.am.virtual}
+                                                    onChange={(e) => handleUpdateProviderPatientCount(provider.name, { am: { ...provider.patientCount.am, virtual: parseInt(e.currentTarget.value) }, pm: provider.patientCount.pm })}
+                                                    InputProps={{ sx: { height: '2rem', width: '4rem' } }}
+                                                />
+                                                <Typography variant='body1'>AM virtual</Typography>
+                                                <TextField
+                                                    type='number'
+                                                    value={provider.patientCount.pm.virtual}
+                                                    onChange={(e) => handleUpdateProviderPatientCount(provider.name, { am: provider.patientCount.am, pm: { ...provider.patientCount.pm, virtual: parseInt(e.currentTarget.value) } })}
+                                                    InputProps={{ sx: { height: '2rem', width: '4rem' } }}
+                                                />
+                                                <Typography variant='body1'>PM virtual</Typography>
                                             </Grid>
                                         </Grid>
                                     )
@@ -654,7 +704,7 @@ export default function Home() {
                                         {
                                             activeNurseTeams.map((nurseTeam, index) => {
                                                 const nurseProviders = nurseAssignments[nurseTeam] ? Object.entries(nurseAssignments[nurseTeam]).map(([_, provider]) => provider) : [];
-                                                const patientCountAM = nurseAssignments[nurseTeam] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am ?? 0), 0) : 0;
+                                                const patientCountAM = nurseAssignments[nurseTeam] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am?.inPerson ?? 0), 0) : 0;
                                                 return (
                                                     <TableCell className={`${patientCountAM > averagePatientCountAM ? 'bg-yellow-100' : 'bg-inherit'}`} key={index}>{patientCountAM}</TableCell>
                                                 )
@@ -663,7 +713,7 @@ export default function Home() {
                                         {
                                             activeNurses.map((nurse, index) => {
                                                 const nurseProviders = nurseAssignments[nurse] ? Object.entries(nurseAssignments[nurse]).map(([_, provider]) => provider) : [];
-                                                const patientCountAM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am ?? 0), 0) : 0;
+                                                const patientCountAM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am?.inPerson ?? 0), 0) : 0;
                                                 return (
                                                     <TableCell className={`${patientCountAM > averagePatientCountAM ? 'bg-yellow-100' : 'bg-inherit'}`} key={index}>{patientCountAM}</TableCell>
                                                 )
@@ -678,7 +728,7 @@ export default function Home() {
                                         {
                                             activeNurseTeams.map((nurseTeam, index) => {
                                                 const nurseProviders = nurseAssignments[nurseTeam] ? Object.entries(nurseAssignments[nurseTeam]).map(([_, provider]) => provider) : [];
-                                                const patientCountPM = nurseAssignments[nurseTeam] ? nurseProviders.reduce((prev, curr) => prev + (curr?.pm?.patientCount?.pm ?? 0), 0) : 0;
+                                                const patientCountPM = nurseAssignments[nurseTeam] ? nurseProviders.reduce((prev, curr) => prev + (curr?.pm?.patientCount?.pm?.inPerson ?? 0), 0) : 0;
                                                 return (
                                                     <TableCell className={`${patientCountPM > averagePatientCountPM ? 'bg-yellow-100' : 'bg-inherit'}`} key={index}>{patientCountPM}</TableCell>
                                                 )
@@ -687,7 +737,7 @@ export default function Home() {
                                         {
                                             activeNurses.map((nurse, index) => {
                                                 const nurseProviders = nurseAssignments[nurse] ? Object.entries(nurseAssignments[nurse]).map(([_, provider]) => provider) : [];
-                                                const patientCountPM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.pm?.patientCount?.pm ?? 0), 0) : 0;
+                                                const patientCountPM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.pm?.patientCount?.pm?.inPerson ?? 0), 0) : 0;
                                                 return (
                                                     <TableCell className={`${patientCountPM > averagePatientCountPM ? 'bg-yellow-100' : 'bg-inherit'}`} key={index}>{patientCountPM}</TableCell>
                                                 )
@@ -702,7 +752,7 @@ export default function Home() {
                                         {
                                             activeNurseTeams.map((nurseTeam, index) => {
                                                 const nurseProviders = nurseAssignments[nurseTeam] ? Object.entries(nurseAssignments[nurseTeam]).map(([_, provider]) => provider) : [];
-                                                const patientCountTotal = nurseAssignments[nurseTeam] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am ?? 0) + (curr?.pm?.patientCount?.pm ?? 0), 0) : 0;
+                                                const patientCountTotal = nurseAssignments[nurseTeam] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am?.inPerson ?? 0) + (curr?.pm?.patientCount?.pm?.inPerson ?? 0), 0) : 0;
                                                 return (
                                                     <TableCell key={index}>{patientCountTotal}</TableCell>
                                                 )
@@ -711,7 +761,7 @@ export default function Home() {
                                         {
                                             activeNurses.map((nurse, index) => {
                                                 const nurseProviders = nurseAssignments[nurse] ? Object.entries(nurseAssignments[nurse]).map(([_, provider]) => provider) : [];
-                                                const patientCountTotal = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am ?? 0) + (curr?.pm?.patientCount?.pm ?? 0), 0) : 0;
+                                                const patientCountTotal = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am?.inPerson ?? 0) + (curr?.pm?.patientCount?.pm?.inPerson ?? 0), 0) : 0;
                                                 return (
                                                     <TableCell key={index}>{patientCountTotal}</TableCell>
                                                 )
@@ -732,8 +782,8 @@ export default function Home() {
                             {
                                 activeNurseTeams.map((nurse, index) => {
                                     const nurseProviders = nurseAssignments[nurse] ? Object.entries(nurseAssignments[nurse]).map(([_, provider]) => provider) : [];
-                                    const patientCountAM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am ?? 0), 0) : 0;
-                                    const patientCountPM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.pm?.patientCount?.pm ?? 0), 0) : 0;
+                                    const patientCountAM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am?.inPerson ?? 0), 0) : 0;
+                                    const patientCountPM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.pm?.patientCount?.pm?.inPerson ?? 0), 0) : 0;
                                     return (
                                         <Grid key={`${index}-${nurse}`} item container className='ml-6 mb-6 p-6 w-4/12 min-w-96 max-w-lg bg-white' direction='column'>
                                             <Typography variant='h5' className="w-fit">{nurse}</Typography>
@@ -783,8 +833,8 @@ export default function Home() {
                             {
                                 activeNurses.map((nurse, index) => {
                                     const nurseProviders = nurseAssignments[nurse] ? Object.entries(nurseAssignments[nurse]).map(([_, provider]) => provider) : [];
-                                    const patientCountAM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am ?? 0), 0) : 0;
-                                    const patientCountPM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.pm?.patientCount?.pm ?? 0), 0) : 0;
+                                    const patientCountAM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am?.inPerson ?? 0), 0) : 0;
+                                    const patientCountPM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.pm?.patientCount?.pm?.inPerson ?? 0), 0) : 0;
                                     return (
                                         <Grid key={`${index}-${nurse}`} item container className='ml-6 mb-6 p-6 w-4/12 min-w-96 max-w-lg bg-white' direction='column'>
                                             <Typography variant='h5' className="w-fit">{nurse}</Typography>
@@ -886,7 +936,7 @@ export default function Home() {
                                 unassignedProvidersAM.length
                                     ? unassignedProvidersAM.map(provider => {
                                         return (
-                                            <DraggableProvider key={`provider-${provider.name}-am`} providerId={provider.name} shift='am'>{provider.name}: {provider.patientCount.am}</DraggableProvider>
+                                            <DraggableProvider key={`provider-${provider.name}-am`} providerId={provider.name} shift='am'>{provider.name}: {provider.patientCount.am?.inPerson}</DraggableProvider>
                                         )
                                     })
                                     : (
@@ -903,7 +953,7 @@ export default function Home() {
                                 unassignedProvidersPM.length
                                     ? unassignedProvidersPM.map(provider => {
                                         return (
-                                            <DraggableProvider key={`provider-${provider.name}-pm`} providerId={provider.name} shift='pm'>{provider.name}: {provider.patientCount.pm}</DraggableProvider>
+                                            <DraggableProvider key={`provider-${provider.name}-pm`} providerId={provider.name} shift='pm'>{provider.name}: {provider.patientCount.pm?.inPerson}</DraggableProvider>
                                         )
                                     })
                                     : (

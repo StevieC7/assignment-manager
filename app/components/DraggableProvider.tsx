@@ -1,6 +1,5 @@
 import React from 'react';
 import { useDraggable, DragOverlayProps } from '@dnd-kit/core';
-import { Grid, Typography } from '@mui/material';
 import { DragIndicator } from '@mui/icons-material';
 
 type Props = {

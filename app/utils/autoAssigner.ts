@@ -33,14 +33,14 @@ export function autoAssigner(nurseList: string[], roomList: string[], providerLi
         nurseList.forEach(() => providerGroupingsAM.push([]));
     }
 
-    providerList.sort((a, z) => z.patientCount.am - a.patientCount.am);
+    providerList.sort((a, z) => z.patientCount.am.inPerson - a.patientCount.am.inPerson);
     while (providerPointerAM < providerList.length) {
-        if (providerList[providerPointerAM].patientCount.am === 0) {
+        if (providerList[providerPointerAM].patientCount.am.inPerson === 0) {
             providerPointerAM++;
             continue;
         }
         providerGroupingsAM.sort((a, z) => (a.length ? a.reduce((p, c) => p + c.amCount, 0) : 0) - (z.length ? z.reduce((p, c) => p + c.amCount, 0) : 0));
-        providerGroupingsAM[0].push({ name: providerList[providerPointerAM].name, amCount: providerList[providerPointerAM].patientCount.am });
+        providerGroupingsAM[0].push({ name: providerList[providerPointerAM].name, amCount: providerList[providerPointerAM].patientCount.am.inPerson });
         providerPointerAM++;
     }
 
@@ -69,14 +69,14 @@ export function autoAssigner(nurseList: string[], roomList: string[], providerLi
         nurseList.forEach(() => providerGroupingsPM.push([]));
     }
 
-    providerList.sort((a, z) => z.patientCount.pm - a.patientCount.pm);
+    providerList.sort((a, z) => z.patientCount.pm.inPerson - a.patientCount.pm.inPerson);
     while (providerPointerPM < providerList.length) {
-        if (providerList[providerPointerPM].patientCount.pm === 0) {
+        if (providerList[providerPointerPM].patientCount.pm.inPerson === 0) {
             providerPointerPM++;
             continue;
         }
         providerGroupingsPM.sort((a, z) => (a.length ? a.reduce((p, c) => p + c.pmCount, 0) : 0) - (z.length ? z.reduce((p, c) => p + c.pmCount, 0) : 0));
-        providerGroupingsPM[0].push({ name: providerList[providerPointerPM].name, pmCount: providerList[providerPointerPM].patientCount.pm });
+        providerGroupingsPM[0].push({ name: providerList[providerPointerPM].name, pmCount: providerList[providerPointerPM].patientCount.pm.inPerson });
         providerPointerPM++;
     }
 
