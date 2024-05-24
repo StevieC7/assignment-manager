@@ -597,7 +597,7 @@ export default function Home() {
                                 Staff Setup
                             </Button>
                         </Grid>
-                        <Grid item container>
+                        <Grid item container mb={'2rem'}>
                             <Grid item xs={6}>
                                 <Button variant='outlined' color='warning' endIcon={<ArrowDownward />} onClick={e => handleOpenMenu(e)} sx={{ height: '3rem', width: '90%' }}>
                                     Reset
@@ -621,15 +621,15 @@ export default function Home() {
                                 </Button>
                             </Grid>
                         </Grid>
-                        <Grid item container>
+                        <Grid item container justifyContent='space-between' mb={'2rem'}>
                             <Typography variant='h4'>Rooms</Typography>
                             {
                                 roomsLocked
-                                    ? <Lock onMouseDown={() => setRoomsLocked(false)} />
-                                    : <LockOpen onMouseDown={() => setRoomsLocked(true)} />
+                                    ? <Lock onMouseDown={() => setRoomsLocked(false)} sx={{ cursor: 'pointer' }} />
+                                    : <LockOpen onMouseDown={() => setRoomsLocked(true)} sx={{ cursor: 'pointer' }} />
                             }
                         </Grid>
-                        <Grid item container direction='row'>
+                        <Grid item container direction='row' mb={'2rem'}>
                             {
                                 unassignedRooms.length
                                     ? unassignedRooms.map(room => {
@@ -645,36 +645,40 @@ export default function Home() {
                                     )
                             }
                         </Grid>
-                        <Typography variant='h4'>AM Providers</Typography>
-                        {
-                            unassignedProvidersAM.length
-                                ? unassignedProvidersAM.map(provider => {
-                                    return (
-                                        <DraggableProvider key={`provider-${provider.name}-am`} providerId={provider.name} shift='am'>{provider.name}: {provider.patientCount.am}</DraggableProvider>
+                        <Typography variant='h4' mb={'2rem'}>AM Providers</Typography>
+                        <Grid item container mb={'2rem'}>
+                            {
+                                unassignedProvidersAM.length
+                                    ? unassignedProvidersAM.map(provider => {
+                                        return (
+                                            <DraggableProvider key={`provider-${provider.name}-am`} providerId={provider.name} shift='am'>{provider.name}: {provider.patientCount.am}</DraggableProvider>
+                                        )
+                                    })
+                                    : (
+                                        <>
+                                            <CheckCircle className='text-green-500' />
+                                            <Typography>All Assigned</Typography>
+                                        </>
                                     )
-                                })
-                                : (
-                                    <>
-                                        <CheckCircle className='text-green-500' />
-                                        <Typography>All Assigned</Typography>
-                                    </>
-                                )
-                        }
-                        <Typography variant='h4'>PM Providers</Typography>
-                        {
-                            unassignedProvidersPM.length
-                                ? unassignedProvidersPM.map(provider => {
-                                    return (
-                                        <DraggableProvider key={`provider-${provider.name}-pm`} providerId={provider.name} shift='pm'>{provider.name}: {provider.patientCount.pm}</DraggableProvider>
+                            }
+                        </Grid>
+                        <Typography variant='h4' mb={'2rem'}>PM Providers</Typography>
+                        <Grid item container>
+                            {
+                                unassignedProvidersPM.length
+                                    ? unassignedProvidersPM.map(provider => {
+                                        return (
+                                            <DraggableProvider key={`provider-${provider.name}-pm`} providerId={provider.name} shift='pm'>{provider.name}: {provider.patientCount.pm}</DraggableProvider>
+                                        )
+                                    })
+                                    : (
+                                        <>
+                                            <CheckCircle className='text-green-500' />
+                                            <Typography>All Assigned</Typography>
+                                        </>
                                     )
-                                })
-                                : (
-                                    <>
-                                        <CheckCircle className='text-green-500' />
-                                        <Typography>All Assigned</Typography>
-                                    </>
-                                )
-                        }
+                            }
+                        </Grid>
                     </Grid>
                     <Snackbar
                         open={snackbarOpen}
