@@ -235,6 +235,7 @@ export default function Home() {
         localStorage.setItem("providers", JSON.stringify(providerList));
         localStorage.setItem("roomParents", JSON.stringify(roomParents));
         localStorage.setItem("providerParents", JSON.stringify(providerParents));
+        localStorage.setItem("roomsLocked", JSON.stringify(roomsLocked));
     }
 
     const handleLoadLocal = () => {
@@ -244,12 +245,14 @@ export default function Home() {
         const providers = localStorage.getItem("providers");
         const roomParents = localStorage.getItem("roomParents");
         const providerParents = localStorage.getItem("providerParents");
+        const roomsLocked = localStorage.getItem("roomsLocked");
         if (dateValue) setDateValue(dayjs(dateValue));
         if (nurses) setNurseList(JSON.parse(nurses));
         if (rooms) setRoomList(JSON.parse(rooms));
         if (providers) setProviderList(JSON.parse(providers));
         if (roomParents) setRoomParents(JSON.parse(roomParents));
         if (providerParents) setProviderParents(JSON.parse(providerParents));
+        if (roomsLocked) setProviderParents(JSON.parse(roomsLocked));
     }
 
     const handleExport = () => {
