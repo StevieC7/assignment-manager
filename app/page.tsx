@@ -51,10 +51,13 @@ export default function Home() {
     const [roomParents, setRoomParents] = useState<Record<string, string | null>>({});
     const [providerParents, setProviderParents] = useState<Record<string, { am: string | null, pm: string | null }>>({});
 
+    const activeNurseTeams = [...nurseTeamList].filter(nurseTeam => nurseTeamChildren[nurseTeam] && nurseTeamChildren[nurseTeam].length);
+    const activeNurses = [...nurseList].filter(nurse => !Object.values(nurseTeamChildren).flat().includes(nurse));
+    const allActiveNurseGroupings = [...activeNurseTeams, ...activeNurses];
     const patientTotalAM = providerList.reduce((prev, curr) => prev + curr.patientCount.am, 0);
     const patientTotalPM = providerList.reduce((prev, curr) => prev + curr.patientCount.pm, 0);
-    const averagePatientCountAM = Math.ceil(providerList.reduce((prev, curr) => prev + curr.patientCount.am, 0) / nurseList.length);
-    const averagePatientCountPM = Math.ceil(providerList.reduce((prev, curr) => prev + curr.patientCount.pm, 0) / nurseList.length);
+    const averagePatientCountAM = Math.ceil(providerList.reduce((prev, curr) => prev + curr.patientCount.am, 0) / allActiveNurseGroupings.length);
+    const averagePatientCountPM = Math.ceil(providerList.reduce((prev, curr) => prev + curr.patientCount.pm, 0) / allActiveNurseGroupings.length);
 
     const assignNurses = () => {
         const nurseRecord: NurseAssignments = {};
@@ -330,7 +333,8 @@ export default function Home() {
     }
 
     const handleAutoAssign = () => {
-        const { providerParents, roomParents: newRoomParents, warningMessage } = autoAssigner(nurseList, roomList, providerList, Object.keys(roomParents).length ? roomParents : undefined);
+        const { providerParents, roomParents: newRoomParents, warningMessage } = autoAssigner(allActiveNurseGroupings, roomList, providerList, Object.keys(roomParents).length ? roomParents : undefined);
+        console.log({ newRoomParents })
         setRoomParents(newRoomParents);
         setProviderParents(providerParents);
         if (warningMessage) {
@@ -492,31 +496,33 @@ export default function Home() {
                                         )
                                     })
                                 }
-                                {nurseList.map((nurse, id) => {
-                                    if (Object.values(nurseTeamChildren).flat().includes(nurse)) {
-                                        return null;
-                                    } else {
-                                        return (
-                                            <Grid key={id} item container direction='row' alignItems='center'>
-                                                <Typography>
-                                                    {nurse}
-                                                </Typography>
-                                                <Select sx={{ width: '5rem' }}>
-                                                    {
-                                                        nurseTeamList.map(nurseTeam => {
-                                                            return (
-                                                                <MenuItem key={nurseTeam} value={nurseTeam} onClick={() => handleAddNurseToTeam(nurse, nurseTeam)}>{nurseTeam}</MenuItem>
-                                                            )
-                                                        })
-                                                    }
-                                                </Select>
-                                                <Button onClick={() => handleDeleteNurse(nurse)}>
-                                                    Delete
-                                                </Button>
-                                            </Grid>
-                                        )
-                                    }
-                                })}
+                                {
+                                    nurseList.map((nurse, id) => {
+                                        if (Object.values(nurseTeamChildren).flat().includes(nurse)) {
+                                            return null;
+                                        } else {
+                                            return (
+                                                <Grid key={id} item container direction='row' alignItems='center'>
+                                                    <Typography>
+                                                        {nurse}
+                                                    </Typography>
+                                                    <Select sx={{ width: '5rem' }}>
+                                                        {
+                                                            nurseTeamList.map(nurseTeam => {
+                                                                return (
+                                                                    <MenuItem key={nurseTeam} value={nurseTeam} onClick={() => handleAddNurseToTeam(nurse, nurseTeam)}>{nurseTeam}</MenuItem>
+                                                                )
+                                                            })
+                                                        }
+                                                    </Select>
+                                                    <Button onClick={() => handleDeleteNurse(nurse)}>
+                                                        Delete
+                                                    </Button>
+                                                </Grid>
+                                            )
+                                        }
+                                    })
+                                }
                             </Grid>
                         </Grid>
                         <Grid item container direction='column' sx={{ mb: '2rem' }}>
@@ -541,18 +547,20 @@ export default function Home() {
                                 </Grid>
                             </Grid>
                             <Grid item>
-                                {roomList.map((room, id) => {
-                                    return (
-                                        <Grid key={id} item container direction='row' alignItems='center'>
-                                            <Typography>
-                                                {room}
-                                            </Typography>
-                                            <Button onClick={() => handleDeleteRoom(id)}>
-                                                Delete
-                                            </Button>
-                                        </Grid>
-                                    )
-                                })}
+                                {
+                                    roomList.map((room, id) => {
+                                        return (
+                                            <Grid key={id} item container direction='row' alignItems='center'>
+                                                <Typography>
+                                                    {room}
+                                                </Typography>
+                                                <Button onClick={() => handleDeleteRoom(id)}>
+                                                    Delete
+                                                </Button>
+                                            </Grid>
+                                        )
+                                    })
+                                }
                             </Grid>
                         </Grid>
                         <Grid item container direction='column'>
@@ -626,16 +634,14 @@ export default function Home() {
                                         <TableCell sx={{ backgroundColor: '#eeeeee', fontWeight: 'bold' }}>Assigned</TableCell>
                                         <TableCell sx={{ backgroundColor: '#eeeeee', fontWeight: 'bold' }}>Pt/Team</TableCell>
                                         {
-                                            nurseTeamList.map((nurseTeam, index) => {
-                                                if (!nurseTeamChildren[nurseTeam]) return null;
+                                            activeNurseTeams.map((nurseTeam, index) => {
                                                 return (
                                                     <TableCell key={'nurse-team' + index}>{nurseTeam}</TableCell>
                                                 )
                                             })
                                         }
                                         {
-                                            nurseList.map((nurse, index) => {
-                                                if (Object.values(nurseTeamChildren).flat().includes(nurse)) return null;
+                                            activeNurses.map((nurse, index) => {
                                                 return (
                                                     <TableCell key={'nurse' + index}>{nurse}</TableCell>
                                                 )
@@ -650,8 +656,7 @@ export default function Home() {
                                         <TableCell className={`${assignedPatientTotalAM < patientTotalAM ? 'bg-yellow-100' : 'bg-inherit'}`}>{assignedPatientTotalAM}</TableCell>
                                         <TableCell className={`${anyAssignedGreaterThanTargetAM ? 'bg-yellow-100' : 'bg-inherit'}`}>{averagePatientCountAM}</TableCell>
                                         {
-                                            nurseTeamList.map((nurseTeam, index) => {
-                                                if (!nurseTeamChildren[nurseTeam]) return null;
+                                            activeNurseTeams.map((nurseTeam, index) => {
                                                 const nurseProviders = nurseAssignments[nurseTeam] ? Object.entries(nurseAssignments[nurseTeam]).map(([_, provider]) => provider) : [];
                                                 const patientCountAM = nurseAssignments[nurseTeam] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am ?? 0), 0) : 0;
                                                 return (
@@ -660,8 +665,7 @@ export default function Home() {
                                             })
                                         }
                                         {
-                                            nurseList.map((nurse, index) => {
-                                                if (Object.values(nurseTeamChildren).flat().includes(nurse)) return null;
+                                            activeNurses.map((nurse, index) => {
                                                 const nurseProviders = nurseAssignments[nurse] ? Object.entries(nurseAssignments[nurse]).map(([_, provider]) => provider) : [];
                                                 const patientCountAM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am ?? 0), 0) : 0;
                                                 return (
@@ -676,8 +680,7 @@ export default function Home() {
                                         <TableCell className={`${assignedPatientTotalPM < patientTotalPM ? 'bg-yellow-100' : 'bg-inherit'}`}>{assignedPatientTotalPM}</TableCell>
                                         <TableCell className={`${anyAssignedGreaterThanTargetPM ? 'bg-yellow-100' : 'bg-inherit'}`}>{averagePatientCountPM}</TableCell>
                                         {
-                                            nurseTeamList.map((nurseTeam, index) => {
-                                                if (!nurseTeamChildren[nurseTeam]) return null;
+                                            activeNurseTeams.map((nurseTeam, index) => {
                                                 const nurseProviders = nurseAssignments[nurseTeam] ? Object.entries(nurseAssignments[nurseTeam]).map(([_, provider]) => provider) : [];
                                                 const patientCountPM = nurseAssignments[nurseTeam] ? nurseProviders.reduce((prev, curr) => prev + (curr?.pm?.patientCount?.pm ?? 0), 0) : 0;
                                                 return (
@@ -686,8 +689,7 @@ export default function Home() {
                                             })
                                         }
                                         {
-                                            nurseList.map((nurse, index) => {
-                                                if (Object.values(nurseTeamChildren).flat().includes(nurse)) return null;
+                                            activeNurses.map((nurse, index) => {
                                                 const nurseProviders = nurseAssignments[nurse] ? Object.entries(nurseAssignments[nurse]).map(([_, provider]) => provider) : [];
                                                 const patientCountPM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.pm?.patientCount?.pm ?? 0), 0) : 0;
                                                 return (
@@ -700,10 +702,9 @@ export default function Home() {
                                         <TableCell sx={{ backgroundColor: '#eeeeee', fontWeight: 'bold' }}>Total</TableCell>
                                         <TableCell>{patientTotalAM + patientTotalPM}</TableCell>
                                         <TableCell className={`${assignedPatientTotalPM + assignedPatientTotalAM < patientTotalPM + patientTotalAM ? 'bg-yellow-100' : 'bg-inherit'}`}>{assignedPatientTotalPM + assignedPatientTotalAM}</TableCell>
-                                        <TableCell>{Math.ceil((averagePatientCountAM + averagePatientCountPM) / 2)}</TableCell>
+                                        <TableCell>{Math.ceil((assignedPatientTotalAM + assignedPatientTotalPM) / allActiveNurseGroupings.length)}</TableCell>
                                         {
-                                            nurseTeamList.map((nurseTeam, index) => {
-                                                if (!nurseTeamChildren[nurseTeam]) return null;
+                                            activeNurseTeams.map((nurseTeam, index) => {
                                                 const nurseProviders = nurseAssignments[nurseTeam] ? Object.entries(nurseAssignments[nurseTeam]).map(([_, provider]) => provider) : [];
                                                 const patientCountTotal = nurseAssignments[nurseTeam] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am ?? 0) + (curr?.pm?.patientCount?.pm ?? 0), 0) : 0;
                                                 return (
@@ -712,8 +713,7 @@ export default function Home() {
                                             })
                                         }
                                         {
-                                            nurseList.map((nurse, index) => {
-                                                if (Object.values(nurseTeamChildren).flat().includes(nurse)) return null;
+                                            activeNurses.map((nurse, index) => {
                                                 const nurseProviders = nurseAssignments[nurse] ? Object.entries(nurseAssignments[nurse]).map(([_, provider]) => provider) : [];
                                                 const patientCountTotal = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am ?? 0) + (curr?.pm?.patientCount?.pm ?? 0), 0) : 0;
                                                 return (
@@ -734,8 +734,7 @@ export default function Home() {
                             xs={12}
                         >
                             {
-                                nurseTeamList.map((nurse, index) => {
-                                    if (!nurseTeamChildren[nurse] || !nurseTeamChildren[nurse].length) return null;
+                                activeNurseTeams.map((nurse, index) => {
                                     const nurseProviders = nurseAssignments[nurse] ? Object.entries(nurseAssignments[nurse]).map(([_, provider]) => provider) : [];
                                     const patientCountAM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am ?? 0), 0) : 0;
                                     const patientCountPM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.pm?.patientCount?.pm ?? 0), 0) : 0;
@@ -786,8 +785,7 @@ export default function Home() {
                                 })
                             }
                             {
-                                nurseList.map((nurse, index) => {
-                                    if (Object.values(nurseTeamChildren).flat().includes(nurse)) return null;
+                                activeNurses.map((nurse, index) => {
                                     const nurseProviders = nurseAssignments[nurse] ? Object.entries(nurseAssignments[nurse]).map(([_, provider]) => provider) : [];
                                     const patientCountAM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am ?? 0), 0) : 0;
                                     const patientCountPM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.pm?.patientCount?.pm ?? 0), 0) : 0;

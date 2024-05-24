@@ -10,7 +10,7 @@ export function autoAssigner(nurseList: string[], roomList: string[], providerLi
 
     // Assign providers to groups for AM, skipping assignment if patientCount = 0 and keeping patientCount as even as possible
     let providerPointerAM = 0;
-    const providerGroupingsAM: { name: string, amCount: number }[][] = new Array(usableRoomList.length);
+    const providerGroupingsAM: { name: string, amCount: number }[][] = new Array();
     /*
          If room groupings already exist, then the group sizes have already been determined.
          We can find these by iterating over nurses and creating a grouping for each with max length
@@ -30,7 +30,7 @@ export function autoAssigner(nurseList: string[], roomList: string[], providerLi
             }
         })
     } else {
-        usableRoomList.forEach(() => providerGroupingsAM.push([]));
+        nurseList.forEach(() => providerGroupingsAM.push([]));
     }
 
     providerList.sort((a, z) => z.patientCount.am - a.patientCount.am);
@@ -46,7 +46,7 @@ export function autoAssigner(nurseList: string[], roomList: string[], providerLi
 
     // Assign providers to groups for PM, skipping assignment if patientCount = 0, maintaining same room if already in a room for AM, and keeping patientCount as even as possible
     let providerPointerPM = 0;
-    const providerGroupingsPM: { name: string, pmCount: number }[][] = new Array(usableRoomList.length);
+    const providerGroupingsPM: { name: string, pmCount: number }[][] = new Array();
     /*
          If room groupings already exist, then the group sizes have already been determined.
          We can find these by iterating over nurses and creating a grouping for each with max length
@@ -66,7 +66,7 @@ export function autoAssigner(nurseList: string[], roomList: string[], providerLi
             }
         })
     } else {
-        usableRoomList.forEach(() => providerGroupingsPM.push([]));
+        nurseList.forEach(() => providerGroupingsPM.push([]));
     }
 
     providerList.sort((a, z) => z.patientCount.pm - a.patientCount.pm);
@@ -88,10 +88,6 @@ export function autoAssigner(nurseList: string[], roomList: string[], providerLi
         if (nursePointerAM >= nurseList.length) nursePointerAM = 0;
         const providerGrouping = providerGroupingsAM[providerGroupingsAMPointer] ?? [];
         for (const provider of providerGrouping) {
-            if (!provider) {
-                roomPointerAM++;
-                continue;
-            }
             providerParents[provider.name] = { am: usableRoomList[roomPointerAM], pm: null };
             if (!roomParents[usableRoomList[roomPointerAM]]) roomParents[usableRoomList[roomPointerAM]] = nurseList[nursePointerAM];
             roomPointerAM++;
