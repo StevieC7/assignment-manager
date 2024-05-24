@@ -1,5 +1,5 @@
 'use client';
-import { Button, Drawer, Grid, Menu, MenuItem, Paper, Snackbar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from "@mui/material";
+import { Button, Drawer, Grid, Menu, MenuItem, Paper, Select, Snackbar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { MouseEvent, useState } from "react";
@@ -36,6 +36,7 @@ export default function Home() {
     const [roomsLocked, setRoomsLocked] = useState<boolean>(false);
 
     const [dateValue, setDateValue] = useState<Dayjs>(dayjs(new Date()));
+    const [nurseTeamName, setNurseTeamName] = useState<string>('');
     const [nurseName, setNurseName] = useState<string>('');
     const [room, setRoom] = useState<string>('');
     const [provider, setProvider] = useState<Provider>({ name: '', patientCount: { am: 0, pm: 0 } });
@@ -43,6 +44,10 @@ export default function Home() {
     const [nurseList, setNurseList] = useState<string[]>([]);
     const [roomList, setRoomList] = useState<string[]>([]);
     const [providerList, setProviderList] = useState<Provider[]>([]);
+
+    const [nurseTeamList, setNurseTeamList] = useState<string[]>([]);
+    const [nurseTeamChildren, setNurseTeamChildren] = useState<Record<string, (string | null)[]>>({});
+    const usingNurseTeams = nurseTeamList.length ? true : false;
 
     const [roomParents, setRoomParents] = useState<Record<string, string | null>>({});
     const [providerParents, setProviderParents] = useState<Record<string, { am: string | null, pm: string | null }>>({});
@@ -84,9 +89,38 @@ export default function Home() {
 
     const isProviderNameDuplicate = provider.name !== '' && providerList.find(existingProvider => existingProvider.name === provider.name) ? true : false;
 
+    const handleAddNurseTeam = () => {
+        setNurseTeamList([...nurseTeamList, nurseTeamName]);
+        setNurseTeamName('');
+    }
+
     const handleAddNurse = () => {
         setNurseList([...nurseList, nurseName])
         setNurseName('')
+    }
+
+    const handleAddNurseToTeam = (nurse: string, nurseTeam: string) => {
+        const newNurseTeamChildren = { ...nurseTeamChildren }
+        const existingNurseTeamMembers = nurseTeamChildren[nurseTeam];
+        if (nurseTeam === '') {
+            const nursePreviousTeamEntry = Object.entries(newNurseTeamChildren).find(([nurseTeam, children]) => children.includes(nurse));
+            if (nursePreviousTeamEntry) {
+                const newPreviousTeamChildrenValue = nursePreviousTeamEntry[1].filter(teamChild => teamChild !== nurse) ?? [];
+                if (!newPreviousTeamChildrenValue.length) {
+                    delete newNurseTeamChildren[nursePreviousTeamEntry[0]]
+                    setNurseTeamChildren(newNurseTeamChildren);
+                    return;
+                }
+                setNurseTeamChildren({ ...newNurseTeamChildren, [nursePreviousTeamEntry[0]]: newPreviousTeamChildrenValue });
+                return;
+            }
+        }
+        if (!existingNurseTeamMembers) {
+            newNurseTeamChildren[nurseTeam] = [nurse]
+        } else {
+            newNurseTeamChildren[nurseTeam] = [nurse, ...existingNurseTeamMembers]
+        }
+        setNurseTeamChildren(newNurseTeamChildren);
     }
 
     const handleAddRoom = () => {
@@ -108,12 +142,13 @@ export default function Home() {
         }
     }
 
-    const handleDeleteNurse = (id: number) => {
-        // TODO: delete all roomParents where this nurse is referenced and all providerParents where those rooms are referenced
+    const handleDeleteNurse = (nurseToDelete: string) => {
+        // TODO: handle deleting children in nurseTeamList
         const newRoomParents = { ...roomParents };
         const newProviderParents = { ...providerParents };
+        const newNurseTeamChildren = { ...nurseTeamChildren };
         for (const [room, nurse] of Object.entries(newRoomParents)) {
-            if (nurse === nurseList[id]) {
+            if (nurse === nurseToDelete) {
                 delete newRoomParents[room]
                 for (const [provider, { am, pm }] of Object.entries(newProviderParents)) {
                     if (am === room) newProviderParents[provider].am = null;
@@ -121,16 +156,26 @@ export default function Home() {
                 }
             }
         }
-        const newList = [...nurseList];
-        newList.splice(id, 1);
+        for (const [team, children] of Object.entries(newNurseTeamChildren)) {
+            if (children.includes(nurseToDelete)) {
+                const newTeamChildren = children.filter(nurse => nurse !== nurseToDelete);
+                newNurseTeamChildren[team] = newTeamChildren;
+            }
+        }
+        const newList = [...nurseList].filter(nurse => nurse !== nurseToDelete);
         setNurseList(newList);
         setRoomParents(newRoomParents);
         setProviderParents(newProviderParents);
+        setNurseTeamChildren(newNurseTeamChildren);
+    }
+
+    const handleDeleteNurseTeam = (nurseTeam: string) => {
+        const newNurseTeamChildren = { ...nurseTeamChildren };
+        delete newNurseTeamChildren[nurseTeam];
+        setNurseTeamChildren(newNurseTeamChildren);
     }
 
     const handleDeleteRoom = (id: number) => {
-        // TODO: delete all roomParents where this room is referenced
-        // TODO: delete all providerParents where this room is referenced
         const newRoomParents = { ...roomParents };
         const newProviderParents = { ...providerParents };
         const roomToDelete = roomList[id];
@@ -338,11 +383,47 @@ export default function Home() {
                             </LocalizationProvider>
                         </Grid>
                         <Grid item container direction='column' sx={{ mb: '2rem' }}>
-                            <Typography variant='h4'>Team</Typography>
+                            <Typography variant='h4'>Teams</Typography>
                             <Grid item container>
                                 <Grid item container xs={8}>
                                     <TextField
-                                        placeholder="Team Members"
+                                        placeholder="Team name"
+                                        value={nurseTeamName}
+                                        onChange={e => setNurseTeamName(e.currentTarget.value)}
+                                        sx={{ width: '100%' }}
+                                    />
+                                </Grid>
+                                <Grid item container justifyContent='center' alignItems='center' xs={4}>
+                                    <Button
+                                        onClick={handleAddNurseTeam}
+                                        variant='contained'
+                                        sx={{ width: '100%', height: '100%' }}
+                                    >
+                                        Save
+                                    </Button>
+                                </Grid>
+                            </Grid>
+                            <Grid item>
+                                {
+                                    nurseTeamList.map((nurseTeam, id) => {
+                                        return (
+                                            <Grid key={id} item container direction='row' alignItems='center'>
+                                                <Typography>
+                                                    {nurseTeam}
+                                                </Typography>
+                                                <Button onClick={() => handleDeleteNurseTeam(nurseTeam)}>
+                                                    Delete
+                                                </Button>
+                                            </Grid>
+                                        )
+                                    })
+                                }
+                            </Grid>
+                            <Typography variant='h4'>Nurses</Typography>
+                            <Grid item container>
+                                <Grid item container xs={8}>
+                                    <TextField
+                                        placeholder="Nurse name"
                                         value={nurseName}
                                         onChange={e => setNurseName(e.currentTarget.value)}
                                         sx={{ width: '100%' }}
@@ -359,17 +440,68 @@ export default function Home() {
                                 </Grid>
                             </Grid>
                             <Grid item>
+                                {
+                                    Object.entries(nurseTeamChildren).map(([team, nurses]) => {
+                                        if (!nurses.length) return null;
+                                        return (
+                                            <Grid key={team} item container sx={{ border: '2px solid black', padding: '1rem' }}>
+                                                <Typography variant='h5'>{team}</Typography>
+                                                {
+                                                    nurses.map((nurse, id) => {
+                                                        if (!nurse) return null;
+                                                        return (
+                                                            <Grid key={id} item container direction='row' alignItems='center'>
+                                                                <Typography>
+                                                                    {nurse}
+                                                                </Typography>
+                                                                <Select sx={{ width: '5rem' }}>
+                                                                    <MenuItem key='none' value='' onClick={() => handleAddNurseToTeam(nurse, '')}>None</MenuItem>
+                                                                    {
+                                                                        nurseTeamList.map(nurseTeam => {
+                                                                            if (nurseTeam === team) return null;
+                                                                            return (
+                                                                                <MenuItem key={nurseTeam} value={nurseTeam} onClick={() => handleAddNurseToTeam(nurse, nurseTeam)}>{nurseTeam}</MenuItem>
+                                                                            )
+                                                                        })
+                                                                    }
+                                                                </Select>
+                                                                <Button onClick={() => handleDeleteNurse(nurse)}>
+                                                                    Delete
+                                                                    {/* TODO: fix delete by passing a unique identifier instead of iterator index */}
+                                                                </Button>
+                                                            </Grid>
+                                                        )
+
+                                                    })
+                                                }
+                                            </Grid>
+                                        )
+                                    })
+                                }
                                 {nurseList.map((nurse, id) => {
-                                    return (
-                                        <Grid key={id} item container direction='row' alignItems='center'>
-                                            <Typography>
-                                                {nurse}
-                                            </Typography>
-                                            <Button onClick={() => handleDeleteNurse(id, nurse)}>
-                                                Delete
-                                            </Button>
-                                        </Grid>
-                                    )
+                                    if (Object.values(nurseTeamChildren).flat().includes(nurse)) {
+                                        return null;
+                                    } else {
+                                        return (
+                                            <Grid key={id} item container direction='row' alignItems='center'>
+                                                <Typography>
+                                                    {nurse}
+                                                </Typography>
+                                                <Select sx={{ width: '5rem' }}>
+                                                    {
+                                                        nurseTeamList.map(nurseTeam => {
+                                                            return (
+                                                                <MenuItem key={nurseTeam} value={nurseTeam} onClick={() => handleAddNurseToTeam(nurse, nurseTeam)}>{nurseTeam}</MenuItem>
+                                                            )
+                                                        })
+                                                    }
+                                                </Select>
+                                                <Button onClick={() => handleDeleteNurse(nurse)}>
+                                                    Delete
+                                                </Button>
+                                            </Grid>
+                                        )
+                                    }
                                 })}
                             </Grid>
                         </Grid>
@@ -435,7 +567,7 @@ export default function Home() {
                                                 <Typography variant='h5'>
                                                     {provider.name}
                                                 </Typography>
-                                                <Delete color='warning' onMouseDown={() => handleDeleteProvider(id, provider.name)} sx={{ cursor: 'pointer' }} />
+                                                <Delete color='warning' onMouseDown={() => handleDeleteProvider(id)} sx={{ cursor: 'pointer' }} />
                                             </Grid>
                                             <Grid item container justifyContent='space-between' alignItems='center'>
                                                 <TextField
