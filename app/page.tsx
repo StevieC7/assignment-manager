@@ -47,7 +47,6 @@ export default function Home() {
 
     const [nurseTeamList, setNurseTeamList] = useState<string[]>([]);
     const [nurseTeamChildren, setNurseTeamChildren] = useState<Record<string, (string | null)[]>>({});
-    const usingNurseTeams = nurseTeamList.length ? true : false;
 
     const [roomParents, setRoomParents] = useState<Record<string, string | null>>({});
     const [providerParents, setProviderParents] = useState<Record<string, { am: string | null, pm: string | null }>>({});
@@ -59,7 +58,7 @@ export default function Home() {
 
     const assignNurses = () => {
         const nurseRecord: NurseAssignments = {};
-        for (const nurse of nurseList) {
+        for (const nurse of [...nurseList, ...nurseTeamList]) {
             for (const [room, roomParent] of Object.entries(roomParents)) {
                 if (roomParent === nurse) {
                     if (!nurseRecord[nurse]) nurseRecord[nurse] = {};
@@ -121,6 +120,20 @@ export default function Home() {
             newNurseTeamChildren[nurseTeam] = [nurse, ...existingNurseTeamMembers]
         }
         setNurseTeamChildren(newNurseTeamChildren);
+
+        const newRoomParents = { ...roomParents };
+        const newProviderParents = { ...providerParents };
+        for (const [room, parentNurse] of Object.entries(newRoomParents)) {
+            if (parentNurse === nurse) {
+                delete newRoomParents[room];
+                for (const [provider, { am, pm }] of Object.entries(newProviderParents)) {
+                    if (am === room) newProviderParents[provider].am = null;
+                    if (pm === room) newProviderParents[provider].pm = null;
+                }
+            }
+        }
+        setRoomParents(newRoomParents);
+        setProviderParents(newProviderParents);
     }
 
     const handleAddRoom = () => {
@@ -143,7 +156,6 @@ export default function Home() {
     }
 
     const handleDeleteNurse = (nurseToDelete: string) => {
-        // TODO: handle deleting children in nurseTeamList
         const newRoomParents = { ...roomParents };
         const newProviderParents = { ...providerParents };
         const newNurseTeamChildren = { ...nurseTeamChildren };
@@ -169,9 +181,11 @@ export default function Home() {
         setNurseTeamChildren(newNurseTeamChildren);
     }
 
-    const handleDeleteNurseTeam = (nurseTeam: string) => {
+    const handleDeleteNurseTeam = (teamToDelete: string) => {
+        const newNurseTeamList = [...nurseTeamList].filter(team => team !== teamToDelete);
+        setNurseTeamList(newNurseTeamList);
         const newNurseTeamChildren = { ...nurseTeamChildren };
-        delete newNurseTeamChildren[nurseTeam];
+        delete newNurseTeamChildren[teamToDelete];
         setNurseTeamChildren(newNurseTeamChildren);
     }
 
@@ -678,7 +692,53 @@ export default function Home() {
                             xs={12}
                         >
                             {
+                                nurseTeamList.map((nurse, index) => {
+                                    if (!nurseTeamChildren[nurse] || !nurseTeamChildren[nurse].length) return null;
+                                    const nurseProviders = nurseAssignments[nurse] ? Object.entries(nurseAssignments[nurse]).map(([_, provider]) => provider) : [];
+                                    const patientCountAM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am ?? 0), 0) : 0;
+                                    const patientCountPM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.pm?.patientCount?.pm ?? 0), 0) : 0;
+                                    return (
+                                        <Grid key={`${index}-${nurse}`} item container className='ml-6 mb-6 w-4/12 min-w-96 max-w-lg bg-white' direction='column'>
+                                            <Typography variant='h5' className="w-fit">{nurse}</Typography>
+                                            <Grid item container direction='row'>
+                                                <Grid item xs={4}></Grid>
+                                                {
+                                                    patientCountAM > 0
+                                                        ? (
+                                                            <Grid item container xs={4} justifyContent='space-between'>
+                                                                AM
+                                                                <Typography className={`w-8 text-center border-1-2 ${patientCountAM <= averagePatientCountAM ? patientCountAM === 0 ? 'bg-red-100' : 'bg-green-100' : 'bg-yellow-100'}`}>{patientCountAM}</Typography>
+                                                            </Grid>
+                                                        )
+                                                        : <Grid item xs={4} />
+                                                }
+                                                {
+                                                    patientCountPM > 0
+                                                        ? (
+                                                            <Grid item container xs={4} justifyContent='space-between'>
+                                                                PM
+                                                                <Typography className={`w-8 text-center border-1-2 ${patientCountPM <= averagePatientCountPM ? patientCountPM === 0 ? 'bg-red-100' : 'bg-green-100' : 'bg-yellow-100'}`}>{patientCountPM}</Typography>
+                                                            </Grid>
+                                                        )
+                                                        : <Grid item xs={4} />
+                                                }
+                                            </Grid>
+                                            <RoomZone nurseId={nurse}>
+                                                {
+                                                    nurseAssignments[nurse] && Object.keys(nurseAssignments[nurse]).map((room, index) => {
+                                                        return (
+                                                            <DraggableRoom key={`${index}-${room}`} roomId={room} nurseName={nurse} nurseAssignments={nurseAssignments} />
+                                                        )
+                                                    })
+                                                }
+                                            </RoomZone>
+                                        </Grid>
+                                    )
+                                })
+                            }
+                            {
                                 nurseList.map((nurse, index) => {
+                                    if (Object.values(nurseTeamChildren).flat().includes(nurse)) return null;
                                     const nurseProviders = nurseAssignments[nurse] ? Object.entries(nurseAssignments[nurse]).map(([_, provider]) => provider) : [];
                                     const patientCountAM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am ?? 0), 0) : 0;
                                     const patientCountPM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.pm?.patientCount?.pm ?? 0), 0) : 0;
