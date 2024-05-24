@@ -5,7 +5,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { MouseEvent, useState } from "react";
 import DraggableProvider from "./components/DraggableProvider";
 import { DndContext, DragEndEvent } from "@dnd-kit/core";
-import { ArrowDownward, ArrowRight, CheckCircle, Delete } from "@mui/icons-material";
+import { ArrowDownward, ArrowRight, CheckCircle, Delete, Lock, LockOpen } from "@mui/icons-material";
 // @ts-ignore
 import * as Papa from 'papaparse';
 import RoomZone from "./components/RoomDropzone";
@@ -33,6 +33,7 @@ export default function Home() {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
     const [snackbarMessage, setSnackbarMessage] = useState<string>('');
+    const [roomsLocked, setRoomsLocked] = useState<boolean>(false);
 
     const [dateValue, setDateValue] = useState<Dayjs>(dayjs(new Date()));
     const [nurseName, setNurseName] = useState<string>('');
@@ -200,6 +201,11 @@ export default function Home() {
                 })
             }
         } else if (activeType === 'room') {
+            if (roomsLocked) {
+                setSnackbarMessage('Unlock rooms to make edits.')
+                setSnackbarOpen(true)
+                return
+            }
             const parentNurse = roomParents[activeValue];
             if (over && parentNurse && overNurse === parentNurse) {
                 return;
@@ -372,7 +378,7 @@ export default function Home() {
                             <Grid item container>
                                 <Grid item container xs={8}>
                                     <TextField
-                                        placeholder="Team Members"
+                                        placeholder="Room Name"
                                         value={room}
                                         onChange={e => setRoom(e.currentTarget.value)}
                                         sx={{ width: '100%' }}
@@ -617,6 +623,11 @@ export default function Home() {
                         </Grid>
                         <Grid item container>
                             <Typography variant='h4'>Rooms</Typography>
+                            {
+                                roomsLocked
+                                    ? <Lock onMouseDown={() => setRoomsLocked(false)} />
+                                    : <LockOpen onMouseDown={() => setRoomsLocked(true)} />
+                            }
                         </Grid>
                         <Grid item container direction='row'>
                             {
