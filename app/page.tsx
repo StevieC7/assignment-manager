@@ -310,6 +310,8 @@ export default function Home() {
         localStorage.setItem("roomParents", JSON.stringify(roomParents));
         localStorage.setItem("providerParents", JSON.stringify(providerParents));
         localStorage.setItem("roomsLocked", JSON.stringify(roomsLocked));
+        localStorage.setItem("nurseTeamList", JSON.stringify(nurseTeamList));
+        localStorage.setItem("nurseTeamChildren", JSON.stringify(nurseTeamChildren));
     }
 
     const handleLoadLocal = () => {
@@ -320,13 +322,17 @@ export default function Home() {
         const roomParents = localStorage.getItem("roomParents");
         const providerParents = localStorage.getItem("providerParents");
         const roomsLocked = localStorage.getItem("roomsLocked");
+        const nurseTeamList = localStorage.getItem("nurseTeamList");
+        const nurseTeamChildren = localStorage.getItem("nurseTeamChildren");
         if (dateValue) setDateValue(dayjs(dateValue));
         if (nurses) setNurseList(JSON.parse(nurses));
         if (rooms) setRoomList(JSON.parse(rooms));
         if (providers) setProviderList(JSON.parse(providers));
         if (roomParents) setRoomParents(JSON.parse(roomParents));
         if (providerParents) setProviderParents(JSON.parse(providerParents));
-        if (roomsLocked) setProviderParents(JSON.parse(roomsLocked));
+        if (roomsLocked) setRoomsLocked(JSON.parse(roomsLocked));
+        if (nurseTeamList) setNurseTeamList(JSON.parse(nurseTeamList));
+        if (nurseTeamChildren) setNurseTeamChildren(JSON.parse(nurseTeamChildren));
     }
 
     const handleExport = () => {

@@ -44,7 +44,7 @@ export default function DraggableRoom({ roomId, nurseName, nurseAssignments, isM
                                             const patientCount = shiftSlots.am?.patientCount;
                                             if (providerName && room === roomId) {
                                                 return (
-                                                    <DraggableProvider key={`provider-${providerName}-am`} shift='am' providerId={providerName}>{providerName}: {patientCount?.am?.inPerson}</DraggableProvider>
+                                                    <DraggableProvider key={`provider-${providerName}-am`} shift='am' providerId={providerName}>{providerName}: {patientCount?.am?.inPerson} {patientCount?.am?.virtual ? `(+${patientCount.am.virtual})` : null}</DraggableProvider>
                                                 )
                                             }
                                         })
