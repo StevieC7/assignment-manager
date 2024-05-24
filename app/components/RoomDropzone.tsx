@@ -9,7 +9,7 @@ export default function RoomZone({ nurseId, children }: Props) {
         id: `nurse-${nurseId}`
     })
     return (
-        <div ref={setNodeRef} className={`border-2 flex flex-col flex-grow`}>
+        <div ref={setNodeRef} className={`flex flex-col flex-grow`}>
             <Grid container>
                 {children}
             </Grid>

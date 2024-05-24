@@ -334,23 +334,18 @@ export default function Home() {
 
     const handleAutoAssign = () => {
         const { providerParents, roomParents: newRoomParents, warningMessage } = autoAssigner(allActiveNurseGroupings, roomList, providerList, Object.keys(roomParents).length ? roomParents : undefined);
-        console.log({ newRoomParents })
+        if (newRoomParents['undefined']) delete newRoomParents['undefined'];
         setRoomParents(newRoomParents);
         setProviderParents(providerParents);
         if (warningMessage) {
             setSnackbarMessage(warningMessage);
             setSnackbarOpen(true);
-        }
-        else {
+        } else {
             setSnackbarMessage('Auto-assign successful!');
             setSnackbarOpen(true);
         }
     }
 
-    const handleResetAssignments = () => {
-        setRoomParents({});
-        setProviderParents({});
-    }
     enum ResetOptions {
         ALL,
         PROVIDERS,
@@ -366,6 +361,7 @@ export default function Home() {
             case ResetOptions.ALL:
                 setRoomParents({});
                 setProviderParents({});
+                setRoomsLocked(false);
                 break;
             case ResetOptions.PROVIDERS:
                 setProviderParents({});
@@ -739,7 +735,7 @@ export default function Home() {
                                     const patientCountAM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am ?? 0), 0) : 0;
                                     const patientCountPM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.pm?.patientCount?.pm ?? 0), 0) : 0;
                                     return (
-                                        <Grid key={`${index}-${nurse}`} item container className='ml-6 mb-6 w-4/12 min-w-96 max-w-lg bg-white' direction='column'>
+                                        <Grid key={`${index}-${nurse}`} item container className='ml-6 mb-6 p-6 w-4/12 min-w-96 max-w-lg bg-white' direction='column'>
                                             <Typography variant='h5' className="w-fit">{nurse}</Typography>
                                             <Grid container>
                                                 {
@@ -790,7 +786,7 @@ export default function Home() {
                                     const patientCountAM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am ?? 0), 0) : 0;
                                     const patientCountPM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.pm?.patientCount?.pm ?? 0), 0) : 0;
                                     return (
-                                        <Grid key={`${index}-${nurse}`} item container className='ml-6 mb-6 w-4/12 min-w-96 max-w-lg bg-white' direction='column'>
+                                        <Grid key={`${index}-${nurse}`} item container className='ml-6 mb-6 p-6 w-4/12 min-w-96 max-w-lg bg-white' direction='column'>
                                             <Typography variant='h5' className="w-fit">{nurse}</Typography>
                                             <Grid item container direction='row'>
                                                 <Grid item xs={4}></Grid>

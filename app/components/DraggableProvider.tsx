@@ -1,5 +1,7 @@
 import React from 'react';
 import { useDraggable, DragOverlayProps } from '@dnd-kit/core';
+import { Grid, Typography } from '@mui/material';
+import { DragIndicator } from '@mui/icons-material';
 
 type Props = {
     providerId: string
@@ -18,6 +20,7 @@ export default function DraggableProvider({ providerId, shift, children }: Props
 
     return (
         <button ref={setNodeRef} style={style} {...listeners} {...attributes} className={`${shift === 'am' ? 'bg-orange-100' : 'bg-blue-100'} p-4 rounded-full h-12 items-center flex`}>
+            <DragIndicator sx={{ mr: '0.25rem' }} />
             {children}
         </button>
     );
