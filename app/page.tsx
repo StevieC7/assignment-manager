@@ -12,6 +12,7 @@ import RoomZone from "./components/RoomDropzone";
 import DraggableRoom from "./components/DraggableRoom";
 import { autoAssigner } from "./utils/autoAssigner";
 import dayjs, { Dayjs } from "dayjs";
+import exportHelper from "./utils/exportHelper";
 
 export type Provider = {
     name: string,
@@ -330,17 +331,14 @@ export default function Home() {
 
     const handleExport = () => {
         // TODO: fix this
-        // const data = {
-        //     fields: ['Nurse', 'Provider', 'Patient Count'],
-        //     data: Object.entries(nurseAssignments).map(assignmentTuple => [assignmentTuple[0], assignmentTuple[1].map(assignment => assignment.provider?.name), assignmentTuple[1].map(assignment => assignment.provider?.patientCount)])
-        // }
-        // const csv = Papa.unparse(data);
-        // const blob = new Blob([csv], { type: 'text/csv;charset=utf-8,' });
-        // const objUrl = URL.createObjectURL(blob);
-        // const link = document.createElement('a');
-        // link.setAttribute('href', objUrl);
-        // link.setAttribute('download', 'schedule.csv');
-        // link.click();
+        const data = exportHelper(nurseAssignments);
+        const csv = Papa.unparse(data);
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8,' });
+        const objUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', objUrl);
+        link.setAttribute('download', `schedule_${dayjs(dateValue).format('MM_DD_YYYY')}.csv`);
+        link.click();
     }
 
     const handleAutoAssign = () => {
