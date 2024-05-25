@@ -44,7 +44,15 @@ export default function DraggableRoom({ roomId, nurseName, nurseAssignments, isM
                                             const patientCount = shiftSlots.am?.patientCount;
                                             if (providerName && room === roomId) {
                                                 return (
-                                                    <DraggableProvider key={`provider-${providerName}-am`} shift='am' providerId={providerName}>{providerName}: {patientCount?.am?.inPerson} {patientCount?.am?.virtual ? `(+${patientCount.am.virtual})` : null}</DraggableProvider>
+                                                    <DraggableProvider
+                                                        key={`provider-${providerName}-am`}
+                                                        shift='am'
+                                                        providerName={providerName}
+                                                        patientCount={{
+                                                            inPerson: patientCount?.am.inPerson ?? 0,
+                                                            virtual: patientCount?.am.virtual ?? 0
+                                                        }}
+                                                    />
                                                 )
                                             }
                                         })
@@ -70,7 +78,15 @@ export default function DraggableRoom({ roomId, nurseName, nurseAssignments, isM
                                             const patientCount = shiftSlots.pm?.patientCount;
                                             if (providerName && room === roomId) {
                                                 return (
-                                                    <DraggableProvider key={`provider-${providerName}-pm`} shift='pm' providerId={providerName}>{providerName}: {patientCount?.pm?.inPerson} {patientCount?.pm?.virtual ? `(+${patientCount.pm.virtual})` : null}</DraggableProvider>
+                                                    <DraggableProvider
+                                                        key={`provider-${providerName}-pm`}
+                                                        shift='pm'
+                                                        providerName={providerName}
+                                                        patientCount={{
+                                                            inPerson: patientCount?.pm.inPerson ?? 0,
+                                                            virtual: patientCount?.pm.virtual ?? 0,
+                                                        }}
+                                                    />
                                                 )
                                             }
                                         })
