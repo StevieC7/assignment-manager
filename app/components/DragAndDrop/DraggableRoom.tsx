@@ -1,6 +1,6 @@
 import { useDraggable } from "@dnd-kit/core";
 import ProviderZone from "./ProviderDropzone";
-import { NurseAssignments } from "../page";
+import { NurseAssignments } from "../../types/types";
 import DraggableProvider from "./DraggableProvider";
 import { Grid, Typography } from "@mui/material";
 import { DragIndicator } from "@mui/icons-material";

@@ -1,4 +1,4 @@
-import { NurseAssignments } from "../page";
+import { NurseAssignments } from "../types/types";
 
 type CSVDataFields = {
     fields: string[],

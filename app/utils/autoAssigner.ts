@@ -1,5 +1,5 @@
 // TODO: fix room name "undefined" sometimes being returned with a provider attached
-import { Provider } from "../page";
+import { Provider } from "../types/types";
 
 export function autoAssigner(nurseList: string[], roomList: string[], providerList: Provider[], existingRoomParents?: Record<string, string | null>) {
     const roomParents: Record<string, string | null> = existingRoomParents ?? {};
