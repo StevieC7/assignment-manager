@@ -12,38 +12,7 @@ import SummaryTable from "./components/SummaryTable";
 import StaffSetupSidebar from "./components/StaffSetupSidebar";
 import MainSidebar from "./components/MainSidebar";
 import NurseTeamCard from "./components/NurseTeamCard";
-
-export type Provider = {
-    name: string,
-    patientCount: {
-        am: {
-            inPerson: number,
-            virtual: number
-        },
-        pm: {
-            inPerson: number,
-            virtual: number
-        },
-    },
-}
-
-export type ShiftSlots = {
-    am: Provider | null,
-    pm: Provider | null,
-};
-export type Rooms = Record<string, ShiftSlots>;
-export type NurseAssignments = Record<string, Rooms>;
-
-export enum ResetOptions {
-    ALL,
-    PROVIDERS,
-}
-
-// export enum SortOptions {
-//     NONE,
-//     ASCENDING_BY_PATIENT_COUNT,
-//     DESCENDING_BY_PATIENT_COUNT
-// }
+import { NurseAssignments, Provider, ResetOptions } from "./types/types";
 
 export default function Home() {
     const [drawerOpen, setDrawerOpen] = useState<boolean>(false);

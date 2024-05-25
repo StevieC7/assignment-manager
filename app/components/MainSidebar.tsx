@@ -3,7 +3,7 @@ import { Button, Grid, Menu, MenuItem, Typography } from "@mui/material"
 import DraggableRoom from "./DragAndDrop/DraggableRoom"
 import DraggableProvider from "./DragAndDrop/DraggableProvider"
 import { Dispatch, MouseEvent, useState } from "react"
-import { NurseAssignments, Provider, ResetOptions } from "../page"
+import { NurseAssignments, Provider, ResetOptions } from "../types/types"
 
 type Props = {
     setDrawerOpen: Dispatch<boolean>

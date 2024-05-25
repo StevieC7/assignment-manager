@@ -1,6 +1,6 @@
 import dayjs, { Dayjs } from "dayjs"
 import { Dispatch, FormEvent, useState } from "react"
-import { Provider } from "../page"
+import { Provider } from "../types/types"
 import { Button, Drawer, Grid, MenuItem, Select, TextField, Typography } from "@mui/material"
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers"
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs"

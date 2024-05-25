@@ -1,5 +1,5 @@
 import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
-import { NurseAssignments, Provider } from "../page";
+import { NurseAssignments, Provider } from "../types/types";
 type Props = {
     activeNurseTeams: string[]
     activeNurses: string[]

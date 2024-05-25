@@ -1,7 +1,7 @@
 import { Grid, Paper, Typography } from "@mui/material"
 import RoomZone from "./DragAndDrop/RoomDropzone"
 import DraggableRoom from "./DragAndDrop/DraggableRoom"
-import { NurseAssignments } from "../page"
+import { NurseAssignments } from "../types/types"
 
 type Props = {
     nurse: string
