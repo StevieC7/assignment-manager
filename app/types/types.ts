@@ -24,8 +24,8 @@ export enum ResetOptions {
     PROVIDERS,
 }
 
-// export enum SortOptions {
-//     NONE,
-//     ASCENDING_BY_PATIENT_COUNT,
-//     DESCENDING_BY_PATIENT_COUNT
-// }
+export enum SortOptions {
+    NONE,
+    ASCENDING_BY_PATIENT_COUNT,
+    DESCENDING_BY_PATIENT_COUNT
+}
