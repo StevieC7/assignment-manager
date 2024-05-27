@@ -1,5 +1,5 @@
 'use client';
-import { Button, Grid, Snackbar, Typography } from "@mui/material";
+import { Button, Grid, Snackbar, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { useState } from "react";
 import { DndContext, DragEndEvent } from "@dnd-kit/core";
 import { FileDownload, FileOpen, Save, Sort } from "@mui/icons-material";
@@ -40,6 +40,9 @@ export default function Home() {
     const allActiveNurseGroupings = [...activeNurseTeams, ...activeNurses];
     const averagePatientCountAM = Math.ceil(providerList.reduce((prev, curr) => prev + curr.patientCount.am.inPerson, 0) / allActiveNurseGroupings.length);
     const averagePatientCountPM = Math.ceil(providerList.reduce((prev, curr) => prev + curr.patientCount.pm.inPerson, 0) / allActiveNurseGroupings.length);
+
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
     const assignNurses = () => {
         const nurseRecord: NurseAssignments = {};
@@ -234,127 +237,138 @@ export default function Home() {
 
     return (
         <main>
-            <DndContext onDragEnd={handleDragEnd}>
-                <Grid container direction='row' justifyContent='space-between' alignItems='center' className='bg-black text-white p-4 fixed top-0'>
-                    <Typography variant="h1" fontSize={36}>Assignment Manager</Typography>
-                    <Grid item>
-                        <Save onClick={handleSaveToLocal} sx={{ cursor: 'pointer', mr: 2 }} />
-                        <FileOpen onClick={handleLoadLocal} sx={{ cursor: 'pointer', mr: 2 }} />
-                        <FileDownload onClick={handleExport} sx={{ cursor: 'pointer' }} />
-                    </Grid>
-                </Grid>
-                <Grid
-                    container
-                    direction='row'
-                    sx={{ position: 'absolute', top: '80px', zIndex: -1 }}
-                >
-                    <Grid item direction='column' xs={9} sx={{ padding: '1rem' }}>
-                        <Grid item container direction='row' alignItems='center'>
-                            <Typography variant='h4'>Summary</Typography>
-                            {dayjs(dateValue).format('MM/DD/YYYY')}
+            {
+                isMobile
+                    ? (
+                        <Grid container justifyContent='center' alignItems='center' sx={{ height: '100vh', p: '2rem' }}>
+                            This application does not yet support this screen size.
                         </Grid>
-                        <SummaryTable
-                            activeNurses={activeNurses}
-                            activeNurseTeams={activeNurseTeams}
-                            nurseAssignments={nurseAssignments}
-                            providerList={providerList}
-                            averagePatientCountAM={isNaN(averagePatientCountAM) ? 0 : averagePatientCountAM}
-                            averagePatientCountPM={isNaN(averagePatientCountPM) ? 0 : averagePatientCountPM}
-                        />
-                        <Grid item container justifyContent='space-between'>
-                            <Typography variant='h4' className='pl-5 mb-2'>Assignments</Typography>
-                            <Grid item container xs={3} justifyContent='flex-end'>
-                                <Button
-                                    onMouseDown={() => setNurseSortSetting(nurseSortSetting === SortOptions.ASCENDING_BY_PATIENT_COUNT ? SortOptions.DESCENDING_BY_PATIENT_COUNT : SortOptions.ASCENDING_BY_PATIENT_COUNT)}
-                                    startIcon={
-                                        <Sort
-                                            sx={{ transform: `${nurseSortSetting === SortOptions.ASCENDING_BY_PATIENT_COUNT ? 'none' : 'rotate(180deg) scaleX(-1)'}` }}
-                                        />
-                                    }
-                                >
-                                    Sort by # Patients
-                                </Button>
+                    )
+                    : (
+
+                        <DndContext onDragEnd={handleDragEnd}>
+                            <Grid container direction='row' justifyContent='space-between' alignItems='center' className='bg-black text-white p-4 fixed top-0'>
+                                <Typography variant="h1" fontSize={36}>Assignment Manager</Typography>
+                                <Grid item>
+                                    <Save onClick={handleSaveToLocal} sx={{ cursor: 'pointer', mr: 2 }} />
+                                    <FileOpen onClick={handleLoadLocal} sx={{ cursor: 'pointer', mr: 2 }} />
+                                    <FileDownload onClick={handleExport} sx={{ cursor: 'pointer' }} />
+                                </Grid>
                             </Grid>
-                        </Grid>
-                        <Grid
-                            item
-                            container
-                            direction='row'
-                            xs={12}
-                            spacing={2}
-                        >
-                            {
-                                nurseSortSetting !== SortOptions.NONE
-                                    ? sortedActiveNursesAndTeams.map((nurse, index) => {
-                                        return (
-                                            <NurseTeamCard
-                                                key={`${index}-${nurse}`}
-                                                nurse={nurse}
-                                                nurseTeamChildren={nurseTeamChildren}
-                                                averagePatientCountAM={averagePatientCountAM}
-                                                averagePatientCountPM={averagePatientCountPM}
-                                                nurseAssignments={nurseAssignments}
-                                            />
-                                        )
-                                    })
-                                    : [...activeNurseTeams, ...activeNurses].map((nurse, index) => {
-                                        return (
-                                            <NurseTeamCard
-                                                key={`${index}-${nurse}`}
-                                                nurse={nurse}
-                                                nurseTeamChildren={nurseTeamChildren}
-                                                averagePatientCountAM={averagePatientCountAM}
-                                                averagePatientCountPM={averagePatientCountPM}
-                                                nurseAssignments={nurseAssignments}
-                                            />
-                                        )
-                                    })
-                            }
-                        </Grid>
-                    </Grid>
-                    <MainSidebar
-                        setDrawerOpen={setDrawerOpen}
-                        handleAutoAssign={handleAutoAssign}
-                        handleReset={handleReset}
-                        roomsLocked={roomsLocked}
-                        setRoomsLocked={setRoomsLocked}
-                        roomList={roomList}
-                        providerList={providerList}
-                        roomParents={roomParents}
-                        providerParents={providerParents}
-                        nurseAssignments={nurseAssignments}
-                    />
-                    <StaffSetupSidebar
-                        open={drawerOpen}
-                        setOpen={setDrawerOpen}
-                        dateValue={dateValue}
-                        setDateValue={setDateValue}
-                        nurseTeamList={nurseTeamList}
-                        setNurseTeamList={setNurseTeamList}
-                        nurseList={nurseList}
-                        setNurseList={setNurseList}
-                        nurseTeamChildren={nurseTeamChildren}
-                        setNurseTeamChildren={setNurseTeamChildren}
-                        roomList={roomList}
-                        setRoomList={setRoomList}
-                        providerList={providerList}
-                        setProviderList={setProviderList}
-                        roomParents={roomParents}
-                        setRoomParents={setRoomParents}
-                        providerParents={providerParents}
-                        setProviderParents={setProviderParents}
-                    />
-                    <Snackbar
-                        open={snackbarOpen}
-                        autoHideDuration={5000}
-                        onClose={() => {
-                            setSnackbarOpen(false)
-                            setSnackbarMessage('')
-                        }}
-                        message={snackbarMessage}
-                    />
-                </Grid>
-            </DndContext>
+                            <Grid
+                                container
+                                direction='row'
+                                sx={{ position: 'absolute', top: '80px', zIndex: -1 }}
+                            >
+                                <Grid item direction='column' xs={9} sx={{ padding: '1rem' }}>
+                                    <Grid item container direction='row' alignItems='center'>
+                                        <Typography variant='h4'>Summary</Typography>
+                                        {dayjs(dateValue).format('MM/DD/YYYY')}
+                                    </Grid>
+                                    <SummaryTable
+                                        activeNurses={activeNurses}
+                                        activeNurseTeams={activeNurseTeams}
+                                        nurseAssignments={nurseAssignments}
+                                        providerList={providerList}
+                                        averagePatientCountAM={isNaN(averagePatientCountAM) ? 0 : averagePatientCountAM}
+                                        averagePatientCountPM={isNaN(averagePatientCountPM) ? 0 : averagePatientCountPM}
+                                    />
+                                    <Grid item container justifyContent='space-between'>
+                                        <Typography variant='h4' className='pl-5 mb-2'>Assignments</Typography>
+                                        <Grid item container xs={3} justifyContent='flex-end'>
+                                            <Button
+                                                onMouseDown={() => setNurseSortSetting(nurseSortSetting === SortOptions.ASCENDING_BY_PATIENT_COUNT ? SortOptions.DESCENDING_BY_PATIENT_COUNT : SortOptions.ASCENDING_BY_PATIENT_COUNT)}
+                                                startIcon={
+                                                    <Sort
+                                                        sx={{ transform: `${nurseSortSetting === SortOptions.ASCENDING_BY_PATIENT_COUNT ? 'none' : 'rotate(180deg) scaleX(-1)'}` }}
+                                                    />
+                                                }
+                                            >
+                                                Sort by # Patients
+                                            </Button>
+                                        </Grid>
+                                    </Grid>
+                                    <Grid
+                                        item
+                                        container
+                                        direction='row'
+                                        xs={12}
+                                        spacing={2}
+                                    >
+                                        {
+                                            nurseSortSetting !== SortOptions.NONE
+                                                ? sortedActiveNursesAndTeams.map((nurse, index) => {
+                                                    return (
+                                                        <NurseTeamCard
+                                                            key={`${index}-${nurse}`}
+                                                            nurse={nurse}
+                                                            nurseTeamChildren={nurseTeamChildren}
+                                                            averagePatientCountAM={averagePatientCountAM}
+                                                            averagePatientCountPM={averagePatientCountPM}
+                                                            nurseAssignments={nurseAssignments}
+                                                        />
+                                                    )
+                                                })
+                                                : [...activeNurseTeams, ...activeNurses].map((nurse, index) => {
+                                                    return (
+                                                        <NurseTeamCard
+                                                            key={`${index}-${nurse}`}
+                                                            nurse={nurse}
+                                                            nurseTeamChildren={nurseTeamChildren}
+                                                            averagePatientCountAM={averagePatientCountAM}
+                                                            averagePatientCountPM={averagePatientCountPM}
+                                                            nurseAssignments={nurseAssignments}
+                                                        />
+                                                    )
+                                                })
+                                        }
+                                    </Grid>
+                                </Grid>
+                                <MainSidebar
+                                    setDrawerOpen={setDrawerOpen}
+                                    handleAutoAssign={handleAutoAssign}
+                                    handleReset={handleReset}
+                                    roomsLocked={roomsLocked}
+                                    setRoomsLocked={setRoomsLocked}
+                                    roomList={roomList}
+                                    providerList={providerList}
+                                    roomParents={roomParents}
+                                    providerParents={providerParents}
+                                    nurseAssignments={nurseAssignments}
+                                />
+                                <StaffSetupSidebar
+                                    open={drawerOpen}
+                                    setOpen={setDrawerOpen}
+                                    dateValue={dateValue}
+                                    setDateValue={setDateValue}
+                                    nurseTeamList={nurseTeamList}
+                                    setNurseTeamList={setNurseTeamList}
+                                    nurseList={nurseList}
+                                    setNurseList={setNurseList}
+                                    nurseTeamChildren={nurseTeamChildren}
+                                    setNurseTeamChildren={setNurseTeamChildren}
+                                    roomList={roomList}
+                                    setRoomList={setRoomList}
+                                    providerList={providerList}
+                                    setProviderList={setProviderList}
+                                    roomParents={roomParents}
+                                    setRoomParents={setRoomParents}
+                                    providerParents={providerParents}
+                                    setProviderParents={setProviderParents}
+                                />
+                                <Snackbar
+                                    open={snackbarOpen}
+                                    autoHideDuration={5000}
+                                    onClose={() => {
+                                        setSnackbarOpen(false)
+                                        setSnackbarMessage('')
+                                    }}
+                                    message={snackbarMessage}
+                                />
+                            </Grid>
+                        </DndContext>
+                    )
+            }
         </main >
     );
 }
