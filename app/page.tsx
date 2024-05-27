@@ -22,8 +22,6 @@ export default function Home() {
     const [roomsLocked, setRoomsLocked] = useState<boolean>(false);
 
     const [nurseSortSetting, setNurseSortSetting] = useState<SortOptions>(SortOptions.NONE);
-    const [sortedActiveNurses, setSortedActiveNurses] = useState<string[]>([]);
-    const [sortedActiveNurseTeams, setSortedActiveNurseTeams] = useState<string[]>([]);
 
     const [dateValue, setDateValue] = useState<Dayjs>(dayjs(new Date()));
 
@@ -42,31 +40,6 @@ export default function Home() {
     const allActiveNurseGroupings = [...activeNurseTeams, ...activeNurses];
     const averagePatientCountAM = Math.ceil(providerList.reduce((prev, curr) => prev + curr.patientCount.am.inPerson, 0) / allActiveNurseGroupings.length);
     const averagePatientCountPM = Math.ceil(providerList.reduce((prev, curr) => prev + curr.patientCount.pm.inPerson, 0) / allActiveNurseGroupings.length);
-
-    const handleSortNursesAndTeams = (sortMode: SortOptions) => {
-        switch (sortMode) {
-            case SortOptions.NONE:
-                setNurseSortSetting(SortOptions.NONE)
-                setSortedActiveNurses([])
-                setSortedActiveNurseTeams([])
-                break;
-            case SortOptions.ASCENDING_BY_PATIENT_COUNT:
-                const sortedActiveNurseListByPatientCountAscending = sortNursesByPatientCount(activeNurses, nurseAssignments, 'asc')
-                const sortedActiveNurseTeamListByPatientCountAscending = sortNursesByPatientCount(activeNurseTeams, nurseAssignments, 'asc')
-                setSortedActiveNurses(sortedActiveNurseListByPatientCountAscending)
-                setSortedActiveNurseTeams(sortedActiveNurseTeamListByPatientCountAscending)
-                setNurseSortSetting(SortOptions.ASCENDING_BY_PATIENT_COUNT)
-                break;
-            case SortOptions.DESCENDING_BY_PATIENT_COUNT:
-                const sortedActiveNurseListByPatientCountDescending = sortNursesByPatientCount(activeNurses, nurseAssignments, 'desc')
-                const sortedActiveNurseTeamListByPatientCountDescending = sortNursesByPatientCount(activeNurseTeams, nurseAssignments, 'desc')
-                setSortedActiveNurses(sortedActiveNurseListByPatientCountDescending)
-                setSortedActiveNurseTeams(sortedActiveNurseTeamListByPatientCountDescending)
-                setNurseSortSetting(SortOptions.DESCENDING_BY_PATIENT_COUNT)
-                break;
-        }
-    }
-
 
     const assignNurses = () => {
         const nurseRecord: NurseAssignments = {};
@@ -88,6 +61,19 @@ export default function Home() {
         return nurseRecord;
     }
     let nurseAssignments = assignNurses();
+
+
+    const handleSortNursesAndTeams = (sortMode: SortOptions) => {
+        switch (sortMode) {
+            case SortOptions.NONE:
+                return [...activeNurseTeams, ...activeNurses]
+            case SortOptions.ASCENDING_BY_PATIENT_COUNT:
+                return sortNursesByPatientCount([...activeNurseTeams, ...activeNurses], nurseAssignments, 'asc')
+            case SortOptions.DESCENDING_BY_PATIENT_COUNT:
+                return sortNursesByPatientCount([...activeNurseTeams, ...activeNurses], nurseAssignments, 'desc')
+        }
+    }
+    const sortedActiveNursesAndTeams = handleSortNursesAndTeams(nurseSortSetting);
 
     const handleDragEnd = (event: DragEndEvent) => {
         // over id format: nurse-{nurseName} | nurse-{nurseName}-room-{roomName}-shift-{shiftType}
@@ -279,7 +265,7 @@ export default function Home() {
                             <Typography variant='h4' className='pl-5 mb-2'>Assignments</Typography>
                             <Grid item container xs={3} justifyContent='flex-end'>
                                 <Button
-                                    onMouseDown={() => handleSortNursesAndTeams(nurseSortSetting === SortOptions.ASCENDING_BY_PATIENT_COUNT ? SortOptions.DESCENDING_BY_PATIENT_COUNT : SortOptions.ASCENDING_BY_PATIENT_COUNT)}
+                                    onMouseDown={() => setNurseSortSetting(nurseSortSetting === SortOptions.ASCENDING_BY_PATIENT_COUNT ? SortOptions.DESCENDING_BY_PATIENT_COUNT : SortOptions.ASCENDING_BY_PATIENT_COUNT)}
                                     startIcon={
                                         <Sort
                                             sx={{ transform: `${nurseSortSetting === SortOptions.ASCENDING_BY_PATIENT_COUNT ? 'none' : 'rotate(180deg) scaleX(-1)'}` }}
@@ -299,7 +285,7 @@ export default function Home() {
                         >
                             {
                                 nurseSortSetting !== SortOptions.NONE
-                                    ? sortedActiveNurseTeams.map((nurse, index) => {
+                                    ? sortedActiveNursesAndTeams.map((nurse, index) => {
                                         return (
                                             <NurseTeamCard
                                                 key={`${index}-${nurse}`}
@@ -311,34 +297,7 @@ export default function Home() {
                                             />
                                         )
                                     })
-                                    : activeNurseTeams.map((nurse, index) => {
-                                        return (
-                                            <NurseTeamCard
-                                                key={`${index}-${nurse}`}
-                                                nurse={nurse}
-                                                nurseTeamChildren={nurseTeamChildren}
-                                                averagePatientCountAM={averagePatientCountAM}
-                                                averagePatientCountPM={averagePatientCountPM}
-                                                nurseAssignments={nurseAssignments}
-                                            />
-                                        )
-                                    })
-                            }
-                            {
-                                nurseSortSetting !== SortOptions.NONE
-                                    ? sortedActiveNurses.map((nurse, index) => {
-                                        return (
-                                            <NurseTeamCard
-                                                key={`${index}-${nurse}`}
-                                                nurse={nurse}
-                                                nurseTeamChildren={nurseTeamChildren}
-                                                averagePatientCountAM={averagePatientCountAM}
-                                                averagePatientCountPM={averagePatientCountPM}
-                                                nurseAssignments={nurseAssignments}
-                                            />
-                                        )
-                                    })
-                                    : activeNurses.map((nurse, index) => {
+                                    : [...activeNurseTeams, ...activeNurses].map((nurse, index) => {
                                         return (
                                             <NurseTeamCard
                                                 key={`${index}-${nurse}`}
