@@ -34,7 +34,8 @@ export default function NurseTeamCard({
                 <Typography variant='h5' className="w-fit">{nurse}</Typography>
                 <Grid container>
                     {
-                        nurseTeamChildren[nurse].map((teamMember, index) => (
+                        nurseTeamChildren[nurse]
+                        && nurseTeamChildren[nurse].map((teamMember, index) => (
                             <Grid key={teamMember} item mr={1}>{index > 0 ? `/ ${teamMember}` : teamMember}</Grid>
                         ))
                     }
