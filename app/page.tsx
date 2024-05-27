@@ -272,8 +272,8 @@ export default function Home() {
                             activeNurseTeams={activeNurseTeams}
                             nurseAssignments={nurseAssignments}
                             providerList={providerList}
-                            averagePatientCountAM={averagePatientCountAM}
-                            averagePatientCountPM={averagePatientCountPM}
+                            averagePatientCountAM={isNaN(averagePatientCountAM) ? 0 : averagePatientCountAM}
+                            averagePatientCountPM={isNaN(averagePatientCountPM) ? 0 : averagePatientCountPM}
                         />
                         <Grid item container justifyContent='space-between'>
                             <Typography variant='h4' className='pl-5 mb-2'>Assignments</Typography>

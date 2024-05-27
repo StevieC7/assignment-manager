@@ -106,7 +106,13 @@ export default function SummaryTable({
                         <TableCell sx={{ backgroundColor: '#eeeeee', fontWeight: 'bold' }}>Total</TableCell>
                         <TableCell>{patientTotalAM + patientTotalPM}</TableCell>
                         <TableCell className={`${assignedPatientTotalPM + assignedPatientTotalAM < patientTotalPM + patientTotalAM ? 'bg-yellow-100' : 'bg-inherit'}`}>{assignedPatientTotalPM + assignedPatientTotalAM}</TableCell>
-                        <TableCell>{Math.ceil((assignedPatientTotalAM + assignedPatientTotalPM) / allActiveNurseGroupings.length)}</TableCell>
+                        <TableCell>
+                            {
+                                isNaN(Math.ceil((assignedPatientTotalAM + assignedPatientTotalPM) / allActiveNurseGroupings.length))
+                                    ? 0
+                                    : Math.ceil((assignedPatientTotalAM + assignedPatientTotalPM) / allActiveNurseGroupings.length)
+                            }
+                        </TableCell>
                         {
                             activeNurseTeams.map((nurseTeam, index) => {
                                 const nurseProviders = nurseAssignments[nurseTeam] ? Object.entries(nurseAssignments[nurseTeam]).map(([_, provider]) => provider) : [];
