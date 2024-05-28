@@ -31,21 +31,41 @@ export default function NurseTeamCard({
             direction='column'
         >
             <Paper sx={{ p: 2 }}>
-                <Typography variant='h5' sx={{ width: 'fit-content' }}>{nurse}</Typography>
+                <Typography variant='h5'
+                    sx={{ width: 'fit-content' }}
+                >
+                    {nurse}
+                </Typography>
                 <Grid container>
                     {
                         nurseTeamChildren[nurse]
                         && nurseTeamChildren[nurse].map((teamMember, index) => (
-                            <Grid key={teamMember} item mr={1}>{index > 0 ? `/ ${teamMember}` : teamMember}</Grid>
+                            <Grid
+                                key={teamMember}
+                                item
+                                mr={1}
+                            >
+                                {index > 0 ? `/ ${teamMember}` : teamMember}
+                            </Grid>
                         ))
                     }
                 </Grid>
-                <Grid item container direction='row'>
-                    <Grid item xs={4}></Grid>
+                <Grid
+                    item
+                    container
+                    direction='row'
+                >
+                    <Grid
+                        item
+                        xs={4}
+                    ></Grid>
                     {
                         patientCountAM > 0
                             ? (
-                                <Grid item container xs={4} justifyContent='space-between'>
+                                <Grid item
+                                    container
+                                    xs={4}
+                                    justifyContent='space-between'>
                                     AM
                                     <Typography
                                         sx={(theme) => ({
@@ -61,12 +81,18 @@ export default function NurseTeamCard({
                                     </Typography>
                                 </Grid>
                             )
-                            : <Grid item xs={4} />
+                            : <Grid item
+                                xs={4} />
                     }
                     {
                         patientCountPM > 0
                             ? (
-                                <Grid item container xs={4} justifyContent='space-between'>
+                                <Grid
+                                    item
+                                    container
+                                    xs={4}
+                                    justifyContent='space-between'
+                                >
                                     PM
                                     <Typography
                                         sx={(theme) => ({
@@ -82,14 +108,24 @@ export default function NurseTeamCard({
                                     </Typography>
                                 </Grid>
                             )
-                            : <Grid item xs={4} />
+                            : (
+                                <Grid
+                                    item
+                                    xs={4}
+                                />
+                            )
                     }
                 </Grid>
                 <RoomZone nurseId={nurse}>
                     {
                         nurseAssignments[nurse] && Object.keys(nurseAssignments[nurse]).map((room, index) => {
                             return (
-                                <DraggableRoom key={`${index}-${room}`} roomId={room} nurseName={nurse} nurseAssignments={nurseAssignments} />
+                                <DraggableRoom
+                                    key={`${index}-${room}`}
+                                    roomId={room}
+                                    nurseName={nurse}
+                                    nurseAssignments={nurseAssignments}
+                                />
                             )
                         })
                     }

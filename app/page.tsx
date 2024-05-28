@@ -240,7 +240,12 @@ export default function Home() {
             {
                 isMobile
                     ? (
-                        <Grid container justifyContent='center' alignItems='center' sx={{ height: '100vh', p: '2rem' }}>
+                        <Grid
+                            container
+                            justifyContent='center'
+                            alignItems='center'
+                            sx={{ height: '100vh', p: '2rem' }}
+                        >
                             This application does not yet support this screen size.
                         </Grid>
                     )
@@ -261,11 +266,23 @@ export default function Home() {
                                     left: 0,
                                 })}
                             >
-                                <Typography variant="h1" fontSize={36}>Assignment Manager</Typography>
+                                <Typography
+                                    variant="h1"
+                                    fontSize={36}
+                                >Assignment Manager</Typography>
                                 <Grid item>
-                                    <Save onClick={handleSaveToLocal} sx={{ cursor: 'pointer', mr: 2 }} />
-                                    <FileOpen onClick={handleLoadLocal} sx={{ cursor: 'pointer', mr: 2 }} />
-                                    <FileDownload onClick={handleExport} sx={{ cursor: 'pointer' }} />
+                                    <Save
+                                        onClick={handleSaveToLocal}
+                                        sx={{ cursor: 'pointer', mr: 2 }}
+                                    />
+                                    <FileOpen
+                                        onClick={handleLoadLocal}
+                                        sx={{ cursor: 'pointer', mr: 2 }}
+                                    />
+                                    <FileDownload
+                                        onClick={handleExport}
+                                        sx={{ cursor: 'pointer' }}
+                                    />
                                 </Grid>
                             </Grid>
                             <Grid
@@ -278,8 +295,18 @@ export default function Home() {
                                     zIndex: -1
                                 }}
                             >
-                                <Grid item direction='column' xs={9} sx={{ padding: '3rem' }}>
-                                    <Grid item container direction='row' alignItems='center'>
+                                <Grid
+                                    item
+                                    direction='column'
+                                    xs={9}
+                                    sx={{ padding: '3rem' }}
+                                >
+                                    <Grid
+                                        item
+                                        container
+                                        direction='row'
+                                        alignItems='center'
+                                    >
                                         <Typography variant='h4'>Summary</Typography>
                                         {dayjs(dateValue).format('MM/DD/YYYY')}
                                     </Grid>
@@ -291,9 +318,23 @@ export default function Home() {
                                         averagePatientCountAM={isNaN(averagePatientCountAM) ? 0 : averagePatientCountAM}
                                         averagePatientCountPM={isNaN(averagePatientCountPM) ? 0 : averagePatientCountPM}
                                     />
-                                    <Grid item container justifyContent='space-between'>
-                                        <Typography variant='h4' sx={{ mb: '1rem' }}>Assignments</Typography>
-                                        <Grid item container xs={3} justifyContent='flex-end'>
+                                    <Grid
+                                        item
+                                        container
+                                        justifyContent='space-between'
+                                    >
+                                        <Typography
+                                            variant='h4'
+                                            sx={{ mb: '1rem' }}
+                                        >
+                                            Assignments
+                                        </Typography>
+                                        <Grid
+                                            item
+                                            container
+                                            xs={3}
+                                            justifyContent='flex-end'
+                                        >
                                             <Button
                                                 onMouseDown={() => setNurseSortSetting(nurseSortSetting === SortOptions.ASCENDING_BY_PATIENT_COUNT ? SortOptions.DESCENDING_BY_PATIENT_COUNT : SortOptions.ASCENDING_BY_PATIENT_COUNT)}
                                                 startIcon={

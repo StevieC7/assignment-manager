@@ -44,9 +44,22 @@ export default function MainSidebar({
     }
 
     return (
-        <Grid item container direction='column' xs={3} sx={{ paddingTop: '3rem', paddingRight: '3rem' }}>
-            <Grid item container direction='column'>
-                <Button onClick={() => setDrawerOpen(true)} variant='contained' color='primary' sx={{ mb: '1rem' }} endIcon={<ArrowRight />}>
+        <Grid
+            item
+            container
+            direction='column'
+            xs={3}
+            sx={{ paddingTop: '3rem', paddingRight: '3rem' }}
+        >
+            <Grid
+                item
+                container
+                direction='column'>
+                <Button onClick={() => setDrawerOpen(true)}
+                    variant='contained'
+                    color='primary'
+                    sx={{ mb: '1rem' }}
+                    endIcon={<ArrowRight />}>
                     Staff Setup
                 </Button>
             </Grid>
@@ -57,7 +70,11 @@ export default function MainSidebar({
                 sx={{ mb: '2rem' }}
             >
                 <Grid item>
-                    <Button variant='outlined' color='warning' endIcon={<ArrowDownward />} onClick={e => handleOpenMenu(e)} sx={{ height: '3rem', width: '10rem' }}>
+                    <Button variant='outlined'
+                        color='warning'
+                        endIcon={<ArrowDownward />}
+                        onClick={e => handleOpenMenu(e)}
+                        sx={{ height: '3rem', width: '10rem' }}>
                         Reset
                     </Button>
                     <Menu
@@ -94,20 +111,36 @@ export default function MainSidebar({
                     </Button>
                 </Grid>
             </Grid>
-            <Grid item container justifyContent='space-between' mb={'2rem'}>
+            <Grid
+                item
+                container
+                justifyContent='space-between'
+                mb={'2rem'}
+            >
                 <Typography variant='h4'>Rooms</Typography>
                 {
                     roomsLocked
-                        ? <Lock onMouseDown={() => setRoomsLocked(false)} sx={{ cursor: 'pointer' }} />
-                        : <LockOpen onMouseDown={() => setRoomsLocked(true)} sx={{ cursor: 'pointer' }} />
+                        ? <Lock onMouseDown={() => setRoomsLocked(false)}
+                            sx={{ cursor: 'pointer' }} />
+                        : <LockOpen onMouseDown={() => setRoomsLocked(true)}
+                            sx={{ cursor: 'pointer' }} />
                 }
             </Grid>
-            <Grid item container direction='row' mb={'2rem'}>
+            <Grid
+                item
+                container
+                direction='row'
+                mb={'2rem'}
+            >
                 {
                     unassignedRooms.length
                         ? unassignedRooms.map(room => {
                             return (
-                                <DraggableRoom key={`room-${room}`} roomId={room} nurseName={null} nurseAssignments={nurseAssignments} isMinimized />
+                                <DraggableRoom key={`room-${room}`}
+                                    roomId={room}
+                                    nurseName={null}
+                                    nurseAssignments={nurseAssignments}
+                                    isMinimized />
                             )
                         })
                         : (
@@ -118,8 +151,17 @@ export default function MainSidebar({
                         )
                 }
             </Grid>
-            <Typography variant='h4' mb={'2rem'}>AM Providers</Typography>
-            <Grid item container mb={'2rem'}>
+            <Typography
+                variant='h4'
+                mb={'2rem'}
+            >
+                AM Providers
+            </Typography>
+            <Grid
+                item
+                container
+                mb={'2rem'}
+            >
                 {
                     unassignedProvidersAM.length
                         ? unassignedProvidersAM.map(provider => {
@@ -144,8 +186,16 @@ export default function MainSidebar({
                         )
                 }
             </Grid>
-            <Typography variant='h4' mb={'2rem'}>PM Providers</Typography>
-            <Grid item container>
+            <Typography
+                variant='h4'
+                mb={'2rem'}
+            >
+                PM Providers
+            </Typography>
+            <Grid
+                item
+                container
+            >
                 {
                     unassignedProvidersPM.length
                         ? unassignedProvidersPM.map(provider => {

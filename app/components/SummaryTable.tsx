@@ -29,7 +29,9 @@ export default function SummaryTable({
     const allActiveNurseGroupings = [...activeNurseTeams, ...activeNurses];
 
     return (
-        <TableContainer sx={{ maxWidth: '100%', mb: '2rem' }} component={Paper}>
+        <TableContainer sx={{ maxWidth: '100%', mb: '2rem' }}
+            component={Paper}
+        >
             <Table size='small'>
                 <TableHead>
                     <TableRow>

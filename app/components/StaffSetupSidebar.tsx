@@ -189,14 +189,20 @@ export default function StaffSetupSidebar({
     }
 
     return (
-        <Drawer open={open} onClose={() => setOpen(false)} anchor='right'>
+        <Drawer open={open}
+            onClose={() => setOpen(false)}
+            anchor='right'>
             <Grid
                 item
                 container
                 direction='column'
                 sx={{ height: 'auto', width: '30rem', padding: '1rem' }}
             >
-                <Grid item container direction='column' sx={{ mb: '2rem' }}>
+                <Grid item
+                    container
+                    direction='column'
+                    sx={{ mb: '2rem' }}
+                >
                     <Typography variant='h4'>Date</Typography>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <DatePicker
@@ -205,11 +211,17 @@ export default function StaffSetupSidebar({
                         />
                     </LocalizationProvider>
                 </Grid>
-                <Grid item container direction='column' sx={{ mb: '2rem' }}>
+                <Grid item
+                    container
+                    direction='column'
+                    sx={{ mb: '2rem' }}>
                     <Typography variant='h4'>Teams</Typography>
                     <form onSubmit={handleAddNurseTeam}>
-                        <Grid item container>
-                            <Grid item container xs={8}>
+                        <Grid item
+                            container>
+                            <Grid item
+                                container
+                                xs={8}>
                                 <TextField
                                     placeholder="Team name"
                                     value={nurseTeamName}
@@ -217,7 +229,11 @@ export default function StaffSetupSidebar({
                                     sx={{ width: '100%' }}
                                 />
                             </Grid>
-                            <Grid item container justifyContent='center' alignItems='center' xs={4}>
+                            <Grid item
+                                container
+                                justifyContent='center'
+                                alignItems='center'
+                                xs={4}>
                                 <Button
                                     type='submit'
                                     variant='contained'
@@ -232,7 +248,11 @@ export default function StaffSetupSidebar({
                         {
                             nurseTeamList.map((nurseTeam, id) => {
                                 return (
-                                    <Grid key={id} item container direction='row' alignItems='center'>
+                                    <Grid key={id}
+                                        item
+                                        container
+                                        direction='row'
+                                        alignItems='center'>
                                         <Typography>
                                             {nurseTeam}
                                         </Typography>
@@ -245,11 +265,17 @@ export default function StaffSetupSidebar({
                         }
                     </Grid>
                 </Grid>
-                <Grid item container direction='column' sx={{ mb: '2rem' }}>
+                <Grid item
+                    container
+                    direction='column'
+                    sx={{ mb: '2rem' }}>
                     <Typography variant='h4'>Nurses</Typography>
                     <form onSubmit={handleAddNurse}>
-                        <Grid item container>
-                            <Grid item container xs={8}>
+                        <Grid item
+                            container>
+                            <Grid item
+                                container
+                                xs={8}>
                                 <TextField
                                     placeholder="Nurse name"
                                     value={nurseName}
@@ -257,7 +283,11 @@ export default function StaffSetupSidebar({
                                     sx={{ width: '100%' }}
                                 />
                             </Grid>
-                            <Grid item container justifyContent='center' alignItems='center' xs={4}>
+                            <Grid item
+                                container
+                                justifyContent='center'
+                                alignItems='center'
+                                xs={4}>
                                 <Button
                                     type='submit'
                                     variant='contained'
@@ -273,23 +303,34 @@ export default function StaffSetupSidebar({
                             Object.entries(nurseTeamChildren).map(([team, nurses]) => {
                                 if (!nurses.length) return null;
                                 return (
-                                    <Grid key={team} item container sx={{ border: '2px solid black', padding: '1rem' }}>
+                                    <Grid key={team}
+                                        item
+                                        container
+                                        sx={{ border: '2px solid black', padding: '1rem' }}>
                                         <Typography variant='h5'>{team}</Typography>
                                         {
                                             nurses.map((nurse, id) => {
                                                 if (!nurse) return null;
                                                 return (
-                                                    <Grid key={id} item container direction='row' alignItems='center'>
+                                                    <Grid key={id}
+                                                        item
+                                                        container
+                                                        direction='row'
+                                                        alignItems='center'>
                                                         <Typography>
                                                             {nurse}
                                                         </Typography>
                                                         <Select sx={{ width: '5rem' }}>
-                                                            <MenuItem key='none' value='' onClick={() => handleAddNurseToTeam(nurse, '')}>None</MenuItem>
+                                                            <MenuItem key='none'
+                                                                value=''
+                                                                onClick={() => handleAddNurseToTeam(nurse, '')}>None</MenuItem>
                                                             {
                                                                 nurseTeamList.map(nurseTeam => {
                                                                     if (nurseTeam === team) return null;
                                                                     return (
-                                                                        <MenuItem key={nurseTeam} value={nurseTeam} onClick={() => handleAddNurseToTeam(nurse, nurseTeam)}>{nurseTeam}</MenuItem>
+                                                                        <MenuItem key={nurseTeam}
+                                                                            value={nurseTeam}
+                                                                            onClick={() => handleAddNurseToTeam(nurse, nurseTeam)}>{nurseTeam}</MenuItem>
                                                                     )
                                                                 })
                                                             }
@@ -313,7 +354,11 @@ export default function StaffSetupSidebar({
                                     return null;
                                 } else {
                                     return (
-                                        <Grid key={id} item container direction='row' alignItems='center'>
+                                        <Grid key={id}
+                                            item
+                                            container
+                                            direction='row'
+                                            alignItems='center'>
                                             <Typography>
                                                 {nurse}
                                             </Typography>
@@ -321,7 +366,9 @@ export default function StaffSetupSidebar({
                                                 {
                                                     nurseTeamList.map(nurseTeam => {
                                                         return (
-                                                            <MenuItem key={nurseTeam} value={nurseTeam} onClick={() => handleAddNurseToTeam(nurse, nurseTeam)}>{nurseTeam}</MenuItem>
+                                                            <MenuItem key={nurseTeam}
+                                                                value={nurseTeam}
+                                                                onClick={() => handleAddNurseToTeam(nurse, nurseTeam)}>{nurseTeam}</MenuItem>
                                                         )
                                                     })
                                                 }
@@ -336,11 +383,17 @@ export default function StaffSetupSidebar({
                         }
                     </Grid>
                 </Grid>
-                <Grid item container direction='column' sx={{ mb: '2rem' }}>
+                <Grid item
+                    container
+                    direction='column'
+                    sx={{ mb: '2rem' }}>
                     <Typography variant='h4'>Rooms</Typography>
                     <form onSubmit={handleAddRoom}>
-                        <Grid item container>
-                            <Grid item container xs={8}>
+                        <Grid item
+                            container>
+                            <Grid item
+                                container
+                                xs={8}>
                                 <TextField
                                     placeholder="Room Name"
                                     value={room}
@@ -348,7 +401,11 @@ export default function StaffSetupSidebar({
                                     sx={{ width: '100%' }}
                                 />
                             </Grid>
-                            <Grid item container justifyContent='center' alignItems='center' xs={4}>
+                            <Grid item
+                                container
+                                justifyContent='center'
+                                alignItems='center'
+                                xs={4}>
                                 <Button
                                     type='submit'
                                     variant='contained'
@@ -363,7 +420,11 @@ export default function StaffSetupSidebar({
                         {
                             roomList.map((room, id) => {
                                 return (
-                                    <Grid key={id} item container direction='row' alignItems='center'>
+                                    <Grid key={id}
+                                        item
+                                        container
+                                        direction='row'
+                                        alignItems='center'>
                                         <Typography>
                                             {room}
                                         </Typography>
@@ -376,7 +437,9 @@ export default function StaffSetupSidebar({
                         }
                     </Grid>
                 </Grid>
-                <Grid item container direction='column'>
+                <Grid item
+                    container
+                    direction='column'>
                     <form onSubmit={handleAddProvider}>
                         <Typography variant='h4'>Providers</Typography>
                         <TextField
@@ -388,9 +451,13 @@ export default function StaffSetupSidebar({
                             fullWidth
                             sx={{ mb: 1 }}
                         />
-                        <Grid container sx={{ mb: 1 }}>
-                            <Grid item container xs={6}>
-                                <Grid item xs={6}>
+                        <Grid container
+                            sx={{ mb: 1 }}>
+                            <Grid item
+                                container
+                                xs={6}>
+                                <Grid item
+                                    xs={6}>
                                     <TextField
                                         type='number'
                                         placeholder="AM Patients"
@@ -407,12 +474,19 @@ export default function StaffSetupSidebar({
                                         })}
                                     />
                                 </Grid>
-                                <Grid item container justifyContent='center' alignItems='center' xs={6}>
+                                <Grid item
+                                    container
+                                    justifyContent='center'
+                                    alignItems='center'
+                                    xs={6}>
                                     AM
                                 </Grid>
                             </Grid>
-                            <Grid item container xs={6}>
-                                <Grid item xs={6}>
+                            <Grid item
+                                container
+                                xs={6}>
+                                <Grid item
+                                    xs={6}>
                                     <TextField
                                         type='number'
                                         placeholder="PM Patients"
@@ -429,14 +503,22 @@ export default function StaffSetupSidebar({
                                         })}
                                     />
                                 </Grid>
-                                <Grid item container justifyContent='center' alignItems='center' xs={6}>
+                                <Grid item
+                                    container
+                                    justifyContent='center'
+                                    alignItems='center'
+                                    xs={6}>
                                     PM
                                 </Grid>
                             </Grid>
                         </Grid>
-                        <Grid container sx={{ mb: 1 }}>
-                            <Grid item container xs={6}>
-                                <Grid item xs={6}>
+                        <Grid container
+                            sx={{ mb: 1 }}>
+                            <Grid item
+                                container
+                                xs={6}>
+                                <Grid item
+                                    xs={6}>
                                     <TextField
                                         type='number'
                                         placeholder="AM Patients"
@@ -453,12 +535,19 @@ export default function StaffSetupSidebar({
                                         })}
                                     />
                                 </Grid>
-                                <Grid item container justifyContent='center' alignItems='center' xs={6}>
+                                <Grid item
+                                    container
+                                    justifyContent='center'
+                                    alignItems='center'
+                                    xs={6}>
                                     AM Virtual
                                 </Grid>
                             </Grid>
-                            <Grid item container xs={6}>
-                                <Grid item xs={6}>
+                            <Grid item
+                                container
+                                xs={6}>
+                                <Grid item
+                                    xs={6}>
                                     <TextField
                                         type='number'
                                         placeholder="PM Patients"
@@ -475,7 +564,11 @@ export default function StaffSetupSidebar({
                                         })}
                                     />
                                 </Grid>
-                                <Grid item container justifyContent='center' alignItems='center' xs={6}>
+                                <Grid item
+                                    container
+                                    justifyContent='center'
+                                    alignItems='center'
+                                    xs={6}>
                                     PM Virtual
                                 </Grid>
                             </Grid>
@@ -489,7 +582,8 @@ export default function StaffSetupSidebar({
                             Save
                         </Button>
                     </form>
-                    <Grid item container>
+                    <Grid item
+                        container>
                         {providerList.map((provider, id) => {
                             return (
                                 <Grid
@@ -505,13 +599,21 @@ export default function StaffSetupSidebar({
                                         border: '2px solid gray'
                                     }}
                                 >
-                                    <Grid item container justifyContent='space-between' sx={{ mb: '1rem' }}>
+                                    <Grid item
+                                        container
+                                        justifyContent='space-between'
+                                        sx={{ mb: '1rem' }}>
                                         <Typography variant='h5'>
                                             {provider.name}
                                         </Typography>
-                                        <Delete color='warning' onMouseDown={() => handleDeleteProvider(id)} sx={{ cursor: 'pointer' }} />
+                                        <Delete color='warning'
+                                            onMouseDown={() => handleDeleteProvider(id)}
+                                            sx={{ cursor: 'pointer' }} />
                                     </Grid>
-                                    <Grid item container justifyContent='space-between' alignItems='center'>
+                                    <Grid item
+                                        container
+                                        justifyContent='space-between'
+                                        alignItems='center'>
                                         <TextField
                                             type='number'
                                             value={provider.patientCount.am.inPerson}
@@ -527,7 +629,10 @@ export default function StaffSetupSidebar({
                                         />
                                         <Typography variant='body1'>PM patients</Typography>
                                     </Grid>
-                                    <Grid item container justifyContent='space-between' alignItems='center'>
+                                    <Grid item
+                                        container
+                                        justifyContent='space-between'
+                                        alignItems='center'>
                                         <TextField
                                             type='number'
                                             value={provider.patientCount.am.virtual}

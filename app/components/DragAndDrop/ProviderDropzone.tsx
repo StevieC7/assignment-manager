@@ -24,7 +24,10 @@ export default function ProviderZone({ nurseId, roomId, shift, isFull, children 
             })}
             xs={4}
         >
-            <Grid item container>
+            <Grid
+                item
+                container
+            >
                 {children}
             </Grid>
             {

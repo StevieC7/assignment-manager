@@ -14,7 +14,10 @@ export default function RoomZone({ nurseId, children }: Props) {
             direction='column'
             ref={setNodeRef}
         >
-            <Grid item container>
+            <Grid
+                item
+                container
+            >
                 {children}
             </Grid>
             <Grid
