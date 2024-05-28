@@ -44,18 +44,34 @@ export default function MainSidebar({
     }
 
     return (
-        <Grid item container direction='column' xs={3} sx={{ paddingTop: '1rem', paddingRight: '1rem' }}>
+        <Grid item container direction='column' xs={3} sx={{ paddingTop: '3rem', paddingRight: '3rem' }}>
             <Grid item container direction='column'>
                 <Button onClick={() => setDrawerOpen(true)} variant='contained' color='primary' sx={{ mb: '1rem' }} endIcon={<ArrowRight />}>
                     Staff Setup
                 </Button>
             </Grid>
-            <Grid item container mb={'2rem'}>
-                <Grid item xs={6}>
-                    <Button variant='outlined' color='warning' endIcon={<ArrowDownward />} onClick={e => handleOpenMenu(e)} sx={{ height: '3rem', width: '90%' }}>
+            <Grid
+                item
+                container
+                justifyContent='flex-end'
+                sx={{ mb: '2rem' }}
+            >
+                <Grid item>
+                    <Button variant='outlined' color='warning' endIcon={<ArrowDownward />} onClick={e => handleOpenMenu(e)} sx={{ height: '3rem', width: '10rem' }}>
                         Reset
                     </Button>
-                    <Menu open={!!anchorEl} anchorEl={anchorEl} onClose={handleCloseMenu}>
+                    <Menu
+                        open={!!anchorEl}
+                        anchorEl={anchorEl}
+                        onClose={handleCloseMenu}
+                        slotProps={{
+                            paper: {
+                                sx: {
+                                    width: '10rem'
+                                }
+                            }
+                        }}
+                    >
                         <MenuItem onClick={() => handleReset(ResetOptions.PROVIDERS)}>
                             Reset Providers
                         </MenuItem>
@@ -64,11 +80,15 @@ export default function MainSidebar({
                         </MenuItem>
                     </Menu>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item>
                     <Button
                         variant='outlined'
                         onClick={handleAutoAssign}
-                        sx={{ height: '3rem', width: '90%', ml: '10%' }}
+                        sx={{
+                            height: '3rem',
+                            width: '10rem',
+                            ml: '1rem'
+                        }}
                     >
                         Quick-fill
                     </Button>
@@ -150,6 +170,6 @@ export default function MainSidebar({
                         )
                 }
             </Grid>
-        </Grid>
+        </Grid >
     )
 }
