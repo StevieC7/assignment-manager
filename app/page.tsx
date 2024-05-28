@@ -247,7 +247,20 @@ export default function Home() {
                     : (
 
                         <DndContext onDragEnd={handleDragEnd}>
-                            <Grid container direction='row' justifyContent='space-between' alignItems='center' className='bg-black text-white p-4 fixed top-0'>
+                            <Grid
+                                container
+                                direction='row'
+                                justifyContent='space-between'
+                                alignItems='center'
+                                sx={(theme) => ({
+                                    backgroundColor: theme.palette.common.black,
+                                    color: theme.palette.common.white,
+                                    p: 4,
+                                    position: 'fixed',
+                                    top: 0,
+                                    left: 0,
+                                })}
+                            >
                                 <Typography variant="h1" fontSize={36}>Assignment Manager</Typography>
                                 <Grid item>
                                     <Save onClick={handleSaveToLocal} sx={{ cursor: 'pointer', mr: 2 }} />
@@ -258,9 +271,14 @@ export default function Home() {
                             <Grid
                                 container
                                 direction='row'
-                                sx={{ position: 'absolute', top: '80px', zIndex: -1 }}
+                                sx={{
+                                    position: 'absolute',
+                                    top: '6rem',
+                                    left: 0,
+                                    zIndex: -1
+                                }}
                             >
-                                <Grid item direction='column' xs={9} sx={{ padding: '1rem' }}>
+                                <Grid item direction='column' xs={9} sx={{ padding: '3rem' }}>
                                     <Grid item container direction='row' alignItems='center'>
                                         <Typography variant='h4'>Summary</Typography>
                                         {dayjs(dateValue).format('MM/DD/YYYY')}
@@ -274,7 +292,7 @@ export default function Home() {
                                         averagePatientCountPM={isNaN(averagePatientCountPM) ? 0 : averagePatientCountPM}
                                     />
                                     <Grid item container justifyContent='space-between'>
-                                        <Typography variant='h4' className='pl-5 mb-2'>Assignments</Typography>
+                                        <Typography variant='h4' sx={{ mb: '1rem' }}>Assignments</Typography>
                                         <Grid item container xs={3} justifyContent='flex-end'>
                                             <Button
                                                 onMouseDown={() => setNurseSortSetting(nurseSortSetting === SortOptions.ASCENDING_BY_PATIENT_COUNT ? SortOptions.DESCENDING_BY_PATIENT_COUNT : SortOptions.ASCENDING_BY_PATIENT_COUNT)}

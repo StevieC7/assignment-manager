@@ -29,7 +29,7 @@ export default function SummaryTable({
     const allActiveNurseGroupings = [...activeNurseTeams, ...activeNurses];
 
     return (
-        <TableContainer sx={{ maxWidth: '100%' }} component={Paper}>
+        <TableContainer sx={{ maxWidth: '100%', mb: '2rem' }} component={Paper}>
             <Table size='small'>
                 <TableHead>
                     <TableRow>
@@ -57,14 +57,19 @@ export default function SummaryTable({
                     <TableRow>
                         <TableCell sx={{ backgroundColor: '#eeeeee', fontWeight: 'bold' }}>AM</TableCell>
                         <TableCell>{patientTotalAM}</TableCell>
-                        <TableCell className={`${assignedPatientTotalAM < patientTotalAM ? 'bg-yellow-100' : 'bg-inherit'}`}>{assignedPatientTotalAM}</TableCell>
-                        <TableCell className={`${anyAssignedGreaterThanTargetAM ? 'bg-yellow-100' : 'bg-inherit'}`}>{averagePatientCountAM}</TableCell>
+                        <TableCell sx={(theme) => ({ backgroundColor: assignedPatientTotalAM < patientTotalAM ? theme.palette.warning.light : 'inherit' })}>{assignedPatientTotalAM}</TableCell>
+                        <TableCell sx={(theme) => ({ backgroundColor: anyAssignedGreaterThanTargetAM ? theme.palette.warning.light : 'inherit' })}>{averagePatientCountAM}</TableCell>
                         {
                             activeNurseTeams.map((nurseTeam, index) => {
                                 const nurseProviders = nurseAssignments[nurseTeam] ? Object.entries(nurseAssignments[nurseTeam]).map(([_, provider]) => provider) : [];
                                 const patientCountAM = nurseAssignments[nurseTeam] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am?.inPerson ?? 0), 0) : 0;
                                 return (
-                                    <TableCell className={`${patientCountAM > averagePatientCountAM ? 'bg-yellow-100' : 'bg-inherit'}`} key={index}>{patientCountAM}</TableCell>
+                                    <TableCell
+                                        sx={(theme) => ({ backgroundColor: patientCountAM > averagePatientCountAM ? theme.palette.warning.light : 'inherit' })}
+                                        key={index}
+                                    >
+                                        {patientCountAM}
+                                    </TableCell>
                                 )
                             })
                         }
@@ -73,7 +78,12 @@ export default function SummaryTable({
                                 const nurseProviders = nurseAssignments[nurse] ? Object.entries(nurseAssignments[nurse]).map(([_, provider]) => provider) : [];
                                 const patientCountAM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.am?.patientCount?.am?.inPerson ?? 0), 0) : 0;
                                 return (
-                                    <TableCell className={`${patientCountAM > averagePatientCountAM ? 'bg-yellow-100' : 'bg-inherit'}`} key={index}>{patientCountAM}</TableCell>
+                                    <TableCell
+                                        sx={(theme) => ({ backgroundColor: patientCountAM > averagePatientCountAM ? theme.palette.warning.light : 'inherit' })}
+                                        key={index}
+                                    >
+                                        {patientCountAM}
+                                    </TableCell>
                                 )
                             })
                         }
@@ -81,14 +91,19 @@ export default function SummaryTable({
                     <TableRow>
                         <TableCell sx={{ backgroundColor: '#eeeeee', fontWeight: 'bold' }}>PM</TableCell>
                         <TableCell>{patientTotalPM}</TableCell>
-                        <TableCell className={`${assignedPatientTotalPM < patientTotalPM ? 'bg-yellow-100' : 'bg-inherit'}`}>{assignedPatientTotalPM}</TableCell>
-                        <TableCell className={`${anyAssignedGreaterThanTargetPM ? 'bg-yellow-100' : 'bg-inherit'}`}>{averagePatientCountPM}</TableCell>
+                        <TableCell sx={(theme) => ({ backgroundColor: assignedPatientTotalPM < patientTotalPM ? theme.palette.warning.light : 'inherit' })}>{assignedPatientTotalPM}</TableCell>
+                        <TableCell sx={(theme) => ({ backgroundColor: anyAssignedGreaterThanTargetPM ? theme.palette.warning.light : 'inherit' })}>{averagePatientCountPM}</TableCell>
                         {
                             activeNurseTeams.map((nurseTeam, index) => {
                                 const nurseProviders = nurseAssignments[nurseTeam] ? Object.entries(nurseAssignments[nurseTeam]).map(([_, provider]) => provider) : [];
                                 const patientCountPM = nurseAssignments[nurseTeam] ? nurseProviders.reduce((prev, curr) => prev + (curr?.pm?.patientCount?.pm?.inPerson ?? 0), 0) : 0;
                                 return (
-                                    <TableCell className={`${patientCountPM > averagePatientCountPM ? 'bg-yellow-100' : 'bg-inherit'}`} key={index}>{patientCountPM}</TableCell>
+                                    <TableCell
+                                        sx={(theme) => ({ backgroundColor: patientCountPM > averagePatientCountPM ? theme.palette.warning.light : 'inherit' })}
+                                        key={index}
+                                    >
+                                        {patientCountPM}
+                                    </TableCell>
                                 )
                             })
                         }
@@ -97,7 +112,12 @@ export default function SummaryTable({
                                 const nurseProviders = nurseAssignments[nurse] ? Object.entries(nurseAssignments[nurse]).map(([_, provider]) => provider) : [];
                                 const patientCountPM = nurseAssignments[nurse] ? nurseProviders.reduce((prev, curr) => prev + (curr?.pm?.patientCount?.pm?.inPerson ?? 0), 0) : 0;
                                 return (
-                                    <TableCell className={`${patientCountPM > averagePatientCountPM ? 'bg-yellow-100' : 'bg-inherit'}`} key={index}>{patientCountPM}</TableCell>
+                                    <TableCell
+                                        sx={(theme) => ({ backgroundColor: patientCountPM > averagePatientCountPM ? theme.palette.warning.light : 'inherit' })}
+                                        key={index}
+                                    >
+                                        {patientCountPM}
+                                    </TableCell>
                                 )
                             })
                         }
@@ -105,7 +125,7 @@ export default function SummaryTable({
                     <TableRow sx={{ borderTop: '2px solid black' }}>
                         <TableCell sx={{ backgroundColor: '#eeeeee', fontWeight: 'bold' }}>Total</TableCell>
                         <TableCell>{patientTotalAM + patientTotalPM}</TableCell>
-                        <TableCell className={`${assignedPatientTotalPM + assignedPatientTotalAM < patientTotalPM + patientTotalAM ? 'bg-yellow-100' : 'bg-inherit'}`}>{assignedPatientTotalPM + assignedPatientTotalAM}</TableCell>
+                        <TableCell sx={(theme) => ({ backgroundColor: assignedPatientTotalPM + assignedPatientTotalAM < patientTotalPM + patientTotalAM ? theme.palette.warning.light : 'inherit' })}>{assignedPatientTotalPM + assignedPatientTotalAM}</TableCell>
                         <TableCell>
                             {
                                 isNaN(Math.ceil((assignedPatientTotalAM + assignedPatientTotalPM) / allActiveNurseGroupings.length))

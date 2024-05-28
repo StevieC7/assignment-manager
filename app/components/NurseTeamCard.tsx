@@ -31,7 +31,7 @@ export default function NurseTeamCard({
             direction='column'
         >
             <Paper sx={{ p: 2 }}>
-                <Typography variant='h5' className="w-fit">{nurse}</Typography>
+                <Typography variant='h5' sx={{ width: 'fit-content' }}>{nurse}</Typography>
                 <Grid container>
                     {
                         nurseTeamChildren[nurse]
@@ -47,7 +47,18 @@ export default function NurseTeamCard({
                             ? (
                                 <Grid item container xs={4} justifyContent='space-between'>
                                     AM
-                                    <Typography className={`w-8 text-center border-1-2 ${patientCountAM <= averagePatientCountAM ? patientCountAM === 0 ? 'bg-red-100' : 'bg-green-100' : 'bg-yellow-100'}`}>{patientCountAM}</Typography>
+                                    <Typography
+                                        sx={(theme) => ({
+                                            width: '2rem',
+                                            textAlign: 'center',
+                                            borderTop: '1px solid gray',
+                                            borderRight: '1px solid gray',
+                                            borderLeft: '1px solid gray',
+                                            backgroundColor: patientCountAM <= averagePatientCountAM ? theme.palette.success.light : theme.palette.warning.light
+                                        })}
+                                    >
+                                        {patientCountAM}
+                                    </Typography>
                                 </Grid>
                             )
                             : <Grid item xs={4} />
@@ -57,7 +68,18 @@ export default function NurseTeamCard({
                             ? (
                                 <Grid item container xs={4} justifyContent='space-between'>
                                     PM
-                                    <Typography className={`w-8 text-center border-1-2 ${patientCountPM <= averagePatientCountPM ? patientCountPM === 0 ? 'bg-red-100' : 'bg-green-100' : 'bg-yellow-100'}`}>{patientCountPM}</Typography>
+                                    <Typography
+                                        sx={(theme) => ({
+                                            width: '2rem',
+                                            textAlign: 'center',
+                                            borderTop: '1px solid gray',
+                                            borderRight: '1px solid gray',
+                                            borderLeft: '1px solid gray',
+                                            backgroundColor: patientCountPM <= averagePatientCountPM ? theme.palette.success.light : theme.palette.warning.light
+                                        })}
+                                    >
+                                        {patientCountPM}
+                                    </Typography>
                                 </Grid>
                             )
                             : <Grid item xs={4} />

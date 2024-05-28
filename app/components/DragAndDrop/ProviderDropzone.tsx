@@ -8,22 +8,43 @@ type Props = {
     children: DragOverlayProps['children']
 }
 export default function ProviderZone({ nurseId, roomId, shift, isFull, children }: Props) {
-    const { isOver, setNodeRef } = useDroppable({
+    const { isOver, active, setNodeRef } = useDroppable({
         id: `nurse-${nurseId}-room-${roomId}-shift-${shift}`
     })
     return (
-        <div ref={setNodeRef} className={`border-2 bg-white flex flex-col w-4/12 h-full`}>
-            <Grid container>
+        <Grid
+            component={'div'}
+            container
+            direction='column'
+            ref={setNodeRef}
+            sx={(theme) => ({
+                border: '2px solid gray',
+                backgroundColor: theme.palette.common.white,
+                height: '100%'
+            })}
+            xs={4}
+        >
+            <Grid item container>
                 {children}
             </Grid>
             {
                 !isFull
                 && (
-                    <Grid container direction='row' justifyContent='center' alignItems='center' className={`border-dotted border-2 ${isOver && 'bg-green-100'} flex-grow`}>
-                        <Typography className="w-fit">+</Typography>
+                    <Grid
+                        item
+                        container
+                        direction='row'
+                        justifyContent='center'
+                        alignItems='center'
+                        sx={{
+                            backgroundColor: isOver && active?.id.toString().includes('provider') ? 'lightgreen' : undefined,
+                            height: '100%'
+                        }}
+                    >
+                        <Typography sx={{ width: 'fit-content' }}>+</Typography>
                     </Grid>
                 )
             }
-        </div>
+        </Grid>
     )
 }

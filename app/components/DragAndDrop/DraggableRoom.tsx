@@ -2,7 +2,7 @@ import { useDraggable } from "@dnd-kit/core";
 import ProviderZone from "./ProviderDropzone";
 import { NurseAssignments } from "../../types/types";
 import DraggableProvider from "./DraggableProvider";
-import { Grid, Typography } from "@mui/material";
+import { Grid, SxProps, Theme, Typography } from "@mui/material";
 import { DragIndicator } from "@mui/icons-material";
 type Props = {
     roomId: string,
@@ -11,19 +11,77 @@ type Props = {
     isMinimized?: boolean,
 }
 export default function DraggableRoom({ roomId, nurseName, nurseAssignments, isMinimized }: Props) {
-    const { attributes, listeners, setNodeRef, transform } = useDraggable({
+
+    const { attributes, listeners, setNodeRef, transform: dragTransform } = useDraggable({
         id: `room-${roomId}`,
     });
-    const style = transform ? {
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-    } : undefined;
+
+    const sxStyle: SxProps<Theme> = (theme: Theme) => {
+        const common: SxProps = {
+            transform: dragTransform ? `translate3d(${dragTransform.x}px, ${dragTransform.y}px, 0)` : undefined,
+            borderRadius: '12px 12px 12px 12px',
+            alignItems: 'center',
+        }
+        const minimized: SxProps = {
+            height: '2rem',
+            width: '6rem',
+            backgroundColor: theme.palette.primary.light,
+            justifyContent: 'center',
+            ...common
+        }
+        const expanded: SxProps = {
+            height: '3rem',
+            width: '100%',
+            backgroundColor: theme.palette.common.white,
+            justifyContent: 'space-between',
+            ...common
+        }
+        return isMinimized ? minimized : expanded;
+    }
     return (
-        <div ref={setNodeRef} style={style} {...listeners} {...attributes} className={`flex flex-row ${isMinimized ? 'h-12 w-36 rounded-full bg-purple-100 justify-center items-center' : 'h-16 w-full justify-between items-center bg-white rounded-l-[12px]'}`}>
-            <Grid container sx={{ height: '100%', alignItems: 'center' }} xs={isMinimized ? 12 : 4}>
-                <Grid item container justifyContent='center' alignItems='center' sx={{ backgroundColor: isMinimized ? 'lightpurple' : '#eeeeee', width: '2rem', height: '100%', borderBottomLeftRadius: '12px', borderTopLeftRadius: '12px' }}>
+        <Grid
+            container
+            ref={setNodeRef}
+            sx={sxStyle}
+            {...listeners}
+            {...attributes}
+        >
+            <Grid
+                container
+                xs={isMinimized ? 12 : 4}
+                sx={{
+                    height: '100%',
+                    alignItems: 'center',
+                }}
+            >
+                <Grid
+                    item
+                    container
+                    justifyContent='center'
+                    alignItems='center'
+                    sx={(theme) => ({
+                        backgroundColor: isMinimized ? 'inherit' : theme.palette.grey[200],
+                        width: '2rem',
+                        height: '100%',
+                        borderBottomLeftRadius: '12px',
+                        borderTopLeftRadius: '12px',
+                        cursor: 'pointer',
+                        ":hover": {
+                            color: isMinimized ? 'inherit' : theme.palette.primary.main,
+                        }
+                    })}
+                >
                     <DragIndicator />
                 </Grid>
-                <Typography variant='h6' className={`${isMinimized ? '' : 'w-4/12'} pl-5`}>{roomId}</Typography>
+                <Typography
+                    variant='h6'
+                    sx={{
+                        width: isMinimized ? undefined : '33%',
+                        pl: '1rem'
+                    }}
+                >
+                    {roomId}
+                </Typography>
             </Grid>
             {
                 nurseName
@@ -100,6 +158,6 @@ export default function DraggableRoom({ roomId, nurseName, nurseAssignments, isM
                     </>
                 )
             }
-        </div>
+        </Grid>
     )
 }

@@ -480,7 +480,7 @@ export default function StaffSetupSidebar({
                             variant="contained"
                             type='submit'
                             disabled={isProviderNameDuplicate}
-                            className='mb-6'
+                            sx={{ mb: '2rem' }}
                         >
                             Save
                         </Button>
@@ -488,7 +488,19 @@ export default function StaffSetupSidebar({
                     <Grid item container>
                         {providerList.map((provider, id) => {
                             return (
-                                <Grid key={id} item container direction='column' alignItems='center' justifyContent='space-between' className='mb-6 border-2 p-2'>
+                                <Grid
+                                    key={id}
+                                    item
+                                    container
+                                    direction='column'
+                                    alignItems='center'
+                                    justifyContent='space-between'
+                                    sx={{
+                                        mb: '1rem',
+                                        p: '0.5rem',
+                                        border: '2px solid gray'
+                                    }}
+                                >
                                     <Grid item container justifyContent='space-between' sx={{ mb: '1rem' }}>
                                         <Typography variant='h5'>
                                             {provider.name}

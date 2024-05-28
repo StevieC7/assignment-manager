@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { DragIndicator } from '@mui/icons-material';
-import { Tooltip, Typography } from '@mui/material';
+import { Button, Tooltip, Typography } from '@mui/material';
 
 type Props = {
     providerName: string
@@ -10,9 +10,10 @@ type Props = {
         inPerson: number
         virtual: number
     }
+    inSidebar?: boolean
 }
 
-export default function DraggableProvider({ providerName, shift, patientCount }: Props) {
+export default function DraggableProvider({ providerName, shift, patientCount, inSidebar }: Props) {
     const { attributes, listeners, setNodeRef, transform } = useDraggable({
         id: `provider-${providerName}-shift-${shift}`,
     });
@@ -30,13 +31,33 @@ export default function DraggableProvider({ providerName, shift, patientCount }:
     }
 
     return (
-        <button ref={setNodeRef} style={style} {...listeners} {...attributes} className={`${shift === 'am' ? 'bg-orange-100' : 'bg-blue-100'} p-4 rounded-full h-12 items-center flex`}>
+        <Button
+            ref={setNodeRef}
+            style={style}
+            {...listeners}
+            {...attributes}
+            sx={(theme) => ({
+                p: '1rem',
+                m: '0.5rem',
+                borderRadius: '20px 20px 20px 20px',
+                height: '2rem',
+                alignItems: 'center',
+                display: 'flex',
+                backgroundColor: inSidebar ? shift === 'am' ? theme.palette.warning.light : theme.palette.secondary.light : theme.palette.grey[200],
+                color: theme.palette.grey[800],
+                ":hover": {
+                    backgroundColor: shift === 'am' ? theme.palette.warning.light : theme.palette.secondary.light,
+                    color: theme.palette.grey[800],
+                    boxShadow: '2px 2px 2px rgba(0,0,0,0.5)',
+                }
+            })}
+        >
             <DragIndicator sx={{ mr: '0.25rem' }} />
             <Tooltip title={providerName.length > 6 ? providerName : ''}>
                 <Typography variant='body2'>
                     {truncate(providerName, 6)}: {patientCount.inPerson} {patientCount.virtual ? `(+${patientCount.virtual})` : null}
                 </Typography>
             </Tooltip>
-        </button>
+        </Button>
     );
 }

@@ -46,7 +46,7 @@ export default function MainSidebar({
     return (
         <Grid item container direction='column' xs={3} sx={{ paddingTop: '1rem', paddingRight: '1rem' }}>
             <Grid item container direction='column'>
-                <Button onClick={() => setDrawerOpen(true)} variant='contained' color='primary' className='mb-6' endIcon={<ArrowRight />}>
+                <Button onClick={() => setDrawerOpen(true)} variant='contained' color='primary' sx={{ mb: '1rem' }} endIcon={<ArrowRight />}>
                     Staff Setup
                 </Button>
             </Grid>
@@ -92,7 +92,7 @@ export default function MainSidebar({
                         })
                         : (
                             <>
-                                <CheckCircle className='text-green-500' />
+                                <CheckCircle sx={(theme) => ({ color: theme.palette.success.light })} />
                                 <Typography>All Assigned</Typography>
                             </>
                         )
@@ -112,12 +112,13 @@ export default function MainSidebar({
                                         inPerson: provider.patientCount.am.inPerson,
                                         virtual: provider.patientCount.am.virtual
                                     }}
+                                    inSidebar
                                 />
                             )
                         })
                         : (
                             <>
-                                <CheckCircle className='text-green-500' />
+                                <CheckCircle sx={(theme) => ({ color: theme.palette.success.light })} />
                                 <Typography>All Assigned</Typography>
                             </>
                         )
@@ -137,12 +138,13 @@ export default function MainSidebar({
                                         inPerson: provider.patientCount.pm.inPerson,
                                         virtual: provider.patientCount.pm.virtual
                                     }}
+                                    inSidebar
                                 />
                             )
                         })
                         : (
                             <>
-                                <CheckCircle className='text-green-500' />
+                                <CheckCircle sx={(theme) => ({ color: theme.palette.success.light })} />
                                 <Typography>All Assigned</Typography>
                             </>
                         )
