@@ -194,7 +194,7 @@ export default function StaffSetupSidebar({
                 item
                 container
                 direction='column'
-                sx={{ height: 'auto', width: '25rem', padding: '1rem' }}
+                sx={{ height: 'auto', width: '30rem', padding: '1rem' }}
             >
                 <Grid item container direction='column' sx={{ mb: '2rem' }}>
                     <Typography variant='h4'>Date</Typography>
@@ -244,6 +244,8 @@ export default function StaffSetupSidebar({
                             })
                         }
                     </Grid>
+                </Grid>
+                <Grid item container direction='column' sx={{ mb: '2rem' }}>
                     <Typography variant='h4'>Nurses</Typography>
                     <form onSubmit={handleAddNurse}>
                         <Grid item container>
@@ -383,8 +385,10 @@ export default function StaffSetupSidebar({
                             value={provider.name}
                             onChange={e => setProvider({ name: e.currentTarget.value, patientCount: provider.patientCount })}
                             error={isProviderNameDuplicate}
+                            fullWidth
+                            sx={{ mb: 1 }}
                         />
-                        <Grid container>
+                        <Grid container sx={{ mb: 1 }}>
                             <Grid item container xs={6}>
                                 <Grid item xs={6}>
                                     <TextField
@@ -430,7 +434,7 @@ export default function StaffSetupSidebar({
                                 </Grid>
                             </Grid>
                         </Grid>
-                        <Grid container>
+                        <Grid container sx={{ mb: 1 }}>
                             <Grid item container xs={6}>
                                 <Grid item xs={6}>
                                     <TextField
