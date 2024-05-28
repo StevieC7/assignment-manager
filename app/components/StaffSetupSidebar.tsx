@@ -5,6 +5,7 @@ import { Button, Drawer, Grid, MenuItem, Select, TextField, Typography } from "@
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers"
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs"
 import { Delete } from "@mui/icons-material"
+import { z } from 'zod';
 
 type Props = {
     open: boolean
@@ -54,6 +55,30 @@ export default function StaffSetupSidebar({
     const [provider, setProvider] = useState<Provider>({ name: '', patientCount: { am: { inPerson: 0, virtual: 0 }, pm: { inPerson: 0, virtual: 0 } } });
 
     const isProviderNameDuplicate = provider.name !== '' && providerList.find(existingProvider => existingProvider.name === provider.name) ? true : false;
+
+    const nurseTeamSchema = z.string().min(1).refine((val) => !nurseTeamList.find((existing) => existing === val));
+    const nurseSchema = z.string().min(1).refine((val) => !nurseList.find((existing) => existing === val));
+    const roomSchema = z.string().min(1).refine((val) => !roomList.find((existing) => existing === val));
+    const providerSchema = z.object({
+        name: z.string().min(1),
+        patientCount: z.object({
+            am: z.object({
+                inPerson: z.number().min(0),
+                virtual: z.number().min(0)
+            }),
+            pm: z.object({
+                inPerson: z.number().min(0),
+                virtual: z.number().min(0)
+            })
+        })
+    }).refine((val) => !providerList.find((existingProvider => existingProvider.name === val.name)));
+
+    const errors = {
+        nurseTeamName: !nurseTeamSchema.safeParse(nurseTeamName).success,
+        nurseName: !nurseSchema.safeParse(nurseName).success,
+        room: !roomSchema.safeParse(roomSchema).success,
+        provider: !providerSchema.safeParse(provider).success
+    }
 
     const handleAddNurseTeam = (e: FormEvent) => {
         e.preventDefault();
@@ -237,6 +262,7 @@ export default function StaffSetupSidebar({
                                 <Button
                                     type='submit'
                                     variant='contained'
+                                    disabled={errors.nurseTeamName}
                                     sx={{ width: '100%', height: '100%' }}
                                 >
                                     Save
@@ -291,6 +317,7 @@ export default function StaffSetupSidebar({
                                 <Button
                                     type='submit'
                                     variant='contained'
+                                    disabled={errors.nurseName}
                                     sx={{ width: '100%', height: '100%' }}
                                 >
                                     Save
@@ -409,6 +436,7 @@ export default function StaffSetupSidebar({
                                 <Button
                                     type='submit'
                                     variant='contained'
+                                    disabled={errors.room}
                                     sx={{ width: '100%', height: '100%' }}
                                 >
                                     Save
@@ -447,7 +475,6 @@ export default function StaffSetupSidebar({
                             placeholder="Provider Name"
                             value={provider.name}
                             onChange={e => setProvider({ name: e.currentTarget.value, patientCount: provider.patientCount })}
-                            error={isProviderNameDuplicate}
                             fullWidth
                             sx={{ mb: 1 }}
                         />
@@ -576,7 +603,7 @@ export default function StaffSetupSidebar({
                         <Button
                             variant="contained"
                             type='submit'
-                            disabled={isProviderNameDuplicate}
+                            disabled={errors.provider}
                             sx={{ mb: '2rem' }}
                         >
                             Save
