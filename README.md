@@ -15,13 +15,13 @@ Play with [the demo](https://breakdown-builder-de4f8e84a9f8.herokuapp.com/) as m
 8. (Encouraged) Enjoy.
 
 ## Features
-[x] Quick-fill button to automatically balance the patient count between teams
-[x] Drag and drop interface for assigning rooms to teams and care providers to rooms
-[x] Local save/load
-[x] CSV export
-[ ] Theoretically optimal algorithm to improve quick-fill feature
-[ ] Save versioning
-[ ] Support for any number of shifts
+- [x] Quick-fill button to automatically balance the patient count between teams
+- [x] Drag and drop interface for assigning rooms to teams and care providers to rooms
+- [x] Local save/load
+- [x] CSV export
+- [ ] Theoretically optimal algorithm to improve quick-fill feature
+- [ ] Save versioning
+- [ ] Support for any number of shifts
 
 ## Technical Details
 - Next.js framework
