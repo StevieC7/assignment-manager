@@ -1,3 +1,5 @@
+https://github.com/StevieC7/assignment-manager/assets/46426105/6244a1e3-6c26-4e89-a914-104e9f12af84
+
 # Assignment Manager
 A client-side web app for managing room assignments in a healthcare setting.
 
