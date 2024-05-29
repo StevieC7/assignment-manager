@@ -2,7 +2,7 @@
 A client-side web app for managing room assignments in a healthcare setting.
 
 ## Demo
-Play with [the demo](https://breakdown-builder-de4f8e84a9f8.herokuapp.com/) as much as you like. Please leave an issue here if something breaks.
+Play with [the demo](https://assignment-manager-1b31a0161c7f.herokuapp.com/) as much as you like. Please leave an issue here if something breaks.
 
 ### How to use it
 1. Create nurses, rooms, and care providers in the "Staff Setup" sidebar.
