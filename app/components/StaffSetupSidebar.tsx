@@ -76,7 +76,7 @@ export default function StaffSetupSidebar({
     const errors = {
         nurseTeamName: !nurseTeamSchema.safeParse(nurseTeamName).success,
         nurseName: !nurseSchema.safeParse(nurseName).success,
-        room: !roomSchema.safeParse(roomSchema).success,
+        room: !roomSchema.safeParse(room).success,
         provider: !providerSchema.safeParse(provider).success
     }
 
