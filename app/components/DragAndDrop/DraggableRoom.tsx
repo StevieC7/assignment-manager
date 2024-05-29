@@ -2,7 +2,7 @@ import { useDraggable } from "@dnd-kit/core";
 import ProviderZone from "./ProviderDropzone";
 import { NurseAssignments } from "../../types/types";
 import DraggableProvider from "./DraggableProvider";
-import { Grid, SxProps, Theme, Typography } from "@mui/material";
+import { Grid, SxProps, Theme, Tooltip, Typography } from "@mui/material";
 import { DragIndicator } from "@mui/icons-material";
 type Props = {
     roomId: string,
@@ -21,12 +21,13 @@ export default function DraggableRoom({ roomId, nurseName, nurseAssignments, isM
             transform: dragTransform ? `translate3d(${dragTransform.x}px, ${dragTransform.y}px, 0)` : undefined,
             borderRadius: '12px 12px 12px 12px',
             alignItems: 'center',
-            paddingRight: '0.5rem',
-            m: '0.5rem'
         }
         const minimized: SxProps = {
             height: '2rem',
             width: 'fit-content',
+            pl: '0.5rem',
+            pr: '0.5rem',
+            m: '0.5rem',
             backgroundColor: theme.palette.primary.light,
             justifyContent: 'center',
             ...common
@@ -59,11 +60,12 @@ export default function DraggableRoom({ roomId, nurseName, nurseAssignments, isM
                 <Grid
                     item
                     container
-                    justifyContent='center'
+                    justifyContent={isMinimized ? 'flex-start' : 'center'}
                     alignItems='center'
+                    xs={isMinimized ? undefined : 2}
                     sx={(theme) => ({
                         backgroundColor: isMinimized ? 'inherit' : theme.palette.grey[200],
-                        width: '2rem',
+                        width: isMinimized ? '1.5rem' : '2rem',
                         height: '100%',
                         borderBottomLeftRadius: '12px',
                         borderTopLeftRadius: '12px',
@@ -75,13 +77,20 @@ export default function DraggableRoom({ roomId, nurseName, nurseAssignments, isM
                 >
                     <DragIndicator />
                 </Grid>
-                <Typography
-                    sx={{
-                        width: isMinimized ? undefined : '33%',
-                    }}
+                <Grid
+                    item
+                    sx={{ pl: '0.5rem', pr: '0.5rem' }}
+                    xs={isMinimized ? undefined : 10}
                 >
-                    {roomId}
-                </Typography>
+                    <Tooltip title={roomId}>
+                        <Typography
+                            sx={{ width: '100%' }}
+                            noWrap
+                        >
+                            {roomId}
+                        </Typography>
+                    </Tooltip>
+                </Grid>
             </Grid>
             {
                 nurseName

@@ -18,22 +18,9 @@ export default function DraggableProvider({ providerName, shift, patientCount, i
         id: `provider-${providerName}-shift-${shift}`,
     });
 
-    const style = transform ? {
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-    } : undefined;
-
-    const truncate = (name: string, length: number) => {
-        if (name.length > length) {
-            return `${name.slice(0, length)}...`
-        } else {
-            return name
-        }
-    }
-
     return (
         <Button
             ref={setNodeRef}
-            style={style}
             {...listeners}
             {...attributes}
             sx={(theme) => ({
@@ -45,6 +32,7 @@ export default function DraggableProvider({ providerName, shift, patientCount, i
                 display: 'flex',
                 backgroundColor: inSidebar ? shift === 'am' ? theme.palette.warning.light : theme.palette.secondary.light : theme.palette.grey[200],
                 color: theme.palette.grey[800],
+                transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
                 ":hover": {
                     backgroundColor: shift === 'am' ? theme.palette.warning.light : theme.palette.secondary.light,
                     color: theme.palette.grey[800],
@@ -53,9 +41,12 @@ export default function DraggableProvider({ providerName, shift, patientCount, i
             })}
         >
             <DragIndicator sx={{ mr: '0.25rem' }} />
-            <Tooltip title={providerName.length > 6 ? providerName : ''}>
-                <Typography variant='body2'>
-                    {truncate(providerName, 6)}: {patientCount.inPerson} {patientCount.virtual ? `(+${patientCount.virtual})` : null}
+            <Tooltip title={providerName}>
+                <Typography
+                    variant='body2'
+                    noWrap
+                >
+                    {providerName}: {patientCount.inPerson} {patientCount.virtual ? `(+${patientCount.virtual})` : null}
                 </Typography>
             </Tooltip>
         </Button>
