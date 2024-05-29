@@ -21,10 +21,12 @@ export default function DraggableRoom({ roomId, nurseName, nurseAssignments, isM
             transform: dragTransform ? `translate3d(${dragTransform.x}px, ${dragTransform.y}px, 0)` : undefined,
             borderRadius: '12px 12px 12px 12px',
             alignItems: 'center',
+            paddingRight: '0.5rem',
+            m: '0.5rem'
         }
         const minimized: SxProps = {
             height: '2rem',
-            width: '6rem',
+            width: 'fit-content',
             backgroundColor: theme.palette.primary.light,
             justifyContent: 'center',
             ...common
@@ -74,10 +76,8 @@ export default function DraggableRoom({ roomId, nurseName, nurseAssignments, isM
                     <DragIndicator />
                 </Grid>
                 <Typography
-                    variant='h6'
                     sx={{
                         width: isMinimized ? undefined : '33%',
-                        pl: '1rem'
                     }}
                 >
                     {roomId}
